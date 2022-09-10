@@ -14,6 +14,8 @@ where
     let skim_options = SkimOptionsBuilder::default()
         .exit0(true)
         .select1(true)
+        .height(Some("40"))
+        .reverse(true)
         .query(query)
         .build()
         .unwrap();
@@ -38,6 +40,8 @@ where
     let skim_options = SkimOptionsBuilder::default()
         .exit0(true)
         .select1(true)
+        .height(Some("40"))
+        .reverse(true)
         .query(query)
         .multi(true)
         .build()
@@ -58,31 +62,4 @@ where
         .iter()
         .map(|i| i.output().into_owned())
         .collect()
-
-    // selected_items
-    //     .iter()
-    //     .filter_map(|item| list.iter().position(|el| el == &item.output()))
-    //     .collect()
 }
-
-// pub fn fuzzy_select_multi(list: &[String], query: Option<&str>) -> Vec<usize> {
-//     let skim_options = SkimOptionsBuilder::default()
-//         .exit0(true)
-//         .select1(true)
-//         .query(query)
-//         .multi(true)
-//         .build()
-//         .unwrap();
-//     let input = list.join("\n").to_string();
-
-//     let item_reader = SkimItemReader::default();
-//     let items = item_reader.of_bufread(Cursor::new(input));
-//     let selected_items = Skim::run_with(&skim_options, Some(items))
-//         .map(|out| out.selected_items)
-//         .unwrap_or_else(|| Vec::new());
-
-//     selected_items
-//         .iter()
-//         .filter_map(|item| list.iter().position(|el| el == &item.output()))
-//         .collect()
-// }
