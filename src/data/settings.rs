@@ -23,6 +23,7 @@ pub enum PathKind {
 pub struct Settings {
     pub single_paths: HashSet<String>,
     pub workspace_paths: HashSet<String>,
+    pub depth: Option<usize>,
 }
 
 impl Settings {
@@ -74,27 +75,28 @@ impl Settings {
     pub fn list_paths(&self) -> HashSet<String> {
         let mut results = self.single_paths.clone();
 
+        let depth = self.depth.unwrap_or(100);
         for ws_path in &self.workspace_paths {
-            let walker =
-                WalkDir::new(ws_path)
-                    .skip_hidden(false)
-                    .into_iter()
-                    .filter(|dir_entry_result| {
-                        dir_entry_result
-                            .as_ref()
-                            .map(|dir_entry| {
-                                if !dir_entry.file_type().is_dir() {
-                                    return false;
-                                }
+            let walker = WalkDir::new(ws_path)
+                .skip_hidden(false)
+                .max_depth(depth)
+                .into_iter()
+                .filter(|dir_entry_result| {
+                    dir_entry_result
+                        .as_ref()
+                        .map(|dir_entry| {
+                            if !dir_entry.file_type().is_dir() {
+                                return false;
+                            }
 
-                                dir_entry
-                                    .file_name()
-                                    .to_str()
-                                    .map(|s| s == ".git" || s == ".bare")
-                                    .unwrap_or(false)
-                            })
-                            .unwrap_or(false)
-                    });
+                            dir_entry
+                                .file_name()
+                                .to_str()
+                                .map(|s| s == ".git" || s == ".bare")
+                                .unwrap_or(false)
+                        })
+                        .unwrap_or(false)
+                });
 
             for entry in walker {
                 results.insert(entry.unwrap().parent_path().display().to_string());
@@ -119,6 +121,10 @@ fn merge_if_exists(settings: &mut Settings, path: &Path) -> Result<()> {
 
     for p in raw.workspace_paths {
         settings.workspace_paths.insert(p);
+    }
+
+    if let Some(depth) = raw.depth {
+        settings.depth = Some(depth);
     }
 
     Ok(())
