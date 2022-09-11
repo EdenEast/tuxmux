@@ -18,6 +18,11 @@ pub fn make_subcommand() -> Command<'static> {
                 .short('g')
                 .long("global")
                 .action(clap::ArgAction::SetTrue),
+            Arg::new("list")
+                .help("List current paths")
+                .short('l')
+                .long("long")
+                .action(clap::ArgAction::SetTrue),
             Arg::new("path")
                 .help("Optional paths to be added. Uses 'cwd' if not present")
                 .required(false)
@@ -27,6 +32,22 @@ pub fn make_subcommand() -> Command<'static> {
 }
 
 pub fn execute(matches: &ArgMatches) -> Result<bool> {
+    if matches.get_flag("list") {
+        let settings = Settings::new()?;
+
+        settings
+            .single_paths
+            .iter()
+            .for_each(|s| println!("s| {}", s));
+
+        settings
+            .workspace_paths
+            .iter()
+            .for_each(|s| println!("w| {}", s));
+
+        return Ok(true);
+    }
+
     let cwd = std::env::current_dir()?;
     let paths = match &matches.get_many::<PathBuf>("path") {
         Some(vr) => vr.clone().map(|p| p.as_path()).collect(),

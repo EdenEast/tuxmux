@@ -1,10 +1,14 @@
 use eyre::{Context, Result};
 use tmux_interface::{
-    AttachSession, HasSession, KillSession, NewSession, NewWindow, SendKeys, Sessions,
+    AttachSession, HasSession, KillSession, NewSession, NewWindow, SendKeys, Session, Sessions,
     SwitchClient, TmuxCommand, SESSION_ALL,
 };
 
-pub fn get_sessions() -> Result<Vec<String>> {
+pub fn sessions() -> Result<Vec<Session>> {
+    Ok(Sessions::get(SESSION_ALL)?.into_iter().collect())
+}
+
+pub fn session_names() -> Result<Vec<String>> {
     let tmux_sessions = Sessions::get(SESSION_ALL)?;
 
     Ok(tmux_sessions

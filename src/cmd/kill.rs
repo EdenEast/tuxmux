@@ -24,7 +24,7 @@ pub fn execute(matches: &ArgMatches) -> Result<bool> {
         .get_many::<String>("query")
         .map(|vs| vs.map(|s| s.as_str()).collect::<Vec<_>>().join(" "));
 
-    let names = tmux::get_sessions()?;
+    let names = tmux::session_names()?;
     let selected = if matches.get_flag("all") {
         names
     } else {

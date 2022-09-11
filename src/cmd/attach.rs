@@ -33,7 +33,7 @@ pub fn execute(matches: &ArgMatches) -> Result<bool> {
         .map(|vs| vs.map(|s| s.as_str()).collect::<Vec<_>>().join(" "));
 
     if matches.get_flag("exist") {
-        let names = tmgr::tmux::get_sessions()?;
+        let names = tmgr::tmux::session_names()?;
 
         let selected = match names.len() {
             0 => return Ok(true),
