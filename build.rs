@@ -9,7 +9,7 @@ fn main() {
 
     write!(
         &mut file,
-        "static CONFIG_DESCRIPTIONS: phf::Map<&'static str, &'static str> = {}",
+        "pub static CONFIG_DESCRIPTIONS: phf::Map<&'static str, &'static str> = {}",
         phf_codegen::Map::new()
             .entry(
                 "depth",

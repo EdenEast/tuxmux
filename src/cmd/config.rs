@@ -3,9 +3,7 @@ use std::env;
 use clap::{builder::PossibleValuesParser, Arg, ArgMatches, Command};
 use eyre::Result;
 use serde::__private::de::Content;
-use tmgr::data::{Location, Settings};
-
-include!(concat!(env!("OUT_DIR"), "/config-desc-map.rs"));
+use tmgr::data::{Location, Settings, CONFIG_DESCRIPTIONS};
 
 pub fn make_subcommand() -> Command<'static> {
     Command::new("config")
@@ -66,6 +64,14 @@ pub fn execute(matches: &ArgMatches) -> Result<bool> {
 
         let content = toml::to_string_pretty(&settings)?;
         println!("{}", content);
+
+        return Ok(true);
+    }
+
+    if matches.get_flag("options") {
+        for (k, v) in &CONFIG_DESCRIPTIONS {
+            println!("{:>10} = {}", k, v);
+        }
 
         return Ok(true);
     }
