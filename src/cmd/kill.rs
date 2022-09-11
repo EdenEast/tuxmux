@@ -12,6 +12,11 @@ pub fn make_subcommand() -> Command<'static> {
                 .short('a')
                 .long("all")
                 .action(clap::ArgAction::SetTrue),
+            Arg::new("exact")
+                .help("Use exact match search")
+                .short('x')
+                .long("exact")
+                .action(clap::ArgAction::SetTrue),
             Arg::new("query")
                 .help("Query to search from")
                 .required(false)
@@ -28,7 +33,11 @@ pub fn execute(matches: &ArgMatches) -> Result<bool> {
     let selected = if matches.get_flag("all") {
         names
     } else {
-        fuzzy::fuzzy_select_multi(names.iter().map(|a| a.as_str()), query.as_deref())
+        fuzzy::fuzzy_select_multi(
+            names.iter().map(|a| a.as_str()),
+            query.as_deref(),
+            matches.get_flag("exact"),
+        )
     };
 
     for sel in selected {

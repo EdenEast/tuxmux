@@ -14,6 +14,11 @@ pub fn make_subcommand() -> Command<'static> {
                 .short('e')
                 .long("exist")
                 .action(clap::ArgAction::SetTrue),
+            Arg::new("exact")
+                .help("Use exact match search")
+                .short('x')
+                .long("exact")
+                .action(clap::ArgAction::SetTrue),
             Arg::new("path")
                 .help("Exact path to create or attach tmux session")
                 .short('p')
@@ -32,6 +37,7 @@ pub fn execute(matches: &ArgMatches) -> Result<bool> {
         .get_many::<String>("query")
         .map(|vs| vs.map(|s| s.as_str()).collect::<Vec<_>>().join(" "));
 
+    let exact = matches.get_flag("exact");
     if matches.get_flag("exist") {
         let names = tmgr::tmux::session_names()?;
 
@@ -41,6 +47,7 @@ pub fn execute(matches: &ArgMatches) -> Result<bool> {
             _ => match tmgr::fuzzy::fuzzy_select_one(
                 names.iter().map(|a| a.as_str()),
                 query.as_deref(),
+                exact,
             ) {
                 Some(index) => index,
                 None => return Ok(true),
@@ -60,7 +67,11 @@ pub fn execute(matches: &ArgMatches) -> Result<bool> {
         }
         path.to_owned()
     } else {
-        match tmgr::fuzzy::fuzzy_select_one(paths.iter().map(|a| a.as_str()), query.as_deref()) {
+        match tmgr::fuzzy::fuzzy_select_one(
+            paths.iter().map(|a| a.as_str()),
+            query.as_deref(),
+            exact,
+        ) {
             Some(sel) => PathBuf::from_str(&sel)?,
             None => return Ok(true),
         }

@@ -20,6 +20,11 @@ pub fn make_subcommand() -> Command<'static> {
                 .short('g')
                 .long("global")
                 .action(clap::ArgAction::SetTrue),
+            Arg::new("exact")
+                .help("Use exact match search")
+                .short('x')
+                .long("exact")
+                .action(clap::ArgAction::SetTrue),
         ])
 }
 
@@ -44,7 +49,11 @@ pub fn execute(matches: &ArgMatches) -> Result<bool> {
             s
         }))
         .collect();
-    let selected = fuzzy::fuzzy_select_multi(iter.iter().map(|a| a.as_str()), None);
+    let selected = fuzzy::fuzzy_select_multi(
+        iter.iter().map(|a| a.as_str()),
+        None,
+        matches.get_flag("exact"),
+    );
     if selected.is_empty() {
         return Ok(true);
     }

@@ -7,7 +7,7 @@ use skim::{
 
 use crate::util::intersperse;
 
-pub fn fuzzy_select_one<'a, I>(iter: I, query: Option<&str>) -> Option<String>
+pub fn fuzzy_select_one<'a, I>(iter: I, query: Option<&str>, exact:bool) -> Option<String>
 where
     I: Iterator<Item = &'a str>,
 {
@@ -16,6 +16,7 @@ where
         .select1(true)
         .height(Some("40"))
         .reverse(true)
+        .exact(exact)
         .query(query)
         .build()
         .unwrap();
@@ -33,7 +34,7 @@ where
     }
 }
 
-pub fn fuzzy_select_multi<'a, I>(iter: I, query: Option<&str>) -> Vec<String>
+pub fn fuzzy_select_multi<'a, I>(iter: I, query: Option<&str>, exact: bool) -> Vec<String>
 where
     I: Iterator<Item = &'a str>,
 {
@@ -42,6 +43,7 @@ where
         .select1(true)
         .height(Some("40"))
         .reverse(true)
+        .exact(exact)
         .query(query)
         .multi(true)
         .build()
