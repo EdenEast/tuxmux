@@ -11,11 +11,15 @@ lto = true        # Optimize the result in the linking phase
 strip = "none"
 opt-level = 3
 
+[build-dependencies]
+phf_codegen = "0.11.1"
+
 [dependencies]
 clap = { version = "3.2.20", features = [ "cargo" ] }
 dirs-next = "2.0.0"
 eyre = "0.6.8"
 jwalk = "0.6.0"
+phf = "0.11.1"
 serde = { version = "1.0.144", features = [ "derive" ] }
 skim = "0.9.4"
 tmux_interface = "0.2.1"

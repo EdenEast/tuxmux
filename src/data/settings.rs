@@ -1,13 +1,16 @@
 use eyre::Result;
 use jwalk::WalkDir;
 use serde::{Deserialize, Serialize};
-use std::{collections::HashSet, path::Path};
+use std::{
+    collections::HashSet,
+    path::{Path, PathBuf},
+};
 
 use crate::util;
 
 const CONF_PATH_COMPONENTS: &[&str] = &["config.toml"];
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Location {
     Global,
     Local,
@@ -47,6 +50,13 @@ impl Settings {
             }
         };
         Ok(settings)
+    }
+
+    pub fn filepath_from_location(location: Location) -> PathBuf {
+        match location {
+            Location::Global => util::get_config(CONF_PATH_COMPONENTS),
+            Location::Local => util::get_local(CONF_PATH_COMPONENTS),
+        }
     }
 
     pub fn write(&self, location: Location) -> Result<()> {

@@ -1,3 +1,4 @@
+#![allow(unused)]
 use clap::{crate_description, crate_version, Command};
 use eyre::Result;
 
@@ -14,6 +15,7 @@ fn main() -> Result<()> {
     let exec_subcommand = match matches.subcommand() {
         Some(("add", sub_matches)) => cmd::add::execute(sub_matches)?,
         Some(("attach", sub_matches)) => cmd::attach::execute(sub_matches)?,
+        Some(("config", sub_matches)) => cmd::config::execute(sub_matches)?,
         Some(("jump", sub_matches)) => cmd::jump::execute(sub_matches)?,
         Some(("kill", sub_matches)) => cmd::kill::execute(sub_matches)?,
         Some(("list", sub_matches)) => cmd::list::execute(sub_matches)?,
@@ -39,6 +41,7 @@ fn make_clap_command() -> Command<'static> {
         .allow_hyphen_values(true)
         .subcommand(cmd::add::make_subcommand())
         .subcommand(cmd::attach::make_subcommand())
+        .subcommand(cmd::config::make_subcommand())
         .subcommand(cmd::jump::make_subcommand())
         .subcommand(cmd::kill::make_subcommand())
         .subcommand(cmd::list::make_subcommand())
