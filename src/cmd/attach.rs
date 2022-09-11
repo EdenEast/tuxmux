@@ -1,6 +1,6 @@
 use std::{path::PathBuf, str::FromStr};
 
-use clap::{Arg, ArgMatches, Command};
+use clap::{value_parser, Arg, ArgMatches, Command};
 use eyre::Result;
 use tmgr::{data::Settings, tmux};
 
@@ -18,7 +18,8 @@ pub fn make_subcommand() -> Command<'static> {
                 .help("Exact path to create or attach tmux session")
                 .short('p')
                 .long("path")
-                .takes_value(true),
+                .takes_value(true)
+                .value_parser(value_parser!(PathBuf)),
             Arg::new("query")
                 .help("Query to search from")
                 .required(false)
@@ -53,17 +54,22 @@ pub fn execute(matches: &ArgMatches) -> Result<bool> {
 
     let settings = Settings::new()?;
     let paths = settings.list_paths();
-    let selected =
+    let selected = if let Some(path) = matches.get_one::<PathBuf>("path") {
+        if !path.exists() {
+            return Err(eyre::eyre!("Invalid path: '{}'", path.display()));
+        }
+        path.to_owned()
+    } else {
         match tmgr::fuzzy::fuzzy_select_one(paths.iter().map(|a| a.as_str()), query.as_deref()) {
-            Some(sel) => sel,
+            Some(sel) => PathBuf::from_str(&sel)?,
             None => return Ok(true),
-        };
+        }
+    };
 
-    let path = PathBuf::from_str(&selected)?;
-    let name = path.as_path().file_name().unwrap().to_str().unwrap();
+    let name = selected.as_path().file_name().unwrap().to_str().unwrap();
 
     if !tmux::session_exists(name) {
-        tmux::create_session(name, &selected)?;
+        tmux::create_session(name, &selected.to_str().unwrap())?;
     }
 
     tmux::attach_session(name)?;
