@@ -70,7 +70,10 @@ pub fn execute(matches: &ArgMatches) -> Result<bool> {
         return Ok(true);
     }
 
-    match (matches.get_one::<String>("name"), matches.get_one::<String>("value")) {
+    match (
+        matches.get_one::<String>("name"),
+        matches.get_one::<String>("value"),
+    ) {
         (Some(name), Some(value)) => set_value(name, value, location)?,
         (Some(name), None) => get_value(name)?,
         _ => {}
@@ -79,7 +82,7 @@ pub fn execute(matches: &ArgMatches) -> Result<bool> {
     Ok(true)
 }
 
-fn get_value(name: &str) -> Result<()>{
+fn get_value(name: &str) -> Result<()> {
     let settings = Settings::new()?;
     match name {
         "depth" => {
@@ -93,7 +96,7 @@ fn get_value(name: &str) -> Result<()>{
                 name,
                 CONFIG_DESCRIPTIONS
                     .keys()
-                    .map(|v| *v)
+                    .copied()
                     .collect::<Vec<_>>()
                     .join(", ")
             );
@@ -116,7 +119,7 @@ pub fn set_value(name: &str, value: &str, location: Location) -> Result<()> {
                 name,
                 CONFIG_DESCRIPTIONS
                     .keys()
-                    .map(|v| *v)
+                    .copied()
                     .collect::<Vec<_>>()
                     .join(", ")
             );

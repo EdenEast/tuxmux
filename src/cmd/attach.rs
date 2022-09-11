@@ -69,7 +69,7 @@ pub fn execute(matches: &ArgMatches) -> Result<bool> {
     let name = selected.as_path().file_name().unwrap().to_str().unwrap();
 
     if !tmux::session_exists(name) {
-        tmux::create_session(name, &selected.to_str().unwrap())?;
+        tmux::create_session(name, selected.to_str().unwrap())?;
     }
 
     tmux::attach_session(name)?;
