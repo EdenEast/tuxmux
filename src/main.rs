@@ -1,5 +1,6 @@
 #![allow(unused)]
-use clap::{crate_description, crate_version, Command};
+use clap::{builder::PossibleValuesParser, crate_description, crate_version, Arg, Command};
+use clap_complete::Shell;
 use eyre::Result;
 
 mod cmd;
@@ -11,6 +12,17 @@ command 'attach' will be assumed. \
 
 fn main() -> Result<()> {
     let matches = make_clap_command().get_matches();
+
+    if let Some(completion) = matches.get_one::<String>("completion") {
+        let shell: Shell = completion
+            .parse()
+            .map_err(|_| eyre::eyre!("Invalid shell: {}", completion))?;
+
+        let mut app = make_clap_command();
+        clap_complete::generate(shell, &mut app, "tm", &mut std::io::stdout().lock());
+
+        return Ok(());
+    }
 
     let exec_subcommand = match matches.subcommand() {
         Some(("add", sub_matches)) => cmd::add::execute(sub_matches)?,
@@ -47,4 +59,10 @@ fn make_clap_command() -> Command<'static> {
         .subcommand(cmd::list::make_subcommand())
         .subcommand(cmd::remove::make_subcommand())
         .subcommand(cmd::wcmd::make_subcommand())
+        .arg(
+            Arg::new("completion")
+                .long("completion")
+                .takes_value(true)
+                .value_parser(PossibleValuesParser::new(["bash", "zsh", "fish"])),
+        )
 }
