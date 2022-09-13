@@ -17,7 +17,6 @@ phf_codegen = "0.11.1"
 [dependencies]
 clap = { version = "3.2.20", features = [ "cargo" ] }
 clap_complete = "3.2.4"
-clap_mangen = "0.1.11"
 dirs-next = "2.0.0"
 eyre = "0.6.8"
 jwalk = "0.6.0"
@@ -35,7 +34,3 @@ path = "src/main.rs"
 [[bin]]
 name = "tmgr-completions"
 path = "src/bin/completions.rs"
-
-[[bin]]
-name = "tmgr-mangen"
-path = "src/bin/mangen.rs"
