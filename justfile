@@ -1,3 +1,17 @@
+default_bin := "tm"
+
+run *args:
+  cargo run --bin tm -- {{args}}
+
+build:
+  cargo build --bin tm
+
+check:
+  cargo check --bin tm
+
+test:
+  cargo test --bin tm
+
 release:
   #/usr/bin/env bash
   cargo build --release --bin tm
