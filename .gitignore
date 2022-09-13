@@ -1,6 +1,8 @@
 # Created by https://www.toptal.com/developers/gitignore/api/rust,vim,visualstudiocode,windows,macos,linux,direnv
 # Edit at https://www.toptal.com/developers/gitignore?templates=rust,vim,visualstudiocode,windows,macos,linux,direnv
 
+release/
+
 ### direnv ###
 .direnv
 

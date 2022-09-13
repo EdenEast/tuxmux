@@ -1,14 +1,15 @@
-use clap::{Arg, ArgMatches, Command};
+use crate::tmux;
+use clap::{ArgMatches, Command};
 use eyre::Result;
-use tmgr::{data::Settings, tmux};
 
 pub fn make_subcommand() -> Command<'static> {
     Command::new("list")
         .about("List current sessions")
         .alias("ls")
+        .disable_version_flag(true)
 }
 
-pub fn execute(matches: &ArgMatches) -> Result<bool> {
+pub fn execute(_: &ArgMatches) -> Result<bool> {
     let sessions = tmux::sessions()?;
 
     let max_name = sessions
@@ -19,7 +20,7 @@ pub fn execute(matches: &ArgMatches) -> Result<bool> {
 
     for s in sessions {
         let attach_num = s.attached.unwrap_or(0);
-        let name = s.name.unwrap_or("".to_string());
+        let name = s.name.unwrap_or_else(|| "".to_string());
 
         let attach = if attach_num > 0 {
             attach_num.to_string()

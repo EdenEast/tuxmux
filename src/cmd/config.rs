@@ -1,14 +1,14 @@
 use std::env;
 
+use crate::data::{Location, Settings, CONFIG_DESCRIPTIONS};
 use clap::{builder::PossibleValuesParser, Arg, ArgMatches, Command};
 use eyre::Result;
-use serde::__private::de::Content;
-use tmgr::data::{Location, Settings, CONFIG_DESCRIPTIONS};
 
 pub fn make_subcommand() -> Command<'static> {
     Command::new("config")
         .about("Get or set configuration options")
         .alias("c")
+        .disable_version_flag(true)
         .args(&[
             Arg::new("name")
                 .help("Name of configuration option")

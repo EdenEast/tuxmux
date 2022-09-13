@@ -1,13 +1,14 @@
 use std::{path::PathBuf, str::FromStr};
 
+use crate::{data::Settings, tmux};
 use clap::{value_parser, Arg, ArgMatches, Command};
 use eyre::Result;
-use tmgr::{data::Settings, tmux};
 
 pub fn make_subcommand() -> Command<'static> {
     Command::new("attach")
         .about("Create or attach to a tmux session based on the path specified")
         .alias("a")
+        .disable_version_flag(true)
         .args(&[
             Arg::new("exist")
                 .help("Attach to existing tmux session")
@@ -39,12 +40,12 @@ pub fn execute(matches: &ArgMatches) -> Result<bool> {
 
     let exact = matches.get_flag("exact");
     if matches.get_flag("exist") {
-        let names = tmgr::tmux::session_names()?;
+        let names = crate::tmux::session_names()?;
 
         let selected = match names.len() {
             0 => return Ok(true),
             1 => names[0].clone(),
-            _ => match tmgr::fuzzy::fuzzy_select_one(
+            _ => match crate::fuzzy::fuzzy_select_one(
                 names.iter().map(|a| a.as_str()),
                 query.as_deref(),
                 exact,
@@ -67,7 +68,7 @@ pub fn execute(matches: &ArgMatches) -> Result<bool> {
         }
         path.to_owned()
     } else {
-        match tmgr::fuzzy::fuzzy_select_one(
+        match crate::fuzzy::fuzzy_select_one(
             paths.iter().map(|a| a.as_str()),
             query.as_deref(),
             exact,

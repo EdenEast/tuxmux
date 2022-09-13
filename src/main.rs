@@ -2,27 +2,10 @@
 use clap::{builder::PossibleValuesParser, crate_description, crate_version, Arg, Command};
 use clap_complete::Shell;
 use eyre::Result;
-
-mod cmd;
-
-const AFTER_HELP_MSG: &str = "\
-By default if there is no command passed as the first argument the \
-command 'attach' will be assumed. \
-";
+use tmgr::cmd;
 
 fn main() -> Result<()> {
-    let matches = make_clap_command().get_matches();
-
-    if let Some(completion) = matches.get_one::<String>("completion") {
-        let shell: Shell = completion
-            .parse()
-            .map_err(|_| eyre::eyre!("Invalid shell: {}", completion))?;
-
-        let mut app = make_clap_command();
-        clap_complete::generate(shell, &mut app, "tm", &mut std::io::stdout().lock());
-
-        return Ok(());
-    }
+    let matches = cmd::make_clap_command().get_matches();
 
     let exec_subcommand = match matches.subcommand() {
         Some(("add", sub_matches)) => cmd::add::execute(sub_matches)?,
@@ -41,28 +24,4 @@ fn main() -> Result<()> {
     }
 
     Ok(())
-}
-
-fn make_clap_command() -> Command<'static> {
-    Command::new("tm")
-        .bin_name("tm")
-        .about(crate_description!())
-        .after_help(AFTER_HELP_MSG)
-        .version(crate_version!())
-        .allow_external_subcommands(true)
-        .allow_hyphen_values(true)
-        .subcommand(cmd::add::make_subcommand())
-        .subcommand(cmd::attach::make_subcommand())
-        .subcommand(cmd::config::make_subcommand())
-        .subcommand(cmd::jump::make_subcommand())
-        .subcommand(cmd::kill::make_subcommand())
-        .subcommand(cmd::list::make_subcommand())
-        .subcommand(cmd::remove::make_subcommand())
-        .subcommand(cmd::wcmd::make_subcommand())
-        .arg(
-            Arg::new("completion")
-                .long("completion")
-                .takes_value(true)
-                .value_parser(PossibleValuesParser::new(["bash", "zsh", "fish"])),
-        )
 }

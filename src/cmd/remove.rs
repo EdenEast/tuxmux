@@ -1,14 +1,15 @@
-use clap::{Arg, ArgMatches, Command};
-use eyre::Result;
-use tmgr::{
+use crate::{
     data::{Location, PathKind, Settings},
     fuzzy,
 };
+use clap::{Arg, ArgMatches, Command};
+use eyre::Result;
 
 pub fn make_subcommand() -> Command<'static> {
     Command::new("remove")
         .about("Remove registered path from tm")
         .alias("k")
+        .disable_version_flag(true)
         .args(&[
             Arg::new("workspace")
                 .help("Remove only workspace paths")

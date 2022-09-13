@@ -1,8 +1,8 @@
 use std::path::Path;
 
+use crate::{tmux, util::intersperse};
 use clap::{Arg, ArgMatches, Command};
 use eyre::Result;
-use tmgr::{tmux, util::intersperse};
 
 const LONG_WINDOW_HELP: &str = "\
 Name of the window to execute the command from. \
@@ -30,6 +30,7 @@ pub fn make_subcommand() -> Command<'static> {
         .about("Send a command to a execute in a tmux window")
         .alias("w")
         .after_help(EXAMPLE_AFTER_HELP)
+        .disable_version_flag(true)
         .args(&[
             Arg::new("window")
                 .help("Name of the window to execute the command from")

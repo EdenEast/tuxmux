@@ -1,12 +1,13 @@
 use std::path::PathBuf;
 
+use crate::data::{Location, PathKind, Settings};
 use clap::{value_parser, Arg, ArgMatches, Command};
 use eyre::Result;
-use tmgr::data::{Location, PathKind, Settings};
 
 pub fn make_subcommand() -> Command<'static> {
     Command::new("add")
         .about("Register a path to use when listing paths to attach.")
+        .disable_version_flag(true)
         .args(&[
             Arg::new("workspace")
                 .help("Use path as a workspace path")

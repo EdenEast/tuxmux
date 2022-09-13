@@ -3,9 +3,9 @@ use std::{
     path::{Path, PathBuf},
 };
 
+use crate::{data::Jumplist, tmux};
 use clap::{value_parser, Arg, ArgMatches, Command};
 use eyre::Result;
-use tmgr::{data::Jumplist, tmux};
 
 const LONG_ABOUT: &str = "\
 Store a list of paths and jump to that index. This is useful for keybindings \
@@ -20,6 +20,7 @@ pub fn make_subcommand() -> Command<'static> {
         .about("Store paths and later jump to them by index")
         .long_about(LONG_ABOUT)
         .alias("j")
+        .disable_version_flag(true)
         .args(&[
             Arg::new("edit")
                 .help("Open jump list file in \"$EDITOR\"")

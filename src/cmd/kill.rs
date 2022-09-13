@@ -1,11 +1,12 @@
+use crate::{fuzzy, tmux};
 use clap::{Arg, ArgMatches, Command};
 use eyre::Result;
-use tmgr::{fuzzy, tmux};
 
 pub fn make_subcommand() -> Command<'static> {
     Command::new("kill")
         .about("Kill a running tmux session")
         .alias("k")
+        .disable_version_flag(true)
         .args(&[
             Arg::new("all")
                 .help("Kill all sesssions")

@@ -63,6 +63,9 @@
             cargo-limit
             cargo-watch
             cargo-whatfeatures
+
+            just
+            pandoc
           ] ++ (pkgs.lib.optionals pkgs.stdenv.isDarwin [
             libiconv
           ]);
