@@ -1,5 +1,5 @@
 {
-  description = "Rust application and setup env";
+  description = "Tmux utility for session and window management";
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
@@ -33,14 +33,40 @@
 
         manifest = builtins.fromTOML (builtins.readFile ./Cargo.toml);
         version = manifest.package.version;
+        root = ./.;
+
+        tmgrCmpl = naersk-lib.buildPackage {
+          inherit version root;
+          name = "tmgr-cmpl";
+          singleStep = true;
+          cargoBuildOptions = (opts: opts ++ [ "--bin=tmgr-completions" ]);
+        };
 
         tmgr = naersk-lib.buildPackage {
-          inherit version;
+          inherit version root;
           pname = "tmgr";
-          root = ./.;
 
           buildInputs = with pkgs; [ ];
-          nativeBuildInputs = with pkgs; [ ];
+          nativeBuildInputs = with pkgs; [ pandoc tmgrCmpl ];
+
+          # Workaround for lack of a naersk option to select --bin target.
+          # See https://github.com/nmattia/naersk/issues/127
+          singleStep = true;
+          cargoBuildOptions = (opts: opts ++ [ "--bin=tm" ]);
+
+          overrideMain = _: {
+            postInstall = ''
+              mkdir -p $out/{completions,man}
+              OUT_DIR=$out/completions ${tmgrCmpl}/bin/tmgr-completions
+              pandoc --standalone --to man doc/tm.md -o $out/man/tm.1
+            '';
+          };
+
+          meta = with pkgs.lib; {
+            description = "Tmux utility for session and window management";
+            homepage = "https://github.com/EdenEast/tmgr";
+            license = with licenses; [ mit ];
+          };
         };
 
         devShell = pkgs.mkShell {
