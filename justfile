@@ -12,11 +12,14 @@ check:
 test:
   cargo test --bin tm
 
+install:
+  cargo install --path ./crates/tmgr
+
 release:
   #/usr/bin/env bash
   cargo build --release --bin tm
   mkdir -p release/{completions,man}
-  cp {LICENSE,README.md} release/
-  cp ./target/release/tm release
-  OUT_DIR=release/completions cargo run --release --bin tmgr-completions
+  cp -f ./{LICENSE,readme.md} ./release
+  cp -f ./target/release/tm ./release
+  OUT_DIR=release/completions cargo run --release --bin tmgr-cmpl
   pandoc --standalone --to man doc/tm.md -o release/man/tm.1

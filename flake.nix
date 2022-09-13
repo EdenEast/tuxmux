@@ -31,7 +31,7 @@
           rustc = toolchain.rustc;
         };
 
-        manifest = builtins.fromTOML (builtins.readFile ./Cargo.toml);
+        manifest = builtins.fromTOML (builtins.readFile ./crates/tmgr/Cargo.toml);
         version = manifest.package.version;
         root = ./.;
 
@@ -39,7 +39,7 @@
           inherit version root;
           name = "tmgr-cmpl";
           singleStep = true;
-          cargoBuildOptions = (opts: opts ++ [ "--bin=tmgr-completions" ]);
+          cargoBuildOptions = (opts: opts ++ [ "--bin=tmgr-cmpl" ]);
         };
 
         tmgr = naersk-lib.buildPackage {
@@ -57,7 +57,7 @@
           overrideMain = _: {
             postInstall = ''
               mkdir -p $out/{completions,man}
-              OUT_DIR=$out/completions ${tmgrCmpl}/bin/tmgr-completions
+              OUT_DIR=$out/completions ${tmgrCmpl}/bin/tmgr-cmpl
               pandoc --standalone --to man doc/tm.md -o $out/man/tm.1
             '';
           };
