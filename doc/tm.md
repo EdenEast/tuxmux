@@ -190,13 +190,29 @@ Send a command to a execute in a tmux window.
 `-h`, `--help`
 :   Print help information
 
+CONFIGURATION
+=============
+
+`depth`: *number*
+:   Limit directory traversal for *workspace* paths. By default, there is no limit on the search
+    depth.
+
+`single_paths`: *list*
+:   List of paths to be added to tm's search list. These paths are appended after the workspace
+    paths are searched.
+
+`workspace_paths`: *list*
+:   List of paths to be searched for valid git repositories. Every valid git repository will be
+    added to the list
+
+
 ENVIRONMENT
 ===========
 
 **TM_CONFIG_PATH**
 
-:   Override the location of the `global` config path. If not defined, the `global` config path will be set by
-    `$XDG_CONFIG_HOME/tm`. If this is also not present, will fallback to:
+:   Override the location of the `global` config path. If not defined, the `global` config path will
+    be set by `$XDG_CONFIG_HOME/tm`. If this is also not present, will fallback to:
 
     - `$HOME/.config/tm` on `linux`
     - `$HOME/Library/Application Support/tm` on `macos`.
@@ -204,8 +220,8 @@ ENVIRONMENT
 
 **TM_DATA_PATH**
 
-:   Override the location of the `local` config path. If not defined, the `local` config path will be set by
-    `$XDG_DATA_HOME/tm`. If this is also not present, will fallback to:
+:   Override the location of the `local` config path. If not defined, the `local` config path will
+    be set by `$XDG_DATA_HOME/tm`. If this is also not present, will fallback to:
 
     - `$HOME/.local/share/tm` on `linux`
     - `$HOME/Library/Application Support/tm` on `macos`.
@@ -236,8 +252,3 @@ BUGS
 ====
 
 See GitHub Issues: <https://github.com/EdenEast/tmgr/issues>
-
-AUTHOR
-======
-
-Foobar Goodprogrammer <foo@example.org>

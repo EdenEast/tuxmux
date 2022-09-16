@@ -15,6 +15,9 @@ test:
 install:
   cargo install --path ./crates/tmgr
 
+man:
+  pandoc --standalone --to man doc/tm.md -o doc/tm.1
+
 release:
   #/usr/bin/env bash
   cargo build --release --bin tm
