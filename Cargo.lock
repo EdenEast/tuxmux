@@ -1020,6 +1020,7 @@ dependencies = [
  "jwalk",
  "phf",
  "phf_codegen",
+ "rayon",
  "serde",
  "skim",
  "tmux_interface",

@@ -1,8 +1,9 @@
-use std::{path::PathBuf, str::FromStr};
+use std::{collections::HashSet, path::PathBuf, str::FromStr};
 
 use crate::{data::Settings, tmux};
 use clap::{value_parser, Arg, ArgMatches, Command};
 use eyre::Result;
+use rayon::prelude::*;
 
 pub fn make_subcommand() -> Command<'static> {
     Command::new("attach")
@@ -62,20 +63,10 @@ pub fn execute(matches: &ArgMatches) -> Result<bool> {
 
     let settings = Settings::new()?;
     let paths = settings.list_paths();
-    let selected = if let Some(path) = matches.get_one::<PathBuf>("path") {
-        if !path.exists() {
-            return Err(eyre::eyre!("Invalid path: '{}'", path.display()));
-        }
-        path.to_owned()
-    } else {
-        match crate::fuzzy::fuzzy_select_one(
-            paths.iter().map(|a| a.as_str()),
-            query.as_deref(),
-            exact,
-        ) {
-            Some(sel) => PathBuf::from_str(&sel)?,
-            None => return Ok(true),
-        }
+    let selected = match get_selected(&paths, &query, matches) {
+        Ok(Some(s)) => s,
+        Ok(None) => return Ok(true),
+        Err(e) => return Err(e),
     };
 
     let name = selected.as_path().file_name().unwrap().to_str().unwrap();
@@ -87,4 +78,33 @@ pub fn execute(matches: &ArgMatches) -> Result<bool> {
     tmux::attach_session(name)?;
 
     Ok(true)
+}
+
+fn get_selected(
+    paths: &HashSet<String>,
+    query: &Option<String>,
+    matches: &ArgMatches,
+) -> Result<Option<PathBuf>> {
+    if let Some(path) = matches.get_one::<PathBuf>("path") {
+        if !path.exists() {
+            return Err(eyre::eyre!("Invalid path: '{}'", path.display()));
+        }
+        return Ok(Some(path.to_owned()));
+    }
+
+    if let Some(q) = query {
+        let iter = paths.par_iter().filter(|v| v.contains(q));
+        let count = iter.clone().count();
+        if count == 1 {
+            let l = iter.collect::<Vec<_>>();
+            return Ok(Some(PathBuf::from_str(l[0])?));
+        }
+    }
+
+    let exact = matches.get_flag("exact");
+    match crate::fuzzy::fuzzy_select_one(paths.iter().map(|a| a.as_str()), query.as_deref(), exact)
+    {
+        Some(sel) => Ok(Some(PathBuf::from_str(&sel)?)),
+        None => Ok(None),
+    }
 }
