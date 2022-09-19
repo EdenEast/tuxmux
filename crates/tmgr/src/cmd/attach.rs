@@ -35,6 +35,7 @@ pub fn make_subcommand() -> Command<'static> {
 }
 
 pub fn execute(matches: &ArgMatches) -> Result<bool> {
+    let settings = Settings::new()?;
     let query = matches
         .get_many::<String>("query")
         .map(|vs| vs.map(|s| s.as_str()).collect::<Vec<_>>().join(" "));
@@ -50,6 +51,7 @@ pub fn execute(matches: &ArgMatches) -> Result<bool> {
                 names.iter().map(|a| a.as_str()),
                 query.as_deref(),
                 exact,
+                &settings,
             ) {
                 Some(index) => index,
                 None => return Ok(true),
@@ -61,9 +63,8 @@ pub fn execute(matches: &ArgMatches) -> Result<bool> {
         return Ok(true);
     }
 
-    let settings = Settings::new()?;
     let paths = settings.list_paths();
-    let selected = match get_selected(&paths, &query, matches) {
+    let selected = match get_selected(&paths, &query, matches, &settings) {
         Ok(Some(s)) => s,
         Ok(None) => return Ok(true),
         Err(e) => return Err(e),
@@ -84,6 +85,7 @@ fn get_selected(
     paths: &HashSet<String>,
     query: &Option<String>,
     matches: &ArgMatches,
+    settings: &Settings,
 ) -> Result<Option<PathBuf>> {
     if let Some(path) = matches.get_one::<PathBuf>("path") {
         if !path.exists() {
@@ -102,8 +104,12 @@ fn get_selected(
     }
 
     let exact = matches.get_flag("exact");
-    match crate::fuzzy::fuzzy_select_one(paths.iter().map(|a| a.as_str()), query.as_deref(), exact)
-    {
+    match crate::fuzzy::fuzzy_select_one(
+        paths.iter().map(|a| a.as_str()),
+        query.as_deref(),
+        exact,
+        settings,
+    ) {
         Some(sel) => Ok(Some(PathBuf::from_str(&sel)?)),
         None => Ok(None),
     }

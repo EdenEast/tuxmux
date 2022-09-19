@@ -1,4 +1,4 @@
-use crate::{fuzzy, tmux};
+use crate::{data::Settings, fuzzy, tmux};
 use clap::{Arg, ArgMatches, Command};
 use eyre::Result;
 
@@ -26,6 +26,7 @@ pub fn make_subcommand() -> Command<'static> {
 }
 
 pub fn execute(matches: &ArgMatches) -> Result<bool> {
+    let settings = Settings::new()?;
     let query = matches
         .get_many::<String>("query")
         .map(|vs| vs.map(|s| s.as_str()).collect::<Vec<_>>().join(" "));
@@ -38,6 +39,7 @@ pub fn execute(matches: &ArgMatches) -> Result<bool> {
             names.iter().map(|a| a.as_str()),
             query.as_deref(),
             matches.get_flag("exact"),
+            &settings,
         )
     };
 

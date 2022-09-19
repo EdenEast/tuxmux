@@ -54,6 +54,7 @@ pub fn execute(matches: &ArgMatches) -> Result<bool> {
         iter.iter().map(|a| a.as_str()),
         None,
         matches.get_flag("exact"),
+        &settings,
     );
     if selected.is_empty() {
         return Ok(true);

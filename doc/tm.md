@@ -197,6 +197,9 @@ CONFIGURATION
 :   Limit directory traversal for *workspace* paths. By default, there is no limit on the search
     depth.
 
+`height`: *number*
+:   Set the height of fuzzy selector, as a percentage of the terminal. By default, value is 40 (%)
+
 `single_paths`: *list*
 :   List of paths to be added to tm's search list. These paths are appended after the workspace
     paths are searched.

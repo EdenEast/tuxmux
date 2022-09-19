@@ -29,6 +29,7 @@ pub struct Settings {
     pub single_paths: HashSet<String>,
     pub workspace_paths: HashSet<String>,
     pub depth: Option<usize>,
+    pub height: Option<usize>,
 }
 
 impl Settings {
@@ -137,6 +138,10 @@ fn merge_if_exists(settings: &mut Settings, path: &Path) -> Result<()> {
 
     if let Some(depth) = raw.depth {
         settings.depth = Some(depth);
+    }
+
+    if let Some(height) = raw.height {
+        settings.height = Some(height);
     }
 
     Ok(())

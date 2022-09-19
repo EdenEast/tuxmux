@@ -15,6 +15,9 @@ fn main() {
                 "depth",
                 "\"Depth to traverse though 'workspace' paths. Defaults to None\""
             )
+            .entry(
+                "height",
+                "\"Set the height of fuzzy selector, as a percentage of the terminal. By default, value is 40 (%)\"")
             .build()
     )
     .unwrap();

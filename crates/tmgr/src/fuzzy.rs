@@ -5,16 +5,26 @@ use skim::{
     Skim,
 };
 
-use crate::util::intersperse;
+use crate::{data::Settings, util::intersperse};
 
-pub fn fuzzy_select_one<'a, I>(iter: I, query: Option<&str>, exact:bool) -> Option<String>
+pub fn fuzzy_select_one<'a, I>(
+    iter: I,
+    query: Option<&str>,
+    exact: bool,
+    settings: &Settings,
+) -> Option<String>
 where
     I: Iterator<Item = &'a str>,
 {
+    let height = settings
+        .height
+        .map(|v| v.to_string())
+        .unwrap_or("40".to_string());
+
     let skim_options = SkimOptionsBuilder::default()
         .exit0(true)
         .select1(true)
-        .height(Some("40"))
+        .height(Some(&height))
         .reverse(true)
         .exact(exact)
         .query(query)
@@ -34,14 +44,24 @@ where
     }
 }
 
-pub fn fuzzy_select_multi<'a, I>(iter: I, query: Option<&str>, exact: bool) -> Vec<String>
+pub fn fuzzy_select_multi<'a, I>(
+    iter: I,
+    query: Option<&str>,
+    exact: bool,
+    settings: &Settings,
+) -> Vec<String>
 where
     I: Iterator<Item = &'a str>,
 {
+    let height = settings
+        .height
+        .map(|v| v.to_string())
+        .unwrap_or("40".to_string());
+
     let skim_options = SkimOptionsBuilder::default()
         .exit0(true)
         .select1(true)
-        .height(Some("40"))
+        .height(Some(&height))
         .reverse(true)
         .exact(exact)
         .query(query)

@@ -96,6 +96,11 @@ fn get_value(name: &str) -> Result<()> {
                 println!("{}", depth);
             }
         }
+        "height" => {
+            if let Some(height) = settings.height {
+                println!("{}", height);
+            }
+        }
         _ => {
             println!(
                 "Unknown setting: '{}'. Possible values [{}]",
@@ -118,6 +123,9 @@ pub fn set_value(name: &str, value: &str, location: Location) -> Result<()> {
     match name {
         "depth" => {
             settings.depth = Some(value.parse()?);
+        }
+        "height" => {
+            settings.height = Some(value.parse()?);
         }
         _ => {
             println!(
