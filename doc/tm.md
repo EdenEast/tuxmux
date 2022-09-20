@@ -155,8 +155,31 @@ List current sessions.
 `-h`, `--help`
 :   Print help information.
 
-remove
-------
+path
+----
+
+Manage registered *single* and *workspace* paths.
+
+`add`
+
+Register a path to use when listing paths to attach.
+
+`<path>...`
+:   Optional paths to be added. Uses `cwd` if not present.
+
+`-g`, `--global`
+:   Save to global `$XDG_CONFIG_HOME` instead of `$XDG_DATA_HOME`.
+
+`-l`, `--long`
+:   List current paths.
+
+`-w`, `--workspace`
+:   Use path as a workspace path.
+
+`-h`, `--help`
+:   Print help information.
+
+`remove`
 
 Remove registered path from tm.
 
