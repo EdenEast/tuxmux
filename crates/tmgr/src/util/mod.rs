@@ -27,6 +27,10 @@ pub fn get_config(components: &[&str]) -> PathBuf {
     path
 }
 
+pub fn format_name(name: &str) -> String {
+    name.replace(".", "_")
+}
+
 pub fn get_local(components: &[&str]) -> PathBuf {
     let mut path = match (
         std::env::var("TM_DATA_PATH"),

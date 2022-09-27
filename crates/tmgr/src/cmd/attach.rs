@@ -1,6 +1,6 @@
 use std::{collections::HashSet, path::PathBuf, str::FromStr};
 
-use crate::{data::Settings, tmux};
+use crate::{data::Settings, tmux, util};
 use clap::{value_parser, Arg, ArgMatches, Command};
 use eyre::Result;
 use rayon::prelude::*;
@@ -70,13 +70,13 @@ pub fn execute(matches: &ArgMatches) -> Result<bool> {
         Err(e) => return Err(e),
     };
 
-    let name = selected.as_path().file_name().unwrap().to_str().unwrap();
+    let name = util::format_name(selected.as_path().file_name().unwrap().to_str().unwrap());
 
-    if !tmux::session_exists(name) {
-        tmux::create_session(name, selected.to_str().unwrap())?;
+    if !tmux::session_exists(&name) {
+        tmux::create_session(&name, selected.to_str().unwrap())?;
     }
 
-    tmux::attach_session(name)?;
+    tmux::attach_session(&name)?;
 
     Ok(true)
 }
