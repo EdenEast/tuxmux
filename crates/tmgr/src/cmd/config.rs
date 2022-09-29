@@ -1,8 +1,10 @@
 use std::env;
 
-use crate::data::{Location, Settings, CONFIG_DESCRIPTIONS};
+use crate::data::{Location, Settings};
 use clap::{builder::PossibleValuesParser, Arg, ArgMatches, Command};
 use eyre::Result;
+
+const CONFIG_OPTIONS: [&'static str; 2] = ["depth", "height"];
 
 pub fn make_subcommand() -> Command {
     Command::new("config")
@@ -12,7 +14,7 @@ pub fn make_subcommand() -> Command {
         .args(&[
             Arg::new("name")
                 .help("Name of configuration option")
-                .value_parser(PossibleValuesParser::new(CONFIG_DESCRIPTIONS.keys()))
+                .value_parser(PossibleValuesParser::new(CONFIG_OPTIONS))
                 .hide_possible_values(true)
                 .required(false),
             Arg::new("value")
@@ -32,10 +34,6 @@ pub fn make_subcommand() -> Command {
                 .help("List all config options and values")
                 .short('l')
                 .long("list")
-                .action(clap::ArgAction::SetTrue),
-            Arg::new("options")
-                .help("List all config options with a description of each")
-                .long("options")
                 .action(clap::ArgAction::SetTrue),
         ])
 }
@@ -64,14 +62,6 @@ pub fn execute(matches: &ArgMatches) -> Result<bool> {
 
         let content = toml::to_string_pretty(&settings)?;
         println!("{}", content);
-
-        return Ok(true);
-    }
-
-    if matches.get_flag("options") {
-        for (k, v) in &CONFIG_DESCRIPTIONS {
-            println!("{:>10} = {}", k, v);
-        }
 
         return Ok(true);
     }
@@ -105,11 +95,7 @@ fn get_value(name: &str) -> Result<()> {
             println!(
                 "Unknown setting: '{}'. Possible values [{}]",
                 name,
-                CONFIG_DESCRIPTIONS
-                    .keys()
-                    .copied()
-                    .collect::<Vec<_>>()
-                    .join(", ")
+                CONFIG_OPTIONS.join(", ")
             );
         }
     };
@@ -131,11 +117,7 @@ pub fn set_value(name: &str, value: &str, location: Location) -> Result<()> {
             println!(
                 "Unknown setting: '{}'. Possible values [{}]",
                 name,
-                CONFIG_DESCRIPTIONS
-                    .keys()
-                    .copied()
-                    .collect::<Vec<_>>()
-                    .join(", ")
+                CONFIG_OPTIONS.join(", ")
             );
         }
     }

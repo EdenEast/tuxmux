@@ -8,8 +8,6 @@ use std::{
 
 use crate::util;
 
-include!(concat!(env!("OUT_DIR"), "/config-desc-map.rs"));
-
 const CONF_PATH_COMPONENTS: &[&str] = &["config.toml"];
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
