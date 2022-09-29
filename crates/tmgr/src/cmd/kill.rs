@@ -2,7 +2,7 @@ use crate::{data::Settings, fuzzy, tmux};
 use clap::{Arg, ArgMatches, Command};
 use eyre::Result;
 
-pub fn make_subcommand() -> Command<'static> {
+pub fn make_subcommand() -> Command {
     Command::new("kill")
         .about("Kill a running tmux session")
         .alias("k")
@@ -21,7 +21,7 @@ pub fn make_subcommand() -> Command<'static> {
             Arg::new("query")
                 .help("Query to search from")
                 .required(false)
-                .multiple_values(true),
+                .num_args(0..),
         ])
 }
 

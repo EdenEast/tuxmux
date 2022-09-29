@@ -5,7 +5,7 @@ use crate::{
 use clap::{Arg, ArgMatches, Command};
 use eyre::Result;
 
-pub fn make_subcommand() -> Command<'static> {
+pub fn make_subcommand() -> Command {
     Command::new("remove")
         .about("Remove registered path from tm")
         .alias("k")

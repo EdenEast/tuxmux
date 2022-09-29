@@ -15,7 +15,7 @@ the list of stored paths and use that to jump to that tmux session.
 By default if no options are passed then the cwd is added to the jump list \
 ";
 
-pub fn make_subcommand() -> Command<'static> {
+pub fn make_subcommand() -> Command {
     Command::new("jump")
         .about("Store paths and later jump to them by index")
         .long_about(LONG_ABOUT)
@@ -36,13 +36,13 @@ pub fn make_subcommand() -> Command<'static> {
                 .help("Jump to index in jump list. Index is 1 based")
                 .short('i')
                 .long("index")
-                .takes_value(true)
+                .num_args(1)
                 .value_parser(value_parser!(usize)),
             Arg::new("path")
                 .help("Add path to jump list")
                 .short('o')
                 .long("path")
-                .takes_value(true)
+                .num_args(1)
                 .value_parser(value_parser!(PathBuf)),
         ])
 }

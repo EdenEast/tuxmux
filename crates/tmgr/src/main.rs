@@ -1,6 +1,5 @@
 #![allow(unused)]
 use clap::{builder::PossibleValuesParser, crate_description, crate_version, Arg, Command};
-use clap_complete::Shell;
 use eyre::Result;
 use tmgr::cmd;
 

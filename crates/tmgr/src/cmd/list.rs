@@ -2,7 +2,7 @@ use crate::tmux;
 use clap::{ArgMatches, Command};
 use eyre::Result;
 
-pub fn make_subcommand() -> Command<'static> {
+pub fn make_subcommand() -> Command {
     Command::new("list")
         .about("List current sessions")
         .alias("ls")

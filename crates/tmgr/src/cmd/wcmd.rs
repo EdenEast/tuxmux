@@ -25,7 +25,7 @@ EXAMPLES:
   tm w foo/bar/baz -- make test
 ";
 
-pub fn make_subcommand() -> Command<'static> {
+pub fn make_subcommand() -> Command {
     Command::new("wcmd")
         .about("Send a command to a execute in a tmux window")
         .alias("w")
@@ -40,7 +40,7 @@ pub fn make_subcommand() -> Command<'static> {
                 .help("The command to be executed in the tmux window")
                 .long_help(LONG_CMD_HELP)
                 .required(false)
-                .multiple_values(true),
+                .num_args(0..),
         ])
 }
 

@@ -5,7 +5,7 @@ use clap::{value_parser, Arg, ArgMatches, Command};
 use eyre::Result;
 use rayon::prelude::*;
 
-pub fn make_subcommand() -> Command<'static> {
+pub fn make_subcommand() -> Command {
     Command::new("attach")
         .about("Create or attach to a tmux session based on the path specified")
         .alias("a")
@@ -25,12 +25,12 @@ pub fn make_subcommand() -> Command<'static> {
                 .help("Exact path to create or attach tmux session")
                 .short('p')
                 .long("path")
-                .takes_value(true)
+                .num_args(1)
                 .value_parser(value_parser!(PathBuf)),
             Arg::new("query")
                 .help("Query to search from")
                 .required(false)
-                .multiple_values(true),
+                .num_args(0..),
         ])
 }
 

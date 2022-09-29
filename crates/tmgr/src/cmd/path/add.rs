@@ -4,7 +4,7 @@ use crate::data::{Location, PathKind, Settings};
 use clap::{value_parser, Arg, ArgMatches, Command};
 use eyre::Result;
 
-pub fn make_subcommand() -> Command<'static> {
+pub fn make_subcommand() -> Command {
     Command::new("add")
         .about("Register a path to use when listing paths to attach.")
         .disable_version_flag(true)
@@ -27,7 +27,7 @@ pub fn make_subcommand() -> Command<'static> {
             Arg::new("path")
                 .help("Optional paths to be added. Uses 'cwd' if not present")
                 .required(false)
-                .multiple_values(true)
+                .num_args(0..)
                 .value_parser(value_parser!(PathBuf)),
         ])
 }

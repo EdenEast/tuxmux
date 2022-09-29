@@ -1,4 +1,4 @@
-use clap::ArgEnum;
+use clap::ValueEnum;
 use clap_complete::Shell;
 use std::env;
 use std::io::Result;

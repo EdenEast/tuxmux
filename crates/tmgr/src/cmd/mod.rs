@@ -13,7 +13,7 @@ By default if there is no command passed as the first argument the \
 command 'attach' will be assumed. \
 ";
 
-pub fn make_clap_command() -> Command<'static> {
+pub fn make_clap_command() -> Command {
     Command::new("tm")
         .bin_name("tm")
         .about(crate_description!())

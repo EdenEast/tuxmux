@@ -4,7 +4,7 @@ use crate::data::{Location, Settings, CONFIG_DESCRIPTIONS};
 use clap::{builder::PossibleValuesParser, Arg, ArgMatches, Command};
 use eyre::Result;
 
-pub fn make_subcommand() -> Command<'static> {
+pub fn make_subcommand() -> Command {
     Command::new("config")
         .about("Get or set configuration options")
         .alias("c")
