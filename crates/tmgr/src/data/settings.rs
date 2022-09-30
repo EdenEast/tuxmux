@@ -84,7 +84,17 @@ impl Settings {
     }
 
     pub fn list_paths(&self) -> HashSet<String> {
-        let mut results = self.single_paths.clone();
+        let mut results = self
+            .single_paths
+            .iter()
+            .cloned()
+            .filter_map(|s| {
+                Path::new(&s)
+                    .canonicalize()
+                    .map(|p| p.display().to_string())
+                    .ok()
+            })
+            .collect::<HashSet<_>>();
 
         let depth = self.depth.unwrap_or(100);
         for ws_path in &self.workspace_paths {
