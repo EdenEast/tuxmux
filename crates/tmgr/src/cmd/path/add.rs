@@ -19,11 +19,6 @@ pub fn make_subcommand() -> Command {
                 .short('g')
                 .long("global")
                 .action(clap::ArgAction::SetTrue),
-            Arg::new("list")
-                .help("List current paths")
-                .short('l')
-                .long("long")
-                .action(clap::ArgAction::SetTrue),
             Arg::new("path")
                 .help("Optional paths to be added. Uses 'cwd' if not present")
                 .required(false)
