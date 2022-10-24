@@ -1,4 +1,8 @@
-use std::{collections::HashSet, path::PathBuf, str::FromStr};
+use std::{
+    collections::HashSet,
+    path::{Path, PathBuf},
+    str::FromStr,
+};
 
 use crate::{data::Settings, tmux, util};
 use clap::{value_parser, Arg, ArgMatches, Command};
@@ -88,9 +92,14 @@ fn get_selected(
     settings: &Settings,
 ) -> Result<Option<PathBuf>> {
     if let Some(path) = matches.get_one::<PathBuf>("path") {
+        if path.as_path() == Path::new(".") {
+            return Ok(Some(std::env::current_dir()?));
+        }
+
         if !path.exists() {
             return Err(eyre::eyre!("Invalid path: '{}'", path.display()));
         }
+
         return Ok(Some(path.to_owned()));
     }
 
