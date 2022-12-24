@@ -28,22 +28,6 @@ pub fn make_subcommand() -> Command {
 }
 
 pub fn execute(matches: &ArgMatches) -> Result<bool> {
-    if matches.get_flag("list") {
-        let settings = Settings::new()?;
-
-        settings
-            .single_paths
-            .iter()
-            .for_each(|s| println!("s| {}", s));
-
-        settings
-            .workspace_paths
-            .iter()
-            .for_each(|s| println!("w| {}", s));
-
-        return Ok(true);
-    }
-
     let cwd = std::env::current_dir()?;
     let paths = match &matches.get_many::<PathBuf>("path") {
         Some(vr) => vr.clone().map(|p| p.as_path()).collect(),
