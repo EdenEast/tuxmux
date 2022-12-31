@@ -6,7 +6,7 @@ description = "Tmux utility for session and window management"
 license = "Apache-2.0"
 
 [dependencies]
-clap = { version = "4.0.2", features = [ "cargo" ] }
+clap = { version = "^4.0.32", features = [ "cargo" ] }
 dirs-next = "2.0.0"
 eyre = "0.6.8"
 jwalk = "0.6.0"
