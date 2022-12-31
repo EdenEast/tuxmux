@@ -30,7 +30,7 @@ pub fn make_subcommand() -> Command {
         ])
 }
 
-pub fn execute(matches: &ArgMatches) -> Result<bool> {
+pub fn execute(matches: &ArgMatches) -> Result<()> {
     let settings = match (matches.get_flag("global"), matches.get_flag("local")) {
         (true, false) => Settings::from_location(Location::Global)?,
         (false, true) => Settings::from_location(Location::Local)?,
@@ -39,11 +39,12 @@ pub fn execute(matches: &ArgMatches) -> Result<bool> {
 
     if matches.get_flag("single") {
         settings.single_paths.iter().for_each(|s| println!("{}", s));
-    }
-    else if matches.get_flag("workspace") {
-        settings.workspace_paths.iter().for_each(|s| println!("{}", s));
-    }
-    else {
+    } else if matches.get_flag("workspace") {
+        settings
+            .workspace_paths
+            .iter()
+            .for_each(|s| println!("{}", s));
+    } else {
         settings
             .single_paths
             .iter()
@@ -55,5 +56,5 @@ pub fn execute(matches: &ArgMatches) -> Result<bool> {
             .for_each(|s| println!("w {}", s));
     }
 
-    Ok(true)
+    Ok(())
 }

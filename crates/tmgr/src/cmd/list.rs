@@ -9,7 +9,7 @@ pub fn make_subcommand() -> Command {
         .disable_version_flag(true)
 }
 
-pub fn execute(_: &ArgMatches) -> Result<bool> {
+pub fn execute(_: &ArgMatches) -> Result<()> {
     let sessions = tmux::sessions()?;
 
     let max_name = sessions
@@ -31,5 +31,5 @@ pub fn execute(_: &ArgMatches) -> Result<bool> {
         println!("{} {:npad$}", attach, name, npad = max_name);
     }
 
-    Ok(true)
+    Ok(())
 }

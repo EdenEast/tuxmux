@@ -44,7 +44,7 @@ pub fn make_subcommand() -> Command {
         ])
 }
 
-pub fn execute(matches: &ArgMatches) -> Result<bool> {
+pub fn execute(matches: &ArgMatches) -> Result<()> {
     let window = matches
         .get_one::<String>("window")
         .expect("Window is required");
@@ -70,5 +70,5 @@ pub fn execute(matches: &ArgMatches) -> Result<bool> {
     tmux::send_keys(&target, &cmd)?;
     tmux::send_keys(&target, "C-m")?;
 
-    Ok(true)
+    Ok(())
 }

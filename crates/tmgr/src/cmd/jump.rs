@@ -47,14 +47,14 @@ pub fn make_subcommand() -> Command {
         ])
 }
 
-pub fn execute(matches: &ArgMatches) -> Result<bool> {
+pub fn execute(matches: &ArgMatches) -> Result<()> {
     if matches.get_flag("edit") {
         let editor = env::var("EDITOR").unwrap_or_else(|_| "vim".to_owned());
         std::process::Command::new(&editor)
             .arg(Jumplist::path())
             .status()?;
 
-        return Ok(true);
+        return Ok(());
     }
 
     let mut list = Jumplist::new()?;
@@ -64,7 +64,7 @@ pub fn execute(matches: &ArgMatches) -> Result<bool> {
             println!("{}: {}", i + 1, elem)
         }
 
-        return Ok(true);
+        return Ok(());
     }
 
     if let Some(index) = matches.get_one::<usize>("index") {
@@ -73,7 +73,7 @@ pub fn execute(matches: &ArgMatches) -> Result<bool> {
             tmux::attach_session(name)?;
         }
 
-        return Ok(true);
+        return Ok(());
     }
 
     let path = match matches.get_one::<PathBuf>("path") {
@@ -89,5 +89,5 @@ pub fn execute(matches: &ArgMatches) -> Result<bool> {
     list.add(path.canonicalize()?.display().to_string());
     list.write()?;
 
-    Ok(true)
+    Ok(())
 }

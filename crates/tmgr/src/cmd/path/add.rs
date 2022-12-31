@@ -27,7 +27,7 @@ pub fn make_subcommand() -> Command {
         ])
 }
 
-pub fn execute(matches: &ArgMatches) -> Result<bool> {
+pub fn execute(matches: &ArgMatches) -> Result<()> {
     let cwd = std::env::current_dir()?;
     let paths = match &matches.get_many::<PathBuf>("path") {
         Some(vr) => vr.clone().map(|p| p.as_path()).collect(),
@@ -58,5 +58,5 @@ pub fn execute(matches: &ArgMatches) -> Result<bool> {
 
     settings.write(location)?;
 
-    Ok(true)
+    Ok(())
 }

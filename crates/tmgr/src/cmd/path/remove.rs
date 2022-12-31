@@ -29,7 +29,7 @@ pub fn make_subcommand() -> Command {
         ])
 }
 
-pub fn execute(matches: &ArgMatches) -> Result<bool> {
+pub fn execute(matches: &ArgMatches) -> Result<()> {
     let location = if matches.get_flag("global") {
         Location::Global
     } else {
@@ -57,7 +57,7 @@ pub fn execute(matches: &ArgMatches) -> Result<bool> {
         &settings,
     );
     if selected.is_empty() {
-        return Ok(true);
+        return Ok(());
     }
 
     for sel in selected {
@@ -75,5 +75,5 @@ pub fn execute(matches: &ArgMatches) -> Result<bool> {
 
     settings.write(location)?;
 
-    Ok(true)
+    Ok(())
 }

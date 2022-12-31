@@ -25,7 +25,7 @@ pub fn make_subcommand() -> Command {
         ])
 }
 
-pub fn execute(matches: &ArgMatches) -> Result<bool> {
+pub fn execute(matches: &ArgMatches) -> Result<()> {
     let settings = Settings::new()?;
     let query = matches
         .get_many::<String>("query")
@@ -48,5 +48,5 @@ pub fn execute(matches: &ArgMatches) -> Result<bool> {
         println!("Killed {}", sel);
     }
 
-    Ok(true)
+    Ok(())
 }

@@ -38,7 +38,7 @@ pub fn make_subcommand() -> Command {
         ])
 }
 
-pub fn execute(matches: &ArgMatches) -> Result<bool> {
+pub fn execute(matches: &ArgMatches) -> Result<()> {
     let location = if matches.get_flag("global") {
         Location::Global
     } else {
@@ -50,7 +50,7 @@ pub fn execute(matches: &ArgMatches) -> Result<bool> {
         let file = Settings::filepath_from_location(location);
         std::process::Command::new(&editor).arg(file).status()?;
 
-        return Ok(true);
+        return Ok(());
     }
 
     if matches.get_flag("list") {
@@ -63,7 +63,7 @@ pub fn execute(matches: &ArgMatches) -> Result<bool> {
         let content = toml::to_string_pretty(&settings)?;
         println!("{}", content);
 
-        return Ok(true);
+        return Ok(());
     }
 
     match (
@@ -75,7 +75,7 @@ pub fn execute(matches: &ArgMatches) -> Result<bool> {
         _ => {}
     }
 
-    Ok(true)
+    Ok(())
 }
 
 fn get_value(name: &str) -> Result<()> {

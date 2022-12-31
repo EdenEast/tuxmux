@@ -38,7 +38,7 @@ pub fn make_subcommand() -> Command {
         ])
 }
 
-pub fn execute(matches: &ArgMatches) -> Result<bool> {
+pub fn execute(matches: &ArgMatches) -> Result<()> {
     let settings = Settings::new()?;
     let query = matches
         .get_many::<String>("query")
@@ -49,7 +49,7 @@ pub fn execute(matches: &ArgMatches) -> Result<bool> {
         let names = crate::tmux::session_names()?;
 
         let selected = match names.len() {
-            0 => return Ok(true),
+            0 => return Ok(()),
             1 => names[0].clone(),
             _ => match crate::fuzzy::fuzzy_select_one(
                 names.iter().map(|a| a.as_str()),
@@ -58,19 +58,19 @@ pub fn execute(matches: &ArgMatches) -> Result<bool> {
                 &settings,
             ) {
                 Some(index) => index,
-                None => return Ok(true),
+                None => return Ok(()),
             },
         };
 
         tmux::attach_session(&selected)?;
 
-        return Ok(true);
+        return Ok(());
     }
 
     let paths = settings.list_paths();
     let selected = match get_selected(&paths, &query, matches, &settings) {
         Ok(Some(s)) => s,
-        Ok(None) => return Ok(true),
+        Ok(None) => return Ok(()),
         Err(e) => return Err(e),
     };
 
@@ -82,7 +82,7 @@ pub fn execute(matches: &ArgMatches) -> Result<bool> {
 
     tmux::attach_session(&name)?;
 
-    Ok(true)
+    Ok(())
 }
 
 fn get_selected(

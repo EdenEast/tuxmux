@@ -14,11 +14,11 @@ pub fn make_subcommand() -> Command {
         .subcommand(remove::make_subcommand())
 }
 
-pub fn execute(matches: &ArgMatches) -> Result<bool> {
+pub fn execute(matches: &ArgMatches) -> Result<()> {
     match matches.subcommand() {
         Some(("add", sub_matches)) => add::execute(sub_matches),
         Some(("list", sub_matches)) => list::execute(sub_matches),
         Some(("remove", sub_matches)) => remove::execute(sub_matches),
-        _ => Ok(false),
+        _ => Ok(()),
     }
 }
