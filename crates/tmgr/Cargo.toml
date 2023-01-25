@@ -6,15 +6,15 @@ description = "Tmux utility for session and window management"
 license = "Apache-2.0"
 
 [dependencies]
-clap = { version = "^4.0.32", features = [ "cargo" ] }
+clap = { version = "4.1.4", features = [ "cargo" ] }
 dirs-next = "2.0.0"
 eyre = "0.6.8"
-jwalk = "0.6.0"
-rayon = "1.5.3"
-serde = { version = "1.0.144", features = [ "derive" ] }
+jwalk = "0.8.1"
+rayon = "1.6.1"
+serde = { version = "1.0.152", features = [ "derive" ] }
 skim = { version = "0.10.2", default-features = false }
 tmux_interface = "0.2.1"
-toml = "0.5.9"
+toml = "0.6.0"
 
 [[bin]]
 name = "tm"
