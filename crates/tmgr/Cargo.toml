@@ -12,8 +12,7 @@ eyre = "0.6.8"
 jwalk = "0.6.0"
 rayon = "1.5.3"
 serde = { version = "1.0.144", features = [ "derive" ] }
-# skim = "0.9.4"
-skim = { git = "https://github.com/edeneast/skim", branch = "chore/cli-deps-cleanup", default-features = false }
+skim = { version = "0.10.2", default-features = false }
 tmux_interface = "0.2.1"
 toml = "0.5.9"
 
