@@ -909,6 +909,7 @@ name = "tmgr"
 version = "0.1.0"
 dependencies = [
  "clap",
+ "clap_complete",
  "dirs-next",
  "eyre",
  "jwalk",
@@ -917,15 +918,6 @@ dependencies = [
  "skim",
  "tmux_interface",
  "toml",
-]
-
-[[package]]
-name = "tmgr-cmpl"
-version = "0.1.0"
-dependencies = [
- "clap",
- "clap_complete",
- "tmgr",
 ]
 
 [[package]]

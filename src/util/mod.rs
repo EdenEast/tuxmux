@@ -28,7 +28,7 @@ pub fn get_config(components: &[&str]) -> PathBuf {
 }
 
 pub fn format_name(name: &str) -> String {
-    name.replace(".", "_")
+    name.replace('.', "_")
 }
 
 pub fn get_local(components: &[&str]) -> PathBuf {

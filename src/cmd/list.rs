@@ -20,7 +20,7 @@ pub fn execute(_: &ArgMatches) -> Result<()> {
 
     for s in sessions {
         let attach_num = s.attached.unwrap_or(0);
-        let name = s.name.unwrap_or_else(|| "".to_string());
+        let name = s.name.unwrap_or_default();
 
         let attach = if attach_num > 0 {
             attach_num.to_string()

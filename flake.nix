@@ -31,36 +31,24 @@
           rustc = toolchain.rustc;
         };
 
-        manifest = builtins.fromTOML (builtins.readFile ./crates/tmgr/Cargo.toml);
+        manifest = builtins.fromTOML (builtins.readFile ./Cargo.toml);
         version = manifest.package.version;
         root = ./.;
-
-        tmgrCmpl = naersk-lib.buildPackage {
-          inherit version root;
-          name = "tmgr-cmpl";
-          singleStep = true;
-          cargoBuildOptions = (opts: opts ++ [ "--bin=tmgr-cmpl" ]);
-        };
 
         tmgr = naersk-lib.buildPackage {
           inherit version root;
           pname = "tmgr";
 
           buildInputs = with pkgs; [ ];
-          nativeBuildInputs = with pkgs; [ pandoc tmgrCmpl ];
+          nativeBuildInputs = with pkgs; [ pandoc ];
 
-          # Workaround for lack of a naersk option to select --bin target.
-          # See https://github.com/nmattia/naersk/issues/127
-          singleStep = true;
-          cargoBuildOptions = (opts: opts ++ [ "--bin=tm" ]);
-
-          overrideMain = _: {
-            postInstall = ''
-              mkdir -p $out/{completions,man}
-              OUT_DIR=$out/completions ${tmgrCmpl}/bin/tmgr-cmpl
-              pandoc --standalone --to man doc/tm.md -o $out/man/tm.1
-            '';
-          };
+          # overrideMain = _: {
+          #   postInstall = ''
+          #     mkdir -p $out/{completions,man}
+          #     OUT_DIR=$out/completions ${tmgrCmpl}/bin/tmgr-cmpl
+          #     pandoc --standalone --to man doc/tm.md -o $out/man/tm.1
+          #   '';
+          # };
 
           meta = with pkgs.lib; {
             description = "Tmux utility for session and window management";
@@ -79,15 +67,14 @@
 
             # Development tools
             rust-analyzer
-            rustfmt-preview
-            clippy-preview
+            rustfmt
+            clippy
 
             # Cargo extensions
             cargo-bloat
             cargo-edit
             cargo-license
             cargo-limit
-            cargo-watch
             cargo-whatfeatures
 
             just
@@ -112,4 +99,3 @@
         defaultApp = apps.tmgr;
       });
 }
-

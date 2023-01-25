@@ -19,7 +19,7 @@ where
     let height = settings
         .height
         .map(|v| v.to_string())
-        .unwrap_or("40".to_string());
+        .unwrap_or_else(|| "40".to_string());
 
     let skim_options = SkimOptionsBuilder::default()
         .exit0(true)
@@ -56,7 +56,7 @@ where
     let height = settings
         .height
         .map(|v| v.to_string())
-        .unwrap_or("40".to_string());
+        .unwrap_or_else(|| "40".to_string());
 
     let skim_options = SkimOptionsBuilder::default()
         .exit0(true)

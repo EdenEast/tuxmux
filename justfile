@@ -1,20 +1,5 @@
 default_bin := "tm"
 
-run *args:
-  cargo run --bin tm -- {{args}}
-
-build:
-  cargo build --bin tm
-
-check:
-  cargo check --bin tm
-
-test:
-  cargo test --bin tm
-
-install:
-  cargo install --path ./crates/tmgr
-
 man:
   pandoc --standalone --to man doc/tm.md -o doc/tm.1
 
@@ -24,5 +9,9 @@ release:
   mkdir -p release/{completions,man}
   cp -f ./{LICENSE,readme.md} ./release
   cp -f ./target/release/tm ./release
-  OUT_DIR=release/completions cargo run --release --bin tmgr-cmpl
+  ./release/tm completions bash > ./release/completions/tm.bash
+  ./release/tm completions zsh > ./release/completions/_tm
+  ./release/tm completions fish > ./release/completions/tm.fish
+  ./release/tm completions powershell > ./release/completions/_tm.ps1
+  ./release/tm completions elvish > ./release/completions/tm.elv
   pandoc --standalone --to man doc/tm.md -o release/man/tm.1

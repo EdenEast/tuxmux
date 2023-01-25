@@ -4,7 +4,7 @@ use crate::data::{Location, Settings};
 use clap::{builder::PossibleValuesParser, Arg, ArgMatches, Command};
 use eyre::Result;
 
-const CONFIG_OPTIONS: [&'static str; 2] = ["depth", "height"];
+const CONFIG_OPTIONS: [&str; 2] = ["depth", "height"];
 
 pub fn make_subcommand() -> Command {
     Command::new("config")
@@ -48,7 +48,7 @@ pub fn execute(matches: &ArgMatches) -> Result<()> {
     if matches.get_flag("edit") {
         let editor = env::var("EDITOR").unwrap_or_else(|_| "vim".to_owned());
         let file = Settings::filepath_from_location(location);
-        std::process::Command::new(&editor).arg(file).status()?;
+        std::process::Command::new(editor).arg(file).status()?;
 
         return Ok(());
     }

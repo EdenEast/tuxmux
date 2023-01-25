@@ -50,7 +50,7 @@ pub fn make_subcommand() -> Command {
 pub fn execute(matches: &ArgMatches) -> Result<()> {
     if matches.get_flag("edit") {
         let editor = env::var("EDITOR").unwrap_or_else(|_| "vim".to_owned());
-        std::process::Command::new(&editor)
+        std::process::Command::new(editor)
             .arg(Jumplist::path())
             .status()?;
 

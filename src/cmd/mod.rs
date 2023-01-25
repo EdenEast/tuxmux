@@ -1,6 +1,7 @@
 use clap::{crate_description, crate_version, Command};
 
 pub mod attach;
+pub mod completions;
 pub mod config;
 pub mod jump;
 pub mod kill;
@@ -23,6 +24,7 @@ pub fn make_clap_command() -> Command {
         .allow_hyphen_values(true)
         .disable_help_subcommand(true)
         .subcommand(attach::make_subcommand())
+        .subcommand(completions::make_subcommand())
         .subcommand(config::make_subcommand())
         .subcommand(jump::make_subcommand())
         .subcommand(kill::make_subcommand())
