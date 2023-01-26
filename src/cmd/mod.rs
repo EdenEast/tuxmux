@@ -21,7 +21,7 @@ pub fn make_clap_command() -> Command {
         .after_help(AFTER_HELP_MSG)
         .version(crate_version!())
         .allow_external_subcommands(true)
-        .allow_hyphen_values(true)
+        .disable_colored_help(true)
         .disable_help_subcommand(true)
         .subcommand(attach::make_subcommand())
         .subcommand(completions::make_subcommand())

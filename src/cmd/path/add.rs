@@ -8,6 +8,7 @@ pub fn make_subcommand() -> Command {
     Command::new("add")
         .about("Register a path to use when listing paths to attach.")
         .disable_version_flag(true)
+        .disable_colored_help(true)
         .args(&[
             Arg::new("workspace")
                 .help("Use path as a workspace path")

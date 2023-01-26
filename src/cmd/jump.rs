@@ -21,6 +21,7 @@ pub fn make_subcommand() -> Command {
         .long_about(LONG_ABOUT)
         .alias("j")
         .disable_version_flag(true)
+        .disable_colored_help(true)
         .args(&[
             Arg::new("edit")
                 .help("Open jump list file in \"$EDITOR\"")

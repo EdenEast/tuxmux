@@ -7,6 +7,7 @@ pub fn make_subcommand() -> Command {
         .about("List current sessions")
         .alias("ls")
         .disable_version_flag(true)
+        .disable_colored_help(true)
 }
 
 pub fn execute(_: &ArgMatches) -> Result<()> {

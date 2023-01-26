@@ -6,6 +6,7 @@ pub fn make_subcommand() -> Command {
     Command::new("list")
         .about("List registered workspace and single paths")
         .disable_version_flag(true)
+        .disable_colored_help(true)
         .args(&[
             Arg::new("workspace")
                 .help("Use path as a workspace path")

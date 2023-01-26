@@ -11,6 +11,7 @@ pub fn make_subcommand() -> Command {
         .about("Get or set configuration options")
         .alias("c")
         .disable_version_flag(true)
+        .disable_colored_help(true)
         .args(&[
             Arg::new("name")
                 .help("Name of configuration option")

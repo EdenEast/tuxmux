@@ -14,6 +14,7 @@ pub fn make_subcommand() -> Command {
         .about("Create or attach to a tmux session based on the path specified")
         .alias("a")
         .disable_version_flag(true)
+        .disable_colored_help(true)
         .args(&[
             Arg::new("exist")
                 .help("Attach to existing tmux session")

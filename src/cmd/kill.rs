@@ -7,6 +7,7 @@ pub fn make_subcommand() -> Command {
         .about("Kill a running tmux session")
         .alias("k")
         .disable_version_flag(true)
+        .disable_colored_help(true)
         .args(&[
             Arg::new("all")
                 .help("Kill all sesssions")

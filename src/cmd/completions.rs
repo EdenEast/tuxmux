@@ -8,6 +8,7 @@ pub fn make_subcommand() -> Command {
     Command::new("completions")
         .about("Generate shell completions for your shell to stdout")
         .disable_version_flag(true)
+        .disable_colored_help(true)
         .arg(
             Arg::new("generator")
                 .action(ArgAction::Set)
