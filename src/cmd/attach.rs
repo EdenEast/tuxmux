@@ -77,13 +77,7 @@ pub fn execute(matches: &ArgMatches) -> Result<()> {
 
     let name = util::format_name(selected.as_path().file_name().unwrap().to_str().unwrap());
 
-    if !tmux::session_exists(&name) {
-        tmux::create_session(&name, selected.to_str().unwrap())?;
-    }
-
-    tmux::attach_session(&name)?;
-
-    Ok(())
+    tmux::create_or_attach_session(&name, selected.to_str().unwrap())
 }
 
 fn get_selected(

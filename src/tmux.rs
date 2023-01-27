@@ -21,12 +21,19 @@ pub fn session_names() -> Result<Vec<String>> {
 }
 
 pub fn session_exists(name: &str) -> bool {
-    let something = match HasSession::new().target_session(name).output() {
-        Ok(o) => o,
-        _ => return false,
-    };
+    match HasSession::new().target_session(name).output() {
+        Ok(output) => output.success(),
+        _ => false,
+    }
+}
 
-    something.success()
+pub fn create_or_attach_session(name: &str, path: &str) -> Result<()> {
+    if session_exists(name) {
+        attach_session(name)
+    } else {
+        create_session(name, path)?;
+        attach_session(name)
+    }
 }
 
 pub fn attach_session(name: &str) -> Result<()> {

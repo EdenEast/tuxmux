@@ -71,7 +71,7 @@ pub fn execute(matches: &ArgMatches) -> Result<()> {
     if let Some(index) = matches.get_one::<usize>("index") {
         if let Some(sel) = list.get((*index).saturating_sub(1)) {
             let name = Path::new(sel).file_name().unwrap().to_str().unwrap();
-            tmux::attach_session(name)?;
+            tmux::create_or_attach_session(name, sel)?;
         }
 
         return Ok(());
