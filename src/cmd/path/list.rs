@@ -5,6 +5,7 @@ use eyre::Result;
 pub fn make_subcommand() -> Command {
     Command::new("list")
         .about("List registered workspace and single paths")
+        .bin_name("tm path list")
         .disable_version_flag(true)
         .disable_colored_help(true)
         .args(&[

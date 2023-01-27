@@ -7,6 +7,7 @@ use eyre::Result;
 pub fn make_subcommand() -> Command {
     Command::new("completions")
         .about("Generate shell completions for your shell to stdout")
+        .bin_name("vm completions")
         .disable_version_flag(true)
         .disable_colored_help(true)
         .arg(

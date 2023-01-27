@@ -8,7 +8,7 @@ use eyre::Result;
 pub fn make_subcommand() -> Command {
     Command::new("remove")
         .about("Remove registered path from tm")
-        .alias("k")
+        .bin_name("tm path remove")
         .disable_version_flag(true)
         .disable_colored_help(true)
         .args(&[

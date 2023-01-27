@@ -18,8 +18,9 @@ By default if no options are passed then the cwd is added to the jump list \
 pub fn make_subcommand() -> Command {
     Command::new("jump")
         .about("Store paths and later jump to them by index")
+        .bin_name("tm jump")
+        .visible_alias("j")
         .long_about(LONG_ABOUT)
-        .alias("j")
         .disable_version_flag(true)
         .disable_colored_help(true)
         .args(&[

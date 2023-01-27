@@ -9,7 +9,8 @@ const CONFIG_OPTIONS: [&str; 2] = ["depth", "height"];
 pub fn make_subcommand() -> Command {
     Command::new("config")
         .about("Get or set configuration options")
-        .alias("c")
+        .bin_name("tm config")
+        .visible_alias("c")
         .disable_version_flag(true)
         .disable_colored_help(true)
         .args(&[

@@ -5,7 +5,8 @@ use eyre::Result;
 pub fn make_subcommand() -> Command {
     Command::new("list")
         .about("List current sessions")
-        .alias("ls")
+        .bin_name("tm list")
+        .visible_alias("ls")
         .disable_version_flag(true)
         .disable_colored_help(true)
 }

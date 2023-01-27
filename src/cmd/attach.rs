@@ -12,7 +12,8 @@ use rayon::prelude::*;
 pub fn make_subcommand() -> Command {
     Command::new("attach")
         .about("Create or attach to a tmux session based on the path specified")
-        .alias("a")
+        .bin_name("tm attach")
+        .visible_alias("a")
         .disable_version_flag(true)
         .disable_colored_help(true)
         .args(&[

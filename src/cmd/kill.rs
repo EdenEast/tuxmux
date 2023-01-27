@@ -5,7 +5,8 @@ use eyre::Result;
 pub fn make_subcommand() -> Command {
     Command::new("kill")
         .about("Kill a running tmux session")
-        .alias("k")
+        .bin_name("tm kill")
+        .visible_alias("k")
         .disable_version_flag(true)
         .disable_colored_help(true)
         .args(&[

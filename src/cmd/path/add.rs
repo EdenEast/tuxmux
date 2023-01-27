@@ -7,6 +7,7 @@ use eyre::Result;
 pub fn make_subcommand() -> Command {
     Command::new("add")
         .about("Register a path to use when listing paths to attach.")
+        .bin_name("tm path add")
         .disable_version_flag(true)
         .disable_colored_help(true)
         .args(&[

@@ -7,8 +7,9 @@ mod remove;
 
 pub fn make_subcommand() -> Command {
     Command::new("path")
-        .override_usage("tm path [COMMAND] [OPTIONS]")
         .about("Manage registered search paths")
+        .bin_name("tm path")
+        .visible_alias("p")
         .disable_version_flag(true)
         .disable_colored_help(true)
         .subcommand(add::make_subcommand())

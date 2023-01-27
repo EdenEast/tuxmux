@@ -28,7 +28,8 @@ EXAMPLES:
 pub fn make_subcommand() -> Command {
     Command::new("wcmd")
         .about("Send a command to a execute in a tmux window")
-        .alias("w")
+        .bin_name("tm wcmd")
+        .visible_alias("w")
         .after_help(EXAMPLE_AFTER_HELP)
         .disable_version_flag(true)
         .disable_colored_help(true)
