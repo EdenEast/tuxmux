@@ -43,6 +43,10 @@ fn main() -> Result<()> {
     let mut cmd = cmd::make_clap_command();
 
     if let Some(first) = first {
+        if first == "." {
+            return cmd::attach::use_cwd();
+        }
+
         if execute_subcommand_if_exists(&first, &cmd, std::env::args().take(1).chain(args))? {
             return Ok(());
         }
@@ -57,9 +61,9 @@ fn main() -> Result<()> {
         return Ok(());
     }
 
-    if std::env::args().any(|a| matches!(a.as_str(), "-V" | "--version")){
+    if std::env::args().any(|a| matches!(a.as_str(), "-V" | "--version")) {
         print!("{}", cmd.render_version());
-            return Ok(());
+        return Ok(());
     }
 
     cmd::attach::execute(&cmd::attach::make_subcommand().get_matches())

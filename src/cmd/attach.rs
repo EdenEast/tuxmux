@@ -76,8 +76,15 @@ pub fn execute(matches: &ArgMatches) -> Result<()> {
         Err(e) => return Err(e),
     };
 
-    let name = util::format_name(selected.as_path().file_name().unwrap().to_str().unwrap());
+    execute_selected(&selected)
+}
 
+pub fn use_cwd() -> Result<()> {
+    execute_selected(&std::env::current_dir()?)
+}
+
+fn execute_selected(selected: &Path) -> Result<()> {
+    let name = util::format_name(selected.file_name().unwrap().to_str().unwrap());
     tmux::create_or_attach_session(&name, selected.to_str().unwrap())
 }
 
