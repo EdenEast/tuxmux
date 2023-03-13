@@ -3,30 +3,10 @@ permissions:
   contents: read
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
   pull_request:
   schedule:
     - cron:  '7 7 * * *'
 jobs:
-  update:
-    runs-on: ubuntu-latest
-    name: ubuntu / beta / updated
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: true
-
-      - name: Install beta
-        uses: dtolnay/rust-toolchain@beta
-
-      - name: cargo update
-        run: cargo update
-
-      - name: cargo test
-        run: cargo test --locked --all-features --all-targets
-        env:
-          RUSTFLAGS: -D deprecated
   audit:
     runs-on: ubuntu-latest
     permissions:
@@ -39,7 +19,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
 
       - name: Install cargo-audit
-        run: cargo install cargo-audit
+        run: cargo install cargo-audit --features=fix
 
       - name: Run cargo audit
         if: ${{ github.event_name == 'pull_request' }}
