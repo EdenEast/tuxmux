@@ -7,54 +7,8 @@ on:
   schedule:
     - cron:  '7 7 * * *'
 jobs:
-  audit:
+  deny:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
     steps:
       - uses: actions/checkout@v3
-
-      - name: Install stable
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Cache cargo
-        id: cache-audit
-        uses: actions/cache@v3
-        env:
-          cache-name: cache-cargo-targets
-        with:
-          # npm cache files are stored in `~/.npm` on Linux/macOS
-          path: |
-            target
-            /home/runner/.cargo
-          key: cargo-audit-cache
-
-      - name: Run cargo audit fix
-        if: ${{ github.event_name != 'pull_request' }}
-        id: fix
-        run: |
-          cargo install cargo-audit --features=fix
-          cargo audit fix
-          echo "changes=$(git diff --name-only --diff-filter=M | wc -l)" >> $GITHUB_OUTPUT
-
-      - name: Run cargo audit
-        if: ${{ github.event_name == 'pull_request' }}
-        run: |
-          cargo install cargo-audit
-          cargo audit
-
-      - name: Create pr with fixes
-        if: ${{ steps.fix.outputs.changes != '0' }}
-        uses: peter-evans/create-pull-request @v4
-        with:
-          title: "[Bot] Cargo Audit fixes"
-          body: "Updates to Cargo.toml and/or Cargo.lock with security fixes."
-          branch: "bot/cargo-audit"
-          commit-message: "bot(security): apply cargo audit fixes"
-          token: ${{ secrets.GITHUB_TOKEN }}
-          committer: GitHub <noreply@github.com>
-          author: GitHub <noreply@github.com>
-          labels: |
-            automated pr
-            github actions
+      - uses: EmbarkStudios/cargo-deny-action@v1

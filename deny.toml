@@ -1,0 +1,20 @@
+[advisories]
+vulnerability = "deny"
+unmaintained = "deny"
+yanked = "deny"
+unsound = "deny"
+notice = "deny"
+ignore = [
+  "RUSTSEC-2020-0071", # Timer from skim until skim can be removed
+]
+
+[licenses]
+unlicensed = "warn"
+copyleft = "allow" # this can be re-enabled when skim is removed
+allow-osi-fsf-free = "either"
+default = "deny"
+
+[bans]
+multiple-versions = "allow"
+wildcards = "deny"
+highlight = "all"

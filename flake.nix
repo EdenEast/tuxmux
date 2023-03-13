@@ -71,8 +71,8 @@
             clippy
 
             # Cargo extensions
-            cargo-audit
             cargo-bloat
+            cargo-deny
             cargo-edit
             cargo-license
             cargo-limit
