@@ -1,0 +1,72 @@
+name: rolling
+permissions:
+  contents: read
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron:  '7 7 * * *'
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    name: ubuntu / beta / updated
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+
+      - name: Install beta
+        uses: dtolnay/rust-toolchain@beta
+
+      - name: cargo update
+        run: cargo update
+
+      - name: cargo test
+        run: cargo test --locked --all-features --all-targets
+        env:
+          RUSTFLAGS: -D deprecated
+  audit:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install cargo-audit
+        run: cargo install cargo-audit
+
+      - name: Run cargo audit
+        if: ${{ github.event_name == 'pull_request' }}
+        run: cargo audit
+
+      - name: Run cargo audit fix
+        id: audit-fix
+        if: ${{ github.event_name != 'pull_request' }}
+        run: |
+          cargo audit fix
+          modified=$(git diff --name-only --diff-filter=M)
+          if [[ -x "$modified" ]]; then
+            echo "::set-output name=changes::true"
+          else
+            echo "::set-output name=changes::false"
+          fi
+
+      - name: Create pr with fixes
+        if: ${{ steps.audit-fix.outputs.changes == 'true' }}
+        uses: peter-evans/create-pull-request@v4
+        with:
+          title: "[Bot] Cargo Audit fixes"
+          body: "Updates to Cargo.toml and/or Cargo.lock with security fixes."
+          branch: "bot/cargo-audit"
+          commit-message: "bot(security): apply cargo audit fixes"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          committer: GitHub <noreply@github.com>
+          author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
+          labels: |
+            automated pr

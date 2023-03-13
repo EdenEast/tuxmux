@@ -1,0 +1,59 @@
+name: nix flake update
+permissions:
+  contents: write
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 1,15 * *" # Every two weeks 1st, and 15th
+jobs:
+  flake-update:
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Install nix
+        uses: cachix/install-nix-action@v18
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Git author
+        run: |
+          git config user.name 'GitHub'
+          git config user.email 'noreply@github.com'
+
+      - name: Update lock file
+        run: nix flake update --no-registries --commit-lock-file
+
+      - name: Test nix build
+        run: nix build
+
+      - name: Get commit message
+        id: commit
+        run: |
+          message="$(git log -1 --pretty=%B | tail +3 | awk -f ./.github/misc/flake-to-markdown.awk)"
+          message="${message//'%'/'%25'}"
+          message="${message//$'\n'/'%0A'}"
+          message="${message//$'\r'/'%0D'}"
+          echo "::set-output name=message::$message"
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v4
+        with:
+          title: "chore(flake): Automatic flake update"
+          body: "${{ steps.commit.outputs.message }}"
+          branch: "automated/flake-update"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          committer: GitHub <noreply@github.com>
+          author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
+          signoff: false
+          delete-branch: true
+          label: |
+            automated pr
+            nix
