@@ -71,6 +71,7 @@
             clippy
 
             # Cargo extensions
+            cargo-audit
             cargo-bloat
             cargo-edit
             cargo-license

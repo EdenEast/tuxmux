@@ -18,28 +18,35 @@ jobs:
       - name: Install stable
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Install cargo-audit
-        run: cargo install cargo-audit --features=fix
+      - name: Cache cargo
+        id: cache-audit
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-cargo-targets
+        with:
+          # npm cache files are stored in `~/.npm` on Linux/macOS
+          path: |
+            target
+            /home/runner/.cargo
+          key: cargo-audit-cache
+
+      - name: Run cargo audit fix
+        if: ${{ github.event_name != 'pull_request' }}
+        id: fix
+        run: |
+          cargo install cargo-audit --features=fix
+          cargo audit fix
+          echo "changes=$(git diff --name-only --diff-filter=M | wc -l)" >> $GITHUB_OUTPUT
 
       - name: Run cargo audit
         if: ${{ github.event_name == 'pull_request' }}
-        run: cargo audit
-
-      - name: Run cargo audit fix
-        id: audit-fix
-        if: ${{ github.event_name != 'pull_request' }}
         run: |
-          cargo audit fix
-          modified=$(git diff --name-only --diff-filter=M)
-          if [[ -x "$modified" ]]; then
-            echo "::set-output name=changes::true"
-          else
-            echo "::set-output name=changes::false"
-          fi
+          cargo install cargo-audit
+          cargo audit
 
       - name: Create pr with fixes
-        if: ${{ steps.audit-fix.outputs.changes == 'true' }}
-        uses: peter-evans/create-pull-request@v4
+        if: ${{ steps.fix.outputs.changes != '0' }}
+        uses: peter-evans/create-pull-request @v4
         with:
           title: "[Bot] Cargo Audit fixes"
           body: "Updates to Cargo.toml and/or Cargo.lock with security fixes."
@@ -47,6 +54,7 @@ jobs:
           commit-message: "bot(security): apply cargo audit fixes"
           token: ${{ secrets.GITHUB_TOKEN }}
           committer: GitHub <noreply@github.com>
-          author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
+          author: GitHub <noreply@github.com>
           labels: |
             automated pr
+            github actions
