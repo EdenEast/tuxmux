@@ -73,7 +73,6 @@
             # Cargo extensions
             cargo-bloat
             cargo-deny
-            cargo-edit
             cargo-license
             cargo-limit
             cargo-whatfeatures
