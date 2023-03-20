@@ -5,6 +5,8 @@ on:
   push:
     branches: [main]
   pull_request:
+env:
+  CARGO_REGISTRY_CRATES_IO_PROTOCOL: true
 jobs:
   fmt:
     runs-on: ubuntu-latest
