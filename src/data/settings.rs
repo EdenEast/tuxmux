@@ -6,7 +6,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use crate::util;
+use crate::{finder::FinderChoice, util};
 
 const CONF_PATH_COMPONENTS: &[&str] = &["config.toml"];
 
@@ -28,16 +28,24 @@ pub struct Settings {
     pub workspace_paths: HashSet<String>,
     pub depth: Option<usize>,
     pub height: Option<usize>,
+    pub finder: Option<FinderChoice>,
 }
 
 impl Settings {
     pub fn new() -> Result<Settings> {
-        let mut settings = Settings::default();
+        let mut settings = Settings {
+            height: Some(50),
+            ..Default::default()
+        };
 
         merge_if_exists(&mut settings, &util::get_config(CONF_PATH_COMPONENTS))?;
         merge_if_exists(&mut settings, &util::get_local(CONF_PATH_COMPONENTS))?;
 
         Ok(settings)
+    }
+
+    pub fn finder(&self) -> FinderChoice {
+        self.finder.clone().unwrap_or_default()
     }
 
     pub fn from_location(location: Location) -> Result<Settings> {
@@ -149,7 +157,11 @@ fn merge_if_exists(settings: &mut Settings, path: &Path) -> Result<()> {
     }
 
     if let Some(height) = raw.height {
-        settings.height = Some(height);
+        settings.height = Some(height.clamp(1, 100));
+    }
+
+    if let Some(finder) = raw.finder {
+        settings.finder = Some(finder);
     }
 
     Ok(())

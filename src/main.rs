@@ -4,7 +4,7 @@ use std::ffi::OsString;
 
 use clap::{ArgMatches, Command};
 use eyre::Result;
-use tmgr::cmd;
+use tmgr::{cmd, data::Settings, finder::FinderOptions};
 
 type ExecuteCmd = fn(&ArgMatches) -> Result<()>;
 

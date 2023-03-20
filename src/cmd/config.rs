@@ -4,7 +4,7 @@ use crate::data::{Location, Settings};
 use clap::{builder::PossibleValuesParser, Arg, ArgMatches, Command};
 use eyre::Result;
 
-const CONFIG_OPTIONS: [&str; 2] = ["depth", "height"];
+const CONFIG_OPTIONS: [&str; 3] = ["depth", "height", "finder"];
 
 pub fn make_subcommand() -> Command {
     Command::new("config")
@@ -93,6 +93,17 @@ fn get_value(name: &str) -> Result<()> {
                 println!("{}", height);
             }
         }
+        "finder" => {
+            if let Some(finder) = settings.finder {
+                println!(
+                    "{}",
+                    match finder {
+                        crate::finder::FinderChoice::Fzf => "fzf",
+                        crate::finder::FinderChoice::Skim => "skim",
+                    }
+                );
+            }
+        }
         _ => {
             println!(
                 "Unknown setting: '{}'. Possible values [{}]",
@@ -113,7 +124,10 @@ pub fn set_value(name: &str, value: &str, location: Location) -> Result<()> {
             settings.depth = Some(value.parse()?);
         }
         "height" => {
-            settings.height = Some(value.parse()?);
+            settings.height = Some(value.parse::<usize>()?.clamp(1, 100));
+        }
+        "finder" => {
+            settings.finder = Some(value.parse()?);
         }
         _ => {
             println!(

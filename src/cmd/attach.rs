@@ -4,7 +4,7 @@ use std::{
     str::FromStr,
 };
 
-use crate::{data::Settings, tmux, util};
+use crate::{data::Settings, finder::FinderOptions, tmux, util};
 use clap::{value_parser, Arg, ArgMatches, Command};
 use eyre::Result;
 use rayon::prelude::*;
@@ -47,24 +47,28 @@ pub fn execute(matches: &ArgMatches) -> Result<()> {
         .map(|vs| vs.map(|s| s.as_str()).collect::<Vec<_>>().join(" "));
 
     let exact = matches.get_flag("exact");
+
     if matches.get_flag("exist") {
         let names = crate::tmux::session_names()?;
+        let opts = FinderOptions {
+            exact,
+            query,
+            height: settings.height,
+            ..Default::default()
+        };
 
         let selected = match names.len() {
             0 => return Ok(()),
-            1 => names[0].clone(),
-            _ => match crate::fuzzy::fuzzy_select_one(
-                names.iter().map(|a| a.as_str()),
-                query.as_deref(),
-                exact,
-                &settings,
-            ) {
-                Some(index) => index,
+            1 => names.into_iter().next(),
+            _ => match settings.finder().execute(names.iter(), opts)? {
+                Some(lines) => lines.into_iter().next(),
                 None => return Ok(()),
             },
         };
 
-        tmux::attach_session(&selected)?;
+        if let Some(selected) = selected {
+            tmux::attach_session(selected.as_str())?;
+        }
 
         return Ok(());
     }
@@ -116,13 +120,19 @@ fn get_selected(
     }
 
     let exact = matches.get_flag("exact");
-    match crate::fuzzy::fuzzy_select_one(
-        paths.iter().map(|a| a.as_str()),
-        query.as_deref(),
+
+    let opts = FinderOptions {
         exact,
-        settings,
-    ) {
-        Some(sel) => Ok(Some(PathBuf::from_str(&sel)?)),
-        None => Ok(None),
+        query: query.clone(),
+        height: settings.height,
+        ..Default::default()
+    };
+
+    if let Some(lines) = settings.finder().execute(paths.iter(), opts)? {
+        if let Some(first) = lines.into_iter().next() {
+            return Ok(Some(PathBuf::from_str(first.as_str())?));
+        }
     }
+
+    Ok(None)
 }

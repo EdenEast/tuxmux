@@ -1,6 +1,6 @@
 use crate::{
     data::{Location, PathKind, Settings},
-    fuzzy,
+    finder::FinderOptions,
 };
 use clap::{Arg, ArgMatches, Command};
 use eyre::Result;
@@ -51,15 +51,19 @@ pub fn execute(matches: &ArgMatches) -> Result<()> {
             s
         }))
         .collect();
-    let selected = fuzzy::fuzzy_select_multi(
-        iter.iter().map(|a| a.as_str()),
-        None,
-        matches.get_flag("exact"),
-        &settings,
-    );
-    if selected.is_empty() {
-        return Ok(());
-    }
+
+    let opts = FinderOptions {
+        multi: true,
+        height: settings.height,
+        ..Default::default()
+    };
+
+    let selected = match settings.finder().execute(iter.iter(), opts)? {
+        Some(selected) => selected,
+        None => {
+            return Ok(());
+        }
+    };
 
     for sel in selected {
         let (k, v) = sel.split_at(3);

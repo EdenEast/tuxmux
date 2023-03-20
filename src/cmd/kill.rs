@@ -1,4 +1,4 @@
-use crate::{data::Settings, fuzzy, tmux};
+use crate::{data::Settings, finder::FinderOptions, tmux};
 use clap::{Arg, ArgMatches, Command};
 use eyre::Result;
 
@@ -37,12 +37,14 @@ pub fn execute(matches: &ArgMatches) -> Result<()> {
     let selected = if matches.get_flag("all") {
         names
     } else {
-        fuzzy::fuzzy_select_multi(
-            names.iter().map(|a| a.as_str()),
-            query.as_deref(),
-            matches.get_flag("exact"),
-            &settings,
-        )
+        let opts = FinderOptions {
+            query,
+            multi: true,
+            height: settings.height,
+            ..Default::default()
+        };
+        let finder = settings.finder.unwrap_or_default();
+        finder.execute(names.iter(), opts)?.unwrap_or_default()
     };
 
     for sel in selected {
