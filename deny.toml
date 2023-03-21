@@ -4,9 +4,7 @@ unmaintained = "deny"
 yanked = "deny"
 unsound = "deny"
 notice = "deny"
-ignore = [
-  "RUSTSEC-2020-0071", # Timer from skim until skim can be removed
-]
+ignore = [ ]
 
 [licenses]
 unlicensed = "warn"
