@@ -8,16 +8,17 @@ use tmgr::{cmd, data::Settings, finder::FinderOptions};
 
 type ExecuteCmd = fn(&ArgMatches) -> Result<()>;
 
-fn get_execute_cmd(name: &str) -> Option<ExecuteCmd> {
+fn get_execute_cmd(name: &str) -> Option<(&str, ExecuteCmd)> {
+    dbg!(name);
     match name {
-        "attach" => Some(cmd::attach::execute),
-        "completions" => Some(cmd::completions::execute),
-        "config" => Some(cmd::config::execute),
-        "jump" => Some(cmd::jump::execute),
-        "kill" => Some(cmd::kill::execute),
-        "list" => Some(cmd::list::execute),
-        "path" => Some(cmd::path::execute),
-        "wcmd" => Some(cmd::wcmd::execute),
+        "attach" | "a" => Some(("attach", cmd::attach::execute)),
+        "completions" => Some(("completions", cmd::completions::execute)),
+        "config" | "c" => Some(("config", cmd::config::execute)),
+        "jump" | "j" => Some(("jump", cmd::jump::execute)),
+        "kill" | "k" => Some(("kill", cmd::kill::execute)),
+        "list" | "ls" => Some(("list", cmd::list::execute)),
+        "path" | "p" => Some(("path", cmd::path::execute)),
+        "wcmd" | "w" => Some(("wcmd", cmd::wcmd::execute)),
         _ => None,
     }
 }
@@ -27,13 +28,15 @@ where
     I: IntoIterator<Item = T>,
     T: Into<OsString> + Clone,
 {
-    if let Some(sub) = cmd.get_subcommands().find(|c| c.get_name() == name) {
-        if let Some(execute) = get_execute_cmd(name) {
-            let matches = sub.clone().get_matches_from(iter);
-            execute(&matches)?;
-            return Ok(true);
-        }
+    if let Some((cmd_name, execute)) = get_execute_cmd(name) {
+        let subcmd = cmd
+            .get_subcommands()
+            .find(|c| c.get_name() == name)
+            .expect("Only valid names returned from get_execute_cmd");
+
+        return execute(&subcmd.clone().get_matches_from(iter)).map(|_| true);
     }
+
     Ok(false)
 }
 
@@ -41,6 +44,8 @@ fn main() -> Result<()> {
     let mut args = std::env::args().skip(1);
     let first = args.next();
     let mut cmd = cmd::make_clap_command();
+
+    dbg!(&args, &first);
 
     if let Some(first) = first {
         if first == "." {
