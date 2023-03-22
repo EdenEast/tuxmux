@@ -13,7 +13,6 @@ opt-level = 3
 
 [dependencies]
 clap = { version = "4.1.4", features = [ "cargo", "derive" ] }
-clap_complete = "4.1.1"
 dirs-next = "2.0.0"
 eyre = "0.6.8"
 jwalk = "0.8.1"
@@ -25,3 +24,8 @@ toml = "0.6.0"
 [[bin]]
 name = "tm"
 path = "src/main.rs"
+
+[build-dependencies]
+clap = { version = "4.1.4", features = [ "cargo", "derive" ] }
+clap_complete = "4.1.1"
+clap_mangen = "0.2.10"

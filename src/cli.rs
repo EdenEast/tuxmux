@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use clap::{crate_description, crate_version, Subcommand};
 use clap::{Args, Parser};
-use clap_complete::Shell;
+
 
 const CONFIG_OPTIONS: [&str; 3] = ["depth", "height", "finder"];
 
@@ -57,7 +57,6 @@ pub struct Cli {
 #[derive(Debug, Subcommand)]
 pub enum Cmd {
     Attach(Attach),
-    Completion(Completion),
     Config(Config),
     Jump(Jump),
     Kill(Kill),
@@ -97,14 +96,6 @@ pub struct Attach {
     /// selected. If there are multiple results then a search field will be presented.
     #[arg(default_value = None)]
     pub query: Option<Vec<String>>,
-}
-
-/// Genreate tm shell completions for your shell to stdout
-#[derive(Debug, Args)]
-#[command(hide = true)]
-pub struct Completion {
-    /// Type of shell to generate completions for
-    pub genreator: Shell,
 }
 
 /// Get or set configuration options for tm

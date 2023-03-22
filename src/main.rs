@@ -15,22 +15,8 @@ type ExecuteCmd = fn(&ArgMatches) -> Result<()>;
 
 mod cli;
 
-const VALID_FIRST_OPTIONS: [&str; 15] = [
-    "attach",
-    "a",
-    "completions",
-    "config",
-    "c",
-    "jump",
-    "j",
-    "kill",
-    "k",
-    "list",
-    "ls",
-    "path",
-    "p",
-    "wcmd",
-    "w",
+const VALID_FIRST_OPTIONS: [&str; 14] = [
+    "attach", "a", "config", "c", "jump", "j", "kill", "k", "list", "ls", "path", "p", "wcmd", "w",
 ];
 
 const HELP_AND_VERSION_FLAGS: [&str; 4] = ["--help", "-h", "-V", "--version"];
@@ -50,7 +36,6 @@ fn main() -> Result<()> {
 
     match Cli::parse_from(args).command {
         tmgr::cli::Cmd::Attach(c) => c.execute(),
-        tmgr::cli::Cmd::Completion(c) => c.execute(),
         tmgr::cli::Cmd::Config(c) => c.execute(),
         tmgr::cli::Cmd::Jump(c) => c.execute(),
         tmgr::cli::Cmd::Kill(c) => c.execute(),

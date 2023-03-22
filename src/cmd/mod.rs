@@ -1,5 +1,4 @@
 pub mod attach;
-pub mod completions;
 pub mod config;
 pub mod jump;
 pub mod kill;
