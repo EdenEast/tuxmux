@@ -4,83 +4,52 @@ use std::{
     str::FromStr,
 };
 
-use crate::{data::Settings, finder::FinderOptions, tmux, util};
-use clap::{value_parser, Arg, ArgMatches, Command};
+use crate::{cli::Attach, data::Settings, finder::FinderOptions, tmux, util};
+
 use eyre::Result;
 use rayon::prelude::*;
 
-pub fn make_subcommand() -> Command {
-    Command::new("attach")
-        .about("Create or attach to a tmux session based on the path specified")
-        .bin_name("tm attach")
-        .visible_alias("a")
-        .disable_version_flag(true)
-        .disable_colored_help(true)
-        .args(&[
-            Arg::new("exist")
-                .help("Attach to existing tmux session")
-                .short('e')
-                .long("exist")
-                .action(clap::ArgAction::SetTrue),
-            Arg::new("exact")
-                .help("Use exact match search")
-                .short('x')
-                .long("exact")
-                .action(clap::ArgAction::SetTrue),
-            Arg::new("path")
-                .help("Exact path to create or attach tmux session")
-                .short('p')
-                .long("path")
-                .num_args(1)
-                .value_parser(value_parser!(PathBuf)),
-            Arg::new("query")
-                .help("Query to search from")
-                .required(false)
-                .num_args(0..),
-        ])
-}
+use super::ExecuteableCmd;
 
-pub fn execute(matches: &ArgMatches) -> Result<()> {
-    let settings = Settings::new()?;
-    let query = matches
-        .get_many::<String>("query")
-        .map(|vs| vs.map(|s| s.as_str()).collect::<Vec<_>>().join(" "));
+impl ExecuteableCmd for Attach {
+    fn execute(self) -> eyre::Result<()> {
+        let settings = Settings::new()?;
+        let query = self.query.as_ref().map(|v| v.join(" "));
 
-    let exact = matches.get_flag("exact");
+        if self.exists {
+            let names = crate::tmux::session_names()?;
+            let opts = FinderOptions {
+                exact: self.exact,
+                query,
+                height: settings.height,
+                ..Default::default()
+            };
 
-    if matches.get_flag("exist") {
-        let names = crate::tmux::session_names()?;
-        let opts = FinderOptions {
-            exact,
-            query,
-            height: settings.height,
-            ..Default::default()
-        };
+            let selected = match names.len() {
+                0 => return Ok(()),
+                1 => names.into_iter().next(),
+                _ => match settings.finder().execute(names.iter(), opts)? {
+                    Some(lines) => lines.into_iter().next(),
+                    None => return Ok(()),
+                },
+            };
 
-        let selected = match names.len() {
-            0 => return Ok(()),
-            1 => names.into_iter().next(),
-            _ => match settings.finder().execute(names.iter(), opts)? {
-                Some(lines) => lines.into_iter().next(),
-                None => return Ok(()),
-            },
-        };
+            if let Some(selected) = selected {
+                tmux::attach_session(selected.as_str())?;
+            }
 
-        if let Some(selected) = selected {
-            tmux::attach_session(selected.as_str())?;
+            return Ok(());
         }
 
-        return Ok(());
+        let paths = settings.list_paths();
+        let selected = match get_selected(&paths, &query, &self, &settings) {
+            Ok(Some(s)) => s,
+            Ok(None) => return Ok(()),
+            Err(e) => return Err(e),
+        };
+
+        execute_selected(&selected)
     }
-
-    let paths = settings.list_paths();
-    let selected = match get_selected(&paths, &query, matches, &settings) {
-        Ok(Some(s)) => s,
-        Ok(None) => return Ok(()),
-        Err(e) => return Err(e),
-    };
-
-    execute_selected(&selected)
 }
 
 pub fn use_cwd() -> Result<()> {
@@ -95,10 +64,10 @@ fn execute_selected(selected: &Path) -> Result<()> {
 fn get_selected(
     paths: &HashSet<String>,
     query: &Option<String>,
-    matches: &ArgMatches,
+    attach: &Attach,
     settings: &Settings,
 ) -> Result<Option<PathBuf>> {
-    if let Some(path) = matches.get_one::<PathBuf>("path") {
+    if let Some(path) = attach.path.as_ref() {
         if path.as_path() == Path::new(".") {
             return Ok(Some(std::env::current_dir()?));
         }
@@ -119,10 +88,8 @@ fn get_selected(
         }
     }
 
-    let exact = matches.get_flag("exact");
-
     let opts = FinderOptions {
-        exact,
+        exact: attach.exact,
         query: query.clone(),
         height: settings.height,
         ..Default::default()

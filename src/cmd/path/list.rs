@@ -1,62 +1,37 @@
-use crate::data::{Location, Settings};
-use clap::{Arg, ArgMatches, Command};
-use eyre::Result;
+use crate::{
+    cli::PathList,
+    cmd::ExecuteableCmd,
+    data::{Location, Settings},
+};
 
-pub fn make_subcommand() -> Command {
-    Command::new("list")
-        .about("List registered workspace and single paths")
-        .bin_name("tm path list")
-        .disable_version_flag(true)
-        .disable_colored_help(true)
-        .args(&[
-            Arg::new("workspace")
-                .help("Use path as a workspace path")
-                .short('w')
-                .long("workspace")
-                .action(clap::ArgAction::SetTrue),
-            Arg::new("single")
-                .help("Use path as a workspace path")
-                .short('s')
-                .long("single")
-                .action(clap::ArgAction::SetTrue),
-            Arg::new("global")
-                .help("Save to global $XDG_CONFIG_HOME instead of $XDG_DATA_HOME")
-                .short('g')
-                .long("global")
-                .action(clap::ArgAction::SetTrue),
-            Arg::new("local")
-                .help("Save to global $XDG_CONFIG_HOME instead of $XDG_DATA_HOME")
-                .short('l')
-                .long("local")
-                .action(clap::ArgAction::SetTrue),
-        ])
-}
 
-pub fn execute(matches: &ArgMatches) -> Result<()> {
-    let settings = match (matches.get_flag("global"), matches.get_flag("local")) {
-        (true, false) => Settings::from_location(Location::Global)?,
-        (false, true) => Settings::from_location(Location::Local)?,
-        _ => Settings::new()?,
-    };
+impl ExecuteableCmd for PathList {
+    fn execute(self) -> eyre::Result<()> {
+        let settings = match (self.global, self.local) {
+            (true, false) => Settings::from_location(Location::Global)?,
+            (false, true) => Settings::from_location(Location::Local)?,
+            _ => Settings::new()?,
+        };
 
-    if matches.get_flag("single") {
-        settings.single_paths.iter().for_each(|s| println!("{}", s));
-    } else if matches.get_flag("workspace") {
-        settings
-            .workspace_paths
-            .iter()
-            .for_each(|s| println!("{}", s));
-    } else {
-        settings
-            .single_paths
-            .iter()
-            .for_each(|s| println!("s {}", s));
+        if self.single {
+            settings.single_paths.iter().for_each(|s| println!("{}", s));
+        } else if self.workspace {
+            settings
+                .workspace_paths
+                .iter()
+                .for_each(|s| println!("{}", s));
+        } else {
+            settings
+                .single_paths
+                .iter()
+                .for_each(|s| println!("s {}", s));
 
-        settings
-            .workspace_paths
-            .iter()
-            .for_each(|s| println!("w {}", s));
+            settings
+                .workspace_paths
+                .iter()
+                .for_each(|s| println!("w {}", s));
+        }
+
+        Ok(())
     }
-
-    Ok(())
 }

@@ -1,30 +1,14 @@
-use clap::ArgAction;
-use clap::{value_parser, Arg, ArgMatches, Command};
-use clap_complete::Generator;
-use clap_complete::Shell;
-use eyre::Result;
+use clap::CommandFactory;
 
-pub fn make_subcommand() -> Command {
-    Command::new("completions")
-        .about("Generate shell completions for your shell to stdout")
-        .bin_name("vm completions")
-        .disable_version_flag(true)
-        .disable_colored_help(true)
-        .arg(
-            Arg::new("generator")
-                .action(ArgAction::Set)
-                .value_parser(value_parser!(Shell)),
-        )
-}
+use crate::cli::{Cli, Completion};
 
-fn print_completions<G: Generator>(gen: G, cmd: &mut Command) {
-    clap_complete::generate(gen, cmd, cmd.get_name().to_string(), &mut std::io::stdout());
-}
+use super::ExecuteableCmd;
 
-pub fn execute(matches: &ArgMatches) -> Result<()> {
-    if let Some(shell) = matches.get_one::<Shell>("generator").copied() {
-        let mut cmd = crate::cmd::make_clap_command();
-        print_completions(shell, &mut cmd);
+impl ExecuteableCmd for Completion {
+    fn execute(self) -> eyre::Result<()> {
+        let mut cmd = Cli::command();
+        let name = cmd.get_name().to_string();
+        clap_complete::generate(self.genreator, &mut cmd, name, &mut std::io::stdout());
+        Ok(())
     }
-    Ok(())
 }

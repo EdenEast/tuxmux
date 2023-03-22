@@ -1,83 +1,53 @@
 use std::env;
 
-use crate::data::{Location, Settings};
-use clap::{builder::PossibleValuesParser, Arg, ArgMatches, Command};
+use crate::{
+    cli::Config,
+    data::{Location, Settings},
+};
+
 use eyre::Result;
+
+use super::ExecuteableCmd;
 
 const CONFIG_OPTIONS: [&str; 3] = ["depth", "height", "finder"];
 
-pub fn make_subcommand() -> Command {
-    Command::new("config")
-        .about("Get or set configuration options")
-        .bin_name("tm config")
-        .visible_alias("c")
-        .disable_version_flag(true)
-        .disable_colored_help(true)
-        .args(&[
-            Arg::new("name")
-                .help("Name of configuration option")
-                .value_parser(PossibleValuesParser::new(CONFIG_OPTIONS))
-                .hide_possible_values(true)
-                .required(false),
-            Arg::new("value")
-                .help("Value of the configuration option defined by name")
-                .required(false),
-            Arg::new("global")
-                .help("Save to global $XDG_CONFIG_HOME instead of $XDG_DATA_HOME")
-                .short('g')
-                .long("global")
-                .action(clap::ArgAction::SetTrue),
-            Arg::new("edit")
-                .help("Open config file in '$EDITOR'")
-                .short('e')
-                .long("edit")
-                .action(clap::ArgAction::SetTrue),
-            Arg::new("list")
-                .help("List all config options and values")
-                .short('l')
-                .long("list")
-                .action(clap::ArgAction::SetTrue),
-        ])
-}
-
-pub fn execute(matches: &ArgMatches) -> Result<()> {
-    let location = if matches.get_flag("global") {
-        Location::Global
-    } else {
-        Location::Local
-    };
-
-    if matches.get_flag("edit") {
-        let editor = env::var("EDITOR").unwrap_or_else(|_| "vim".to_owned());
-        let file = Settings::filepath_from_location(location);
-        std::process::Command::new(editor).arg(file).status()?;
-
-        return Ok(());
-    }
-
-    if matches.get_flag("list") {
-        let settings = if location == Location::Global {
-            Settings::from_location(location)?
+impl ExecuteableCmd for Config {
+    fn execute(self) -> eyre::Result<()> {
+        let location = if self.global {
+            Location::Global
         } else {
-            Settings::new()?
+            Location::Local
         };
 
-        let content = toml::to_string_pretty(&settings)?;
-        println!("{}", content);
+        if self.edit {
+            let editor = env::var("EDITOR").unwrap_or_else(|_| "vim".to_owned());
+            let file = Settings::filepath_from_location(location);
+            std::process::Command::new(editor).arg(file).status()?;
 
-        return Ok(());
+            return Ok(());
+        }
+
+        if self.list {
+            let settings = if location == Location::Global {
+                Settings::from_location(location)?
+            } else {
+                Settings::new()?
+            };
+
+            let content = toml::to_string_pretty(&settings)?;
+            println!("{}", content);
+
+            return Ok(());
+        }
+
+        match (self.name, self.value) {
+            (Some(name), Some(value)) => set_value(&name, &value, location)?,
+            (Some(name), None) => get_value(&name)?,
+            _ => {}
+        }
+
+        Ok(())
     }
-
-    match (
-        matches.get_one::<String>("name"),
-        matches.get_one::<String>("value"),
-    ) {
-        (Some(name), Some(value)) => set_value(name, value, location)?,
-        (Some(name), None) => get_value(name)?,
-        _ => {}
-    }
-
-    Ok(())
 }
 
 fn get_value(name: &str) -> Result<()> {

@@ -2,74 +2,60 @@
 
 use std::ffi::OsString;
 
-use clap::{ArgMatches, Command};
+use clap::{ArgMatches, Command, Parser};
 use eyre::Result;
-use tmgr::{cmd, data::Settings, finder::FinderOptions};
+use tmgr::{
+    cli::Cli,
+    cmd::{self, ExecuteableCmd},
+    data::Settings,
+    finder::FinderOptions,
+};
 
 type ExecuteCmd = fn(&ArgMatches) -> Result<()>;
 
-fn get_execute_cmd(name: &str) -> Option<(&str, ExecuteCmd)> {
-    dbg!(name);
-    match name {
-        "attach" | "a" => Some(("attach", cmd::attach::execute)),
-        "completions" => Some(("completions", cmd::completions::execute)),
-        "config" | "c" => Some(("config", cmd::config::execute)),
-        "jump" | "j" => Some(("jump", cmd::jump::execute)),
-        "kill" | "k" => Some(("kill", cmd::kill::execute)),
-        "list" | "ls" => Some(("list", cmd::list::execute)),
-        "path" | "p" => Some(("path", cmd::path::execute)),
-        "wcmd" | "w" => Some(("wcmd", cmd::wcmd::execute)),
-        _ => None,
-    }
-}
+mod cli;
 
-fn execute_subcommand_if_exists<I, T>(name: &str, cmd: &Command, iter: I) -> Result<bool>
-where
-    I: IntoIterator<Item = T>,
-    T: Into<OsString> + Clone,
-{
-    if let Some((cmd_name, execute)) = get_execute_cmd(name) {
-        let subcmd = cmd
-            .get_subcommands()
-            .find(|c| c.get_name() == name)
-            .expect("Only valid names returned from get_execute_cmd");
+const VALID_FIRST_OPTIONS: [&str; 15] = [
+    "attach",
+    "a",
+    "completions",
+    "config",
+    "c",
+    "jump",
+    "j",
+    "kill",
+    "k",
+    "list",
+    "ls",
+    "path",
+    "p",
+    "wcmd",
+    "w",
+];
 
-        return execute(&subcmd.clone().get_matches_from(iter)).map(|_| true);
-    }
-
-    Ok(false)
-}
+const HELP_AND_VERSION_FLAGS: [&str; 4] = ["--help", "-h", "-V", "--version"];
 
 fn main() -> Result<()> {
-    let mut args = std::env::args().skip(1);
-    let first = args.next();
-    let mut cmd = cmd::make_clap_command();
-
-    dbg!(&args, &first);
-
-    if let Some(first) = first {
+    let mut args = std::env::args().collect::<Vec<_>>();
+    if let Some(first) = args.get(1) {
         if first == "." {
             return cmd::attach::use_cwd();
         }
 
-        if execute_subcommand_if_exists(&first, &cmd, std::env::args().take(1).chain(args))? {
-            return Ok(());
+        let contains_help_or_version = HELP_AND_VERSION_FLAGS.iter().any(|v| *v == first);
+        if !contains_help_or_version && !VALID_FIRST_OPTIONS.iter().any(|v| *v == first) {
+            args.insert(1, "attach".to_string());
         }
     }
 
-    if let Some(help_arg) = std::env::args().find(|a| matches!(a.as_str(), "-h" | "--help")) {
-        if help_arg == "-h" {
-            cmd.print_help();
-        } else {
-            cmd.print_long_help();
-        }
-        return Ok(());
+    match Cli::parse_from(args).command {
+        tmgr::cli::Cmd::Attach(c) => c.execute(),
+        tmgr::cli::Cmd::Completion(c) => c.execute(),
+        tmgr::cli::Cmd::Config(c) => c.execute(),
+        tmgr::cli::Cmd::Jump(c) => c.execute(),
+        tmgr::cli::Cmd::Kill(c) => c.execute(),
+        tmgr::cli::Cmd::List(c) => c.execute(),
+        tmgr::cli::Cmd::Path(c) => c.execute(),
+        tmgr::cli::Cmd::Wcmd(c) => c.execute(),
     }
-
-    if std::env::args().any(|a| matches!(a.as_str(), "-V" | "--version")) {
-        print!("{}", cmd.render_version());
-        return Ok(());
-    }
-
-    cmd::attach::execute(&cmd::attach::make_subcommand().get_matches())
 }
