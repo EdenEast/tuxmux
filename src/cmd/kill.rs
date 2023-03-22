@@ -1,6 +1,5 @@
 use crate::{cli::Kill, data::Settings, finder::FinderOptions, tmux};
 
-
 use super::ExecuteableCmd;
 
 impl ExecuteableCmd for Kill {

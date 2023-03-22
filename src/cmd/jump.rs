@@ -2,7 +2,6 @@ use std::{env, path::Path};
 
 use crate::{cli::Jump, data::Jumplist, tmux};
 
-
 use super::ExecuteableCmd;
 
 impl ExecuteableCmd for Jump {

@@ -4,7 +4,6 @@ use crate::{
     data::{Location, Settings},
 };
 
-
 impl ExecuteableCmd for PathList {
     fn execute(self) -> eyre::Result<()> {
         let settings = match (self.global, self.local) {

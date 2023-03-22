@@ -5,7 +5,6 @@ use crate::{
     finder::FinderOptions,
 };
 
-
 impl ExecuteableCmd for PathRemove {
     fn execute(self) -> eyre::Result<()> {
         let location = if self.global {
