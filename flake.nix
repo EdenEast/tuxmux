@@ -35,27 +35,30 @@
         version = manifest.package.version;
         root = ./.;
 
-        tmgr = naersk-lib.buildPackage {
-          inherit version root;
-          pname = "tmgr";
+        tmgr = naersk-lib.buildPackage
+          {
+            inherit version root;
+            pname = "tmgr";
 
-          buildInputs = with pkgs; [ ];
-          nativeBuildInputs = with pkgs; [ pandoc ];
+            buildInputs = with pkgs; [ zstd ];
+            nativeBuildInputs = with pkgs; [ installShellFiles ];
 
-          # overrideMain = _: {
-          #   postInstall = ''
-          #     mkdir -p $out/{completions,man}
-          #     OUT_DIR=$out/completions ${tmgrCmpl}/bin/tmgr-cmpl
-          #     pandoc --standalone --to man doc/tm.md -o $out/man/tm.1
-          #   '';
-          # };
+            overrideMain = _: {
+              preFixup = ''
+                installManPage ./target/man/*
+                installShellCompletion --bash ./target/completions/tm.bash
+                installShellCompletion --zsh ./target/completions/_tm
+                installShellCompletion --fish ./target/completions/tm.fish
+              '';
+            };
 
-          meta = with pkgs.lib; {
-            description = "Tmux utility for session and window management";
-            homepage = "https://github.com/EdenEast/tmgr";
-            license = with licenses; [ mit ];
+            meta = with pkgs.lib; {
+              description = "Tmux utility for session and window management";
+              homepage = "https://github.com/EdenEast/tmgr";
+              license = with licenses; [ mit ];
+              mainProgram = "tm";
+            };
           };
-        };
 
         devShell = pkgs.mkShell {
           name = "tmgr";
