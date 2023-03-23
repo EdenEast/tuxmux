@@ -34,12 +34,10 @@ impl ExecuteableCmd for PathRemove {
             ..Default::default()
         };
 
-        let selected = match settings.finder().execute(iter.iter(), opts)? {
-            Some(selected) => selected,
-            None => {
-                return Ok(());
-            }
-        };
+        let selected = settings.finder().execute(iter.iter(), opts)?;
+        if selected.is_empty() {
+            return Ok(());
+        }
 
         for sel in selected {
             let (k, v) = sel.split_at(3);

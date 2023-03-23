@@ -1,11 +1,10 @@
 use std::{
-    io::{BufRead, BufReader, BufWriter, Write},
-    os::unix::process::ExitStatusExt,
-    process::{Command, ExitStatus, Stdio},
+    io::{BufWriter, Write},
+    process::{self, Command, Stdio},
     str::FromStr,
 };
 
-use eyre::{eyre, Result};
+use eyre::{eyre, Context, Result};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Default, Clone)]
@@ -15,11 +14,6 @@ pub struct FinderOptions {
     pub query: Option<String>,
     pub exact: bool,
     pub multi: bool,
-}
-
-pub struct FeedAndRead {
-    lines: Vec<String>,
-    status: ExitStatus,
 }
 
 #[derive(Debug, Default, Clone, Copy, Serialize, Deserialize)]
@@ -48,7 +42,7 @@ impl FromStr for FinderChoice {
 }
 
 impl FinderChoice {
-    pub fn execute<S, I>(&self, items: I, opts: FinderOptions) -> Result<Option<Vec<String>>>
+    pub fn execute<S, I>(&self, items: I, opts: FinderOptions) -> Result<Vec<String>>
     where
         S: AsRef<str>,
         I: Iterator<Item = S>,
@@ -59,7 +53,13 @@ impl FinderChoice {
         };
 
         let mut command = Command::new(cmd);
-        command.args(&["--reverse", "--keep-right", "--exit-0", "--select-1"]);
+        command.args(&[
+            "--reverse",
+            "--keep-right",
+            "--exit-0",
+            "--select-1",
+            "--ansi",
+        ]);
 
         if opts.exact {
             command.args(&["--exact"]);
@@ -73,41 +73,11 @@ impl FinderChoice {
             command.args(&["--height", &format!("{}%", height)]);
         }
 
-        if let Some(query) = opts.query {
-            command.args(&["--print-query", "--query", &query]);
+        if let Some(query) = opts.query.as_ref() {
+            command.args(&["--query", query]);
         }
 
-        let FeedAndRead { lines, status, .. } = self.feed_and_read(items, &cmd, &mut command)?;
-
-        match status.code() {
-            Some(0 | 1) => Ok(Some(lines)),
-            Some(130) => Ok(None), // Interupted with either CTRL-c or ESC
-            Some(n) => Err(eyre!("{} process execited with status code: {}", cmd, n)),
-            None => {
-                if status.core_dumped() {
-                    Err(eyre!("Core dumped :("))
-                } else if let Some(sig) = status.signal() {
-                    Err(eyre!("{} killed by signal: {}", cmd, sig))
-                } else {
-                    Err(eyre!("{} process exited with status: {:?}", cmd, status))
-                }
-            }
-        }
-    }
-
-    fn feed_and_read<S, I>(
-        &self,
-        items: I,
-        cmd: &str,
-        command: &mut Command,
-    ) -> std::io::Result<FeedAndRead>
-    where
-        S: AsRef<str>,
-        I: Iterator<Item = S>,
-    {
-        let child = command.stdin(Stdio::piped()).stdout(Stdio::piped()).spawn();
-
-        let mut child = match child {
+        let mut child = match command.stdin(Stdio::piped()).stdout(Stdio::piped()).spawn() {
             Ok(x) => x,
             Err(_) => {
                 let repo = match self {
@@ -123,25 +93,27 @@ impl FinderChoice {
             }
         };
 
-        let mut writer = BufWriter::new(child.stdin.take().unwrap());
-        for i in items {
-            writer.write_all(i.as_ref().as_bytes())?;
-            writer.write_all(b"\n")?;
+        if let Some(stdin) = child.stdin.as_mut() {
+            let mut writer = BufWriter::new(stdin);
+            for i in items {
+                writer.write_all(i.as_ref().as_bytes())?;
+                writer.write_all(b"\n")?;
+            }
         }
 
-        writer.flush()?;
-        drop(writer);
+        let out = child.wait_with_output()?;
+        let text = match out.status.code() {
+            Some(0) | Some(1) | Some(2) => {
+                String::from_utf8(out.stdout).context("Invalid utf8 received from finder")?
+            }
+            Some(130) => process::exit(130),
+            _ => {
+                let err = String::from_utf8(out.stderr)
+                    .unwrap_or_else(|_| "<stderr contains invalid UTF-8>".to_owned());
+                panic!("External command failed:\n {}", err)
+            }
+        };
 
-        let reader = BufReader::new(child.stdout.take().unwrap());
-        let mut lines = Vec::new();
-        for line in reader.lines() {
-            let line = line?;
-            lines.push(line);
-        }
-
-        Ok(FeedAndRead {
-            lines,
-            status: child.wait()?,
-        })
+        Ok(text.lines().map(ToOwned::to_owned).collect())
     }
 }

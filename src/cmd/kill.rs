@@ -17,8 +17,7 @@ impl ExecuteableCmd for Kill {
                 height: settings.height,
                 ..Default::default()
             };
-            let finder = settings.finder.unwrap_or_default();
-            finder.execute(names.iter(), opts)?.unwrap_or_default()
+            settings.finder().execute(names.iter(), opts)?
         };
 
         for sel in selected {

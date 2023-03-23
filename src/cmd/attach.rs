@@ -1,13 +1,11 @@
 use std::{
     collections::HashSet,
     path::{Path, PathBuf},
-    str::FromStr,
 };
 
 use crate::{cli::Attach, data::Settings, finder::FinderOptions, tmux, util};
 
 use eyre::Result;
-use rayon::prelude::*;
 
 use super::ExecuteableCmd;
 
@@ -26,12 +24,13 @@ impl ExecuteableCmd for Attach {
             };
 
             let selected = match names.len() {
-                0 => return Ok(()),
+                0 => None,
                 1 => names.into_iter().next(),
-                _ => match settings.finder().execute(names.iter(), opts)? {
-                    Some(lines) => lines.into_iter().next(),
-                    None => return Ok(()),
-                },
+                _ => settings
+                    .finder()
+                    .execute(names.iter(), opts)?
+                    .into_iter()
+                    .next(),
             };
 
             if let Some(selected) = selected {
@@ -79,15 +78,6 @@ fn get_selected(
         return Ok(Some(path.to_owned()));
     }
 
-    if let Some(q) = query {
-        let iter = paths.par_iter().filter(|v| v.contains(q));
-        let count = iter.clone().count();
-        if count == 1 {
-            let l = iter.collect::<Vec<_>>();
-            return Ok(Some(PathBuf::from_str(l[0])?));
-        }
-    }
-
     let opts = FinderOptions {
         exact: attach.exact,
         query: query.clone(),
@@ -95,11 +85,10 @@ fn get_selected(
         ..Default::default()
     };
 
-    if let Some(lines) = settings.finder().execute(paths.iter(), opts)? {
-        if let Some(first) = lines.into_iter().next() {
-            return Ok(Some(PathBuf::from_str(first.as_str())?));
-        }
-    }
-
-    Ok(None)
+    Ok(settings
+        .finder()
+        .execute(paths.iter(), opts)?
+        .into_iter()
+        .next()
+        .map(PathBuf::from))
 }
