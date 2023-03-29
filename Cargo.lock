@@ -555,6 +555,7 @@ dependencies = [
  "dirs-next",
  "eyre",
  "jwalk",
+ "rayon",
  "serde",
  "tmux_interface",
  "toml",

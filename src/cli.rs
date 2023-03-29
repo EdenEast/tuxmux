@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use clap::{crate_description, crate_version, Subcommand};
 use clap::{Args, Parser};
 
-const CONFIG_OPTIONS: [&str; 3] = ["depth", "height", "finder"];
+pub const CONFIG_OPTIONS: [&str; 3] = ["depth", "height", "finder"];
 
 const ARG_AFTER_HELP_MSG: &str = "\
 By default if there is no command passed as the first argument the \

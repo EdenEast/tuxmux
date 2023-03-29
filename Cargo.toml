@@ -16,6 +16,7 @@ clap = { version = "4.1.11", features = [ "cargo", "derive" ] }
 dirs-next = "2.0.0"
 eyre = "0.6.8"
 jwalk = "0.8.1"
+rayon = "1.7.0"
 serde = { version = "1.0.158", features = [ "derive" ] }
 tmux_interface = "0.2.1"
 toml = "0.7.3"

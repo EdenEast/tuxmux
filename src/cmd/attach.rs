@@ -1,11 +1,13 @@
 use std::{
     collections::HashSet,
     path::{Path, PathBuf},
+    str::FromStr,
 };
 
 use crate::{cli::Attach, data::Settings, finder::FinderOptions, tmux, util};
 
 use eyre::Result;
+use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
 
 use super::ExecuteableCmd;
 
@@ -76,6 +78,15 @@ fn get_selected(
         }
 
         return Ok(Some(path.to_owned()));
+    }
+
+    if let Some(query) = &query {
+        let iter = paths.par_iter().filter(|v| v.contains(query));
+        let count = iter.clone().count();
+        if count == 1 {
+            let r = iter.collect::<Vec<_>>()[0];
+            return Ok(Some(PathBuf::from_str(&r)?));
+        }
     }
 
     let opts = FinderOptions {

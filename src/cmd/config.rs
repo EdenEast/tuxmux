@@ -1,15 +1,13 @@
 use std::env;
 
 use crate::{
-    cli::Config,
+    cli::{Config, CONFIG_OPTIONS},
     data::{Location, Settings},
 };
 
 use eyre::Result;
 
 use super::ExecuteableCmd;
-
-const CONFIG_OPTIONS: [&str; 3] = ["depth", "height", "finder"];
 
 impl ExecuteableCmd for Config {
     fn execute(self) -> eyre::Result<()> {

@@ -152,16 +152,16 @@ fn merge_if_exists(settings: &mut Settings, path: &Path) -> Result<()> {
         settings.workspace_paths.insert(p);
     }
 
-    if let Some(depth) = raw.depth {
-        settings.depth = Some(depth);
+    if raw.depth.is_some() {
+        settings.depth = raw.depth;
     }
 
-    if let Some(height) = raw.height {
-        settings.height = Some(height.clamp(1, 100));
+    if raw.height.is_some() {
+        settings.height = raw.height.map(|v| v.clamp(1, 100))
     }
 
-    if let Some(finder) = raw.finder {
-        settings.finder = Some(finder);
+    if raw.finder.is_some() {
+        settings.finder = raw.finder;
     }
 
     Ok(())
