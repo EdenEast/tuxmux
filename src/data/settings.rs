@@ -2,6 +2,7 @@ use eyre::Result;
 use jwalk::WalkDir;
 use serde::{Deserialize, Serialize};
 use std::{
+    borrow::Cow,
     collections::HashSet,
     path::{Path, PathBuf},
 };
@@ -9,6 +10,10 @@ use std::{
 use crate::{finder::FinderChoice, util};
 
 const CONF_PATH_COMPONENTS: &[&str] = &["config.toml"];
+
+lazy_static::lazy_static! {
+    static ref HOME_DIR: PathBuf = dirs_next::home_dir().unwrap();
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Location {
@@ -95,13 +100,7 @@ impl Settings {
         let mut results = self
             .single_paths
             .iter()
-            .cloned()
-            .filter_map(|s| {
-                Path::new(&s)
-                    .canonicalize()
-                    .map(|p| p.display().to_string())
-                    .ok()
-            })
+            .map(|s| normalize_path(Path::new(&s)).display().to_string())
             .collect::<HashSet<_>>();
 
         let depth = self.depth.unwrap_or(100);
@@ -165,4 +164,18 @@ fn merge_if_exists(settings: &mut Settings, path: &Path) -> Result<()> {
     }
 
     Ok(())
+}
+
+pub fn normalize_path<'a, P: AsRef<Path> + ?Sized>(path: &'a P) -> Cow<'a, Path> {
+    let path = path.as_ref();
+    if !path.starts_with("~") {
+        return path.into();
+    }
+
+    HOME_DIR
+        .join(
+            path.strip_prefix("~")
+                .expect("'~' was checked before stripping prefix"),
+        )
+        .into()
 }
