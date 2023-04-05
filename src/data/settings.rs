@@ -103,7 +103,7 @@ impl Settings {
             .map(|s| normalize_path(Path::new(&s)).display().to_string())
             .collect::<HashSet<_>>();
 
-        let depth = self.depth.unwrap_or(100);
+        let depth = self.depth.unwrap_or(10);
         for ws_path in &self.workspace_paths {
             let walker = WalkDir::new(ws_path)
                 .skip_hidden(false)
