@@ -1,17 +1,9 @@
-#![allow(unused)]
-
-use std::ffi::OsString;
-
-use clap::{ArgMatches, Command, Parser};
+use clap::Parser;
 use eyre::Result;
 use tmgr::{
     cli::Cli,
     cmd::{self, ExecuteableCmd},
-    data::Settings,
-    finder::FinderOptions,
 };
-
-type ExecuteCmd = fn(&ArgMatches) -> Result<()>;
 
 mod cli;
 
