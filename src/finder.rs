@@ -53,7 +53,7 @@ impl FinderChoice {
         };
 
         let mut command = Command::new(cmd);
-        command.args(&[
+        command.args([
             "--reverse",
             "--keep-right",
             "--exit-0",
@@ -62,19 +62,19 @@ impl FinderChoice {
         ]);
 
         if opts.exact {
-            command.args(&["--exact"]);
+            command.args(["--exact"]);
         }
 
         if opts.multi {
-            command.args(&["--multi"]);
+            command.args(["--multi"]);
         }
 
         if let Some(height) = opts.height {
-            command.args(&["--height", &format!("{}%", height)]);
+            command.args(["--height", &format!("{}%", height)]);
         }
 
         if let Some(query) = opts.query.as_ref() {
-            command.args(&["--query", query]);
+            command.args(["--query", query]);
         }
 
         let mut child = match command.stdin(Stdio::piped()).stdout(Stdio::piped()).spawn() {

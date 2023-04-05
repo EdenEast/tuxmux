@@ -85,7 +85,7 @@ fn get_selected(
         let count = iter.clone().count();
         if count == 1 {
             let r = iter.collect::<Vec<_>>()[0];
-            return Ok(Some(PathBuf::from_str(&r)?));
+            return Ok(Some(PathBuf::from_str(r)?));
         }
     }
 

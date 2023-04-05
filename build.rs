@@ -70,7 +70,7 @@ fn generate_shell_completion<T>(
 where
     T: Generator,
 {
-    let path = generate_to(shell, cmd, BIN_NAME, &out_dir)?;
+    let path = generate_to(shell, cmd, BIN_NAME, out_dir)?;
     println!("cargo:info=completion file is generated: {:?}", &path);
     Ok(path)
 }

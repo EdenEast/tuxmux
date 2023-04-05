@@ -35,7 +35,7 @@ impl ExecuteableCmd for Jump {
         }
 
         let path = match self.path {
-            Some(path) => path.clone(),
+            Some(path) => path,
             None => std::env::current_dir()?,
         };
 

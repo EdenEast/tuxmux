@@ -50,7 +50,7 @@ impl Settings {
     }
 
     pub fn finder(&self) -> FinderChoice {
-        self.finder.clone().unwrap_or_default()
+        self.finder.unwrap_or_default()
     }
 
     pub fn from_location(location: Location) -> Result<Settings> {
@@ -166,7 +166,7 @@ fn merge_if_exists(settings: &mut Settings, path: &Path) -> Result<()> {
     Ok(())
 }
 
-pub fn normalize_path<'a, P: AsRef<Path> + ?Sized>(path: &'a P) -> Cow<'a, Path> {
+pub fn normalize_path<P: AsRef<Path> + ?Sized>(path: &P) -> Cow<Path> {
     let path = path.as_ref();
     if !path.starts_with("~") {
         return path.into();
