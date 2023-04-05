@@ -42,6 +42,7 @@ EXAMPLES:
 #[derive(Debug, Parser)]
 #[command(
     name = "tm",
+    bin_name("tm"),
     after_help = ARG_AFTER_HELP_MSG,
     about = crate_description!(),
     version = crate_version!(),
@@ -75,6 +76,7 @@ pub enum PathCmd {
 #[derive(Debug, Args)]
 #[command(
     visible_alias("a"),
+    bin_name("tm-attach"),
     disable_colored_help(true),
     disable_version_flag(true)
 )]
@@ -101,6 +103,7 @@ pub struct Attach {
 #[derive(Debug, Args)]
 #[command(
     visible_alias("c"),
+    bin_name("tm-config"),
     disable_colored_help(true),
     disable_version_flag(true)
 )]
@@ -129,6 +132,7 @@ pub struct Config {
 #[derive(Debug, Args)]
 #[command(
     visible_alias("j"),
+    bin_name("tm-jump"),
     disable_colored_help(true),
     disable_version_flag(true),
     long_about = JUMP_LONG_ABOUT,
@@ -155,6 +159,7 @@ pub struct Jump {
 #[derive(Debug, Args)]
 #[command(
     visible_alias("k"),
+    bin_name("tm-kill"),
     disable_colored_help(true),
     disable_version_flag(true)
 )]
@@ -177,6 +182,7 @@ pub struct Kill {
 #[derive(Debug, Args)]
 #[command(
     visible_alias("ls"),
+    bin_name("tm-list"),
     disable_colored_help(true),
     disable_version_flag(true)
 )]
@@ -186,6 +192,7 @@ pub struct List {}
 #[derive(Debug, Args)]
 #[command(
     visible_alias("p"),
+    bin_name("tm-path"),
     disable_colored_help(true),
     disable_version_flag(true)
 )]
@@ -196,7 +203,11 @@ pub struct Path {
 
 /// Register a path to use when listing paths to attach.
 #[derive(Debug, Args)]
-#[command(disable_colored_help(true), disable_version_flag(true))]
+#[command(
+    bin_name("tm-path-add"),
+    disable_colored_help(true),
+    disable_version_flag(true)
+)]
 pub struct PathAdd {
     /// Use path as a workspace path
     #[arg(short, long, default_value_t = false)]
@@ -213,7 +224,11 @@ pub struct PathAdd {
 
 /// List registered workspace and single paths
 #[derive(Debug, Args)]
-#[command(disable_colored_help(true), disable_version_flag(true))]
+#[command(
+    bin_name("tm-path-list"),
+    disable_colored_help(true),
+    disable_version_flag(true)
+)]
 pub struct PathList {
     /// List workspace paths only
     #[arg(short, long, default_value_t = false, conflicts_with = "single")]
@@ -234,7 +249,11 @@ pub struct PathList {
 
 /// Remove registered path from tm
 #[derive(Debug, Args)]
-#[command(disable_colored_help(true), disable_version_flag(true))]
+#[command(
+    bin_name("tm-path-remove"),
+    disable_colored_help(true),
+    disable_version_flag(true)
+)]
 pub struct PathRemove {
     /// Use exact match search instead of fuzzy
     #[arg(short = 'x', long, default_value_t = false)]
@@ -258,6 +277,7 @@ pub struct PathRemove {
 #[derive(Debug, Args)]
 #[command(
     visible_alias("w"),
+    bin_name("tm-wcmd"),
     disable_colored_help(true),
     disable_version_flag(true),
     after_help = WCMD_EXAMPLE_AFTER_HELP,

@@ -4,8 +4,12 @@ use clap_complete::{
     shells::{Bash, Fish, Zsh},
     Generator,
 };
-use clap_mangen::Man;
-use std::{env, fs::File, io::Error, path};
+use std::{
+    env,
+    fs::File,
+    io::{Error, Write},
+    path,
+};
 
 const BIN_NAME: &str = "tm";
 
@@ -23,30 +27,38 @@ fn main() -> Result<(), Error> {
             .to_owned(),
     };
 
-    build_shell_completions(&out_dir)?;
-    build_manpage(&out_dir)?;
+    build_shell_completions(&out_dir.join("completions"))?;
+    build_manpages(&out_dir.join("man"))?;
 
     Ok(())
 }
 
-fn build_manpage(out_dir: &path::Path) -> Result<(), Error> {
-    let man_dir = out_dir.join("man");
-    std::fs::create_dir_all(&man_dir)?;
-    let cli = Cli::command();
-    let filename = man_dir.join(format!("{}.1", BIN_NAME));
-    let mut file = File::create(&filename)?;
-    Man::new(cli).render(&mut file)?;
-    println!("cargo:info=manpage is generated: {:?}", &filename);
-    Ok(())
+fn build_manpages(out_dir: &path::Path) -> Result<(), Error> {
+    std::fs::create_dir_all(out_dir)?;
+    fn build(dir: &path::Path, app: &Command) -> Result<(), Error> {
+        // `get_display_name()` is `Some` for all instances, except the root.
+        let name = app.get_bin_name().unwrap_or_else(|| app.get_name());
+        let mut out = File::create(dir.join(format!("{name}.1")))?;
+
+        clap_mangen::Man::new(app.clone()).render(&mut out)?;
+        out.flush()?;
+
+        for sub in app.get_subcommands() {
+            build(dir, sub)?;
+        }
+
+        Ok(())
+    }
+
+    build(out_dir, &Cli::command())
 }
 
 fn build_shell_completions(out_dir: &path::Path) -> Result<(), Error> {
-    let comp_dir = out_dir.join("completions");
-    std::fs::create_dir_all(&comp_dir)?;
+    std::fs::create_dir_all(out_dir)?;
     let mut cli = Cli::command();
-    generate_shell_completion(&mut cli, &comp_dir, Bash)?;
-    generate_shell_completion(&mut cli, &comp_dir, Zsh)?;
-    generate_shell_completion(&mut cli, &comp_dir, Fish)?;
+    generate_shell_completion(&mut cli, out_dir, Bash)?;
+    generate_shell_completion(&mut cli, out_dir, Zsh)?;
+    generate_shell_completion(&mut cli, out_dir, Fish)?;
     Ok(())
 }
 
