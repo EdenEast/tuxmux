@@ -12,13 +12,13 @@ strip = "none"
 opt-level = 3
 
 [dependencies]
-clap = { version = "4.1.11", features = [ "cargo", "derive" ] }
+clap = { version = "4.2.1", features = [ "cargo", "derive" ] }
 dirs-next = "2.0.0"
 eyre = "0.6.8"
 jwalk = "0.8.1"
 lazy_static = "1.4.0"
 rayon = "1.7.0"
-serde = { version = "1.0.158", features = [ "derive" ] }
+serde = { version = "1.0.159", features = [ "derive" ] }
 tmux_interface = "0.2.1"
 toml = "0.7.3"
 
@@ -27,6 +27,6 @@ name = "tm"
 path = "src/main.rs"
 
 [build-dependencies]
-clap = { version = "4.1.11", features = [ "cargo", "derive" ] }
-clap_complete = "4.1.5"
+clap = { version = "4.2.1", features = [ "cargo", "derive" ] }
+clap_complete = "4.2.0"
 clap_mangen = "0.2.10"
