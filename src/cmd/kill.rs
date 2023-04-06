@@ -1,9 +1,9 @@
-use crate::{cli::Kill, data::Settings, finder::FinderOptions, tmux};
+use crate::{cmd::cli::Kill, data::Settings, finder::FinderOptions, tmux};
 
-use super::ExecuteableCmd;
+use super::Run;
 
-impl ExecuteableCmd for Kill {
-    fn execute(self) -> eyre::Result<()> {
+impl Run for Kill {
+    fn run(self) -> eyre::Result<()> {
         let settings = Settings::new()?;
         let query = self.query.as_ref().map(|v| v.join(" "));
 

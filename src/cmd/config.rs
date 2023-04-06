@@ -1,16 +1,16 @@
 use std::env;
 
 use crate::{
-    cli::{Config, CONFIG_OPTIONS},
+    cmd::cli::{Config, CONFIG_OPTIONS},
     data::{Location, Settings},
 };
 
 use eyre::Result;
 
-use super::ExecuteableCmd;
+use super::Run;
 
-impl ExecuteableCmd for Config {
-    fn execute(self) -> eyre::Result<()> {
+impl Run for Config {
+    fn run(self) -> eyre::Result<()> {
         let location = if self.global {
             Location::Global
         } else {

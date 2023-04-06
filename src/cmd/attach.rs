@@ -4,15 +4,15 @@ use std::{
     str::FromStr,
 };
 
-use crate::{cli::Attach, data::Settings, finder::FinderOptions, tmux, util};
+use crate::{cmd::cli::Attach, data::Settings, finder::FinderOptions, tmux, util};
 
 use eyre::Result;
 use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
 
-use super::ExecuteableCmd;
+use super::Run;
 
-impl ExecuteableCmd for Attach {
-    fn execute(self) -> eyre::Result<()> {
+impl Run for Attach {
+    fn run(self) -> eyre::Result<()> {
         let settings = Settings::new()?;
         let query = self.query.as_ref().map(|v| v.join(" "));
 

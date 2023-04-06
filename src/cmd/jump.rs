@@ -1,11 +1,11 @@
 use std::{env, path::Path};
 
-use crate::{cli::Jump, data::Jumplist, tmux};
+use crate::{cmd::cli::Jump, data::Jumplist, tmux};
 
-use super::ExecuteableCmd;
+use super::Run;
 
-impl ExecuteableCmd for Jump {
-    fn execute(self) -> eyre::Result<()> {
+impl Run for Jump {
+    fn run(self) -> eyre::Result<()> {
         if self.edit {
             let editor = env::var("EDITOR").unwrap_or_else(|_| "vim".to_owned());
             std::process::Command::new(editor)

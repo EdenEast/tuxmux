@@ -1,11 +1,11 @@
 use crate::{
-    cli::PathAdd,
-    cmd::ExecuteableCmd,
+    cmd::cli::PathAdd,
+    cmd::Run,
     data::{Location, PathKind, Settings},
 };
 
-impl ExecuteableCmd for PathAdd {
-    fn execute(self) -> eyre::Result<()> {
+impl Run for PathAdd {
+    fn run(self) -> eyre::Result<()> {
         let cwd = std::env::current_dir()?;
         let paths = match &self.path {
             Some(vr) => vr.iter().map(|p| p.as_path()).collect(),

@@ -1,9 +1,9 @@
-use crate::{cli::List, tmux};
+use crate::{cmd::cli::List, tmux};
 
-use super::ExecuteableCmd;
+use super::Run;
 
-impl ExecuteableCmd for List {
-    fn execute(self) -> eyre::Result<()> {
+impl Run for List {
+    fn run(self) -> eyre::Result<()> {
         let sessions = tmux::sessions()?;
 
         let max_name = sessions

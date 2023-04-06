@@ -1,12 +1,12 @@
 use crate::{
-    cli::PathRemove,
-    cmd::ExecuteableCmd,
+    cmd::cli::PathRemove,
+    cmd::Run,
     data::{Location, PathKind, Settings},
     finder::FinderOptions,
 };
 
-impl ExecuteableCmd for PathRemove {
-    fn execute(self) -> eyre::Result<()> {
+impl Run for PathRemove {
+    fn run(self) -> eyre::Result<()> {
         let location = if self.global {
             Location::Global
         } else {

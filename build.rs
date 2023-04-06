@@ -13,7 +13,7 @@ use std::{
 
 const BIN_NAME: &str = "tm";
 
-include!("src/cli.rs");
+include!("src/cmd/cli.rs");
 
 fn main() -> Result<(), Error> {
     println!("cargo:rerun-if-changed=src/cli.rs");

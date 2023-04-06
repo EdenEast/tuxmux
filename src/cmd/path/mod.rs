@@ -1,17 +1,15 @@
-use crate::cli::Path;
-
-use super::ExecuteableCmd;
+use super::{Path, PathCmd, Run};
 
 mod add;
 mod list;
 mod remove;
 
-impl ExecuteableCmd for Path {
-    fn execute(self) -> eyre::Result<()> {
+impl Run for Path {
+    fn run(self) -> eyre::Result<()> {
         match self.cmd {
-            crate::cli::PathCmd::Add(c) => c.execute(),
-            crate::cli::PathCmd::List(c) => c.execute(),
-            crate::cli::PathCmd::Remove(c) => c.execute(),
+            PathCmd::Add(c) => c.run(),
+            PathCmd::List(c) => c.run(),
+            PathCmd::Remove(c) => c.run(),
         }
     }
 }

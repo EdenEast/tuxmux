@@ -1,11 +1,11 @@
 use crate::{
-    cli::PathList,
-    cmd::ExecuteableCmd,
+    cmd::cli::PathList,
+    cmd::Run,
     data::{Location, Settings},
 };
 
-impl ExecuteableCmd for PathList {
-    fn execute(self) -> eyre::Result<()> {
+impl Run for PathList {
+    fn run(self) -> eyre::Result<()> {
         let settings = match (self.global, self.local) {
             (true, false) => Settings::from_location(Location::Global)?,
             (false, true) => Settings::from_location(Location::Local)?,

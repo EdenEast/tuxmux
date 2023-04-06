@@ -1,11 +1,11 @@
 use std::path::Path;
 
-use crate::{cli::Wcmd, tmux, util::intersperse};
+use crate::{cmd::cli::Wcmd, tmux, util::intersperse};
 
-use super::ExecuteableCmd;
+use super::Run;
 
-impl ExecuteableCmd for Wcmd {
-    fn execute(self) -> eyre::Result<()> {
+impl Run for Wcmd {
+    fn run(self) -> eyre::Result<()> {
         let name = Path::new(&self.window)
             .file_name()
             .unwrap()

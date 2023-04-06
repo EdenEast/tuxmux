@@ -89,12 +89,14 @@ pub struct Attach {
     #[arg(short = 'x', long, default_value_t = false)]
     pub exact: bool,
 
-    /// Exact path to either attach to existing session or create a new one if none exist
+    /// Exact path to either attach to existing session or create a new one if
+    /// none exist
     #[arg(short, long, default_value = None)]
     pub path: Option<PathBuf>,
 
-    /// Query to search from. If there is only one result that result will be automatically
-    /// selected. If there are multiple results then a search field will be presented.
+    /// Query to search from. If there is only one result that result will be
+    /// automatically selected. If there are multiple results then a search
+    /// field will be presented.
     #[arg(default_value = None)]
     pub query: Option<Vec<String>>,
 }
@@ -172,8 +174,9 @@ pub struct Kill {
     #[arg(short = 'x', long, default_value_t = false)]
     pub exact: bool,
 
-    /// Query to search from. If there is only one result that result will be automatically
-    /// selected. If there are multiple results then a search field will be presented.
+    /// Query to search from. If there is only one result that result will be
+    /// automatically selected. If there are multiple results then a search
+    /// field will be presented.
     #[arg(default_value = None)]
     pub query: Option<Vec<String>>,
 }
@@ -267,8 +270,9 @@ pub struct PathRemove {
     #[arg(short, long, default_value_t = false)]
     pub global: bool,
 
-    /// Query to search from. If there is only one result that result will be automatically
-    /// selected. If there are multiple results then a search field will be presented.
+    /// Query to search from. If there is only one result that result will be
+    /// automatically selected. If there are multiple results then a search
+    /// field will be presented.
     #[arg(default_value = None)]
     pub query: Option<Vec<String>>,
 }
@@ -291,3 +295,5 @@ pub struct Wcmd {
     #[arg(long_help = WCMD_LONG_CMD_HELP)]
     pub cmds: Vec<String>,
 }
+
+// vim: textwidth=80
