@@ -20,10 +20,7 @@ pub fn get_config(components: &[&str]) -> PathBuf {
         _ => dirs_next::config_dir().unwrap().join("tm"),
     };
 
-    for c in components {
-        path = path.join(c)
-    }
-
+    path.extend(components);
     path
 }
 
@@ -41,10 +38,7 @@ pub fn get_local(components: &[&str]) -> PathBuf {
         _ => dirs_next::data_dir().unwrap().join("tm"),
     };
 
-    for c in components {
-        path = path.join(c)
-    }
-
+    path.extend(components);
     path
 }
 
