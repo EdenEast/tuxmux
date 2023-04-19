@@ -1,0 +1,9 @@
+paths {
+  workspace "~/dev"
+  workspace "~/work"
+  single "~/.local/nyx"
+}
+
+depth 3
+height 40
+finder "fzf"
