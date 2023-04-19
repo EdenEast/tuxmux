@@ -27,11 +27,9 @@ fn main() -> Result<()> {
 
     match cmd::Cli::parse_from(args).command {
         cmd::Cmd::Attach(c) => c.run(),
-        cmd::Cmd::Config(c) => c.run(),
         cmd::Cmd::Jump(c) => c.run(),
         cmd::Cmd::Kill(c) => c.run(),
         cmd::Cmd::List(c) => c.run(),
-        cmd::Cmd::Path(c) => c.run(),
         cmd::Cmd::Wcmd(c) => c.run(),
     }
 }

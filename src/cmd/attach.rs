@@ -4,7 +4,7 @@ use std::{
     str::FromStr,
 };
 
-use crate::{cmd::cli::Attach, data::Settings, finder::FinderOptions, tmux, util};
+use crate::{cmd::cli::Attach, config::Config, finder::FinderOptions, tmux, util};
 
 use eyre::Result;
 use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
@@ -13,7 +13,7 @@ use super::Run;
 
 impl Run for Attach {
     fn run(self) -> eyre::Result<()> {
-        let settings = Settings::new()?;
+        let config = Config::load()?;
         let query = self.query.as_ref().map(|v| v.join(" "));
 
         if self.exists {
@@ -21,15 +21,15 @@ impl Run for Attach {
             let opts = FinderOptions {
                 exact: self.exact,
                 query,
-                height: settings.height,
+                height: Some(config.height),
                 ..Default::default()
             };
 
             let selected = match names.len() {
                 0 => None,
                 1 => names.into_iter().next(),
-                _ => settings
-                    .finder()
+                _ => config
+                    .finder
                     .execute(names.iter(), opts)?
                     .into_iter()
                     .next(),
@@ -42,8 +42,8 @@ impl Run for Attach {
             return Ok(());
         }
 
-        let paths = settings.list_paths();
-        let selected = match get_selected(&paths, &query, &self, &settings) {
+        let paths = config.list_paths();
+        let selected = match get_selected(&paths, &query, &self, &config) {
             Ok(Some(s)) => s,
             Ok(None) => return Ok(()),
             Err(e) => return Err(e),
@@ -66,7 +66,7 @@ fn get_selected(
     paths: &HashSet<String>,
     query: &Option<String>,
     attach: &Attach,
-    settings: &Settings,
+    config: &Config,
 ) -> Result<Option<PathBuf>> {
     if let Some(path) = attach.path.as_ref() {
         if path.as_path() == Path::new(".") {
@@ -81,23 +81,26 @@ fn get_selected(
     }
 
     if let Some(query) = &query {
-        let iter = paths.par_iter().filter(|v| v.contains(query));
-        let count = iter.clone().count();
-        if count == 1 {
-            let r = iter.collect::<Vec<_>>()[0];
-            return Ok(Some(PathBuf::from_str(r)?));
+        let matches = paths
+            .par_iter()
+            .filter(|v| v.contains(query))
+            .collect::<Vec<_>>();
+        if matches.len() == 1 {
+            return Ok(Some(PathBuf::from_str(
+                matches.first().expect("Matches length is 1"),
+            )?));
         }
     }
 
     let opts = FinderOptions {
         exact: attach.exact,
         query: query.clone(),
-        height: settings.height,
+        height: Some(config.height),
         ..Default::default()
     };
 
-    Ok(settings
-        .finder()
+    Ok(config
+        .finder
         .execute(paths.iter(), opts)?
         .into_iter()
         .next()

@@ -20,10 +20,8 @@ kdl = "4.6.0"
 lazy_static = "1.4.0"
 miette = "5.8.0"
 rayon = "1.7.0"
-serde = { version = "1.0.159", features = [ "derive" ] }
 thiserror = "1.0.40"
 tmux_interface = "0.2.1"
-toml = "0.7.3"
 
 [[bin]]
 name = "tm"

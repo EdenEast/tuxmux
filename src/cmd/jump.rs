@@ -1,6 +1,6 @@
 use std::{env, path::Path};
 
-use crate::{cmd::cli::Jump, data::Jumplist, tmux};
+use crate::{cmd::cli::Jump, jumplist::Jumplist, tmux};
 
 use super::Run;
 

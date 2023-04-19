@@ -57,19 +57,10 @@ pub struct Cli {
 #[derive(Debug, Subcommand)]
 pub enum Cmd {
     Attach(Attach),
-    Config(Config),
     Jump(Jump),
     Kill(Kill),
     List(List),
-    Path(Path),
     Wcmd(Wcmd),
-}
-
-#[derive(Debug, Parser)]
-pub enum PathCmd {
-    Add(PathAdd),
-    List(PathList),
-    Remove(PathRemove),
 }
 
 /// Create or attach to a tmux session based on the path specified
@@ -190,92 +181,6 @@ pub struct Kill {
     disable_version_flag(true)
 )]
 pub struct List {}
-
-/// Manage registered search paths
-#[derive(Debug, Args)]
-#[command(
-    visible_alias("p"),
-    bin_name("tm-path"),
-    disable_colored_help(true),
-    disable_version_flag(true)
-)]
-pub struct Path {
-    #[clap(subcommand)]
-    pub cmd: PathCmd,
-}
-
-/// Register a path to use when listing paths to attach.
-#[derive(Debug, Args)]
-#[command(
-    bin_name("tm-path-add"),
-    disable_colored_help(true),
-    disable_version_flag(true)
-)]
-pub struct PathAdd {
-    /// Use path as a workspace path
-    #[arg(short, long, default_value_t = false)]
-    pub workspace: bool,
-
-    /// Save to global $XDG_CONFIG_HOME instead of $XDG_DATA_HOME
-    #[arg(short, long, default_value_t = false)]
-    pub global: bool,
-
-    /// Optional paths to be added. Uses 'cwd' if not present
-    #[arg(short, long, default_value = None)]
-    pub path: Option<Vec<PathBuf>>,
-}
-
-/// List registered workspace and single paths
-#[derive(Debug, Args)]
-#[command(
-    bin_name("tm-path-list"),
-    disable_colored_help(true),
-    disable_version_flag(true)
-)]
-pub struct PathList {
-    /// List workspace paths only
-    #[arg(short, long, default_value_t = false, conflicts_with = "single")]
-    pub workspace: bool,
-
-    /// List single paths only
-    #[arg(short, long, default_value_t = false, conflicts_with = "workspace")]
-    pub single: bool,
-
-    /// List global paths only
-    #[arg(short, long, default_value_t = false, conflicts_with = "local")]
-    pub global: bool,
-
-    /// List local paths only
-    #[arg(short, long, default_value_t = false, conflicts_with = "global")]
-    pub local: bool,
-}
-
-/// Remove registered path from tm
-#[derive(Debug, Args)]
-#[command(
-    bin_name("tm-path-remove"),
-    disable_colored_help(true),
-    disable_version_flag(true)
-)]
-pub struct PathRemove {
-    /// Use exact match search instead of fuzzy
-    #[arg(short = 'x', long, default_value_t = false)]
-    pub exact: bool,
-
-    /// Remove only workspace paths
-    #[arg(short, long, default_value_t = false)]
-    pub workspace: bool,
-
-    /// Remove only global paths
-    #[arg(short, long, default_value_t = false)]
-    pub global: bool,
-
-    /// Query to search from. If there is only one result that result will be
-    /// automatically selected. If there are multiple results then a search
-    /// field will be presented.
-    #[arg(default_value = None)]
-    pub query: Option<Vec<String>>,
-}
 
 /// Send a command to a execute in a tmux window
 #[derive(Debug, Args)]

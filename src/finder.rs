@@ -5,7 +5,12 @@ use std::{
 };
 
 use eyre::{eyre, Context, Result};
-use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Location {
+    Global,
+    Local,
+}
 
 #[derive(Debug, Default, Clone)]
 pub struct FinderOptions {
@@ -16,8 +21,7 @@ pub struct FinderOptions {
     pub multi: bool,
 }
 
-#[derive(Debug, Default, Clone, Copy, Serialize, Deserialize)]
-#[serde(rename_all = "lowercase")]
+#[derive(Debug, Default, Clone, Copy)]
 pub enum FinderChoice {
     #[default]
     Fzf,

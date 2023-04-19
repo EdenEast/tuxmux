@@ -1,10 +1,10 @@
-use crate::{cmd::cli::Kill, data::Settings, finder::FinderOptions, tmux};
+use crate::{cmd::cli::Kill, config::Config, finder::FinderOptions, tmux};
 
 use super::Run;
 
 impl Run for Kill {
     fn run(self) -> eyre::Result<()> {
-        let settings = Settings::new()?;
+        let config = Config::load()?;
         let query = self.query.as_ref().map(|v| v.join(" "));
 
         let names = tmux::session_names()?;
@@ -14,10 +14,10 @@ impl Run for Kill {
             let opts = FinderOptions {
                 query,
                 multi: true,
-                height: settings.height,
+                height: Some(config.height),
                 ..Default::default()
             };
-            settings.finder().execute(names.iter(), opts)?
+            config.finder.execute(names.iter(), opts)?
         };
 
         for sel in selected {

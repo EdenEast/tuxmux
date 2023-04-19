@@ -5,12 +5,18 @@ use jwalk::WalkDir;
 use kdl::KdlDocument;
 use thiserror::Error;
 
-use crate::{data::Location, finder::FinderChoice, util};
+use crate::{finder::FinderChoice, util};
 
-const CONF_PATH_COMPONENTS: &[&str] = &["config.toml"];
+const CONF_PATH_COMPONENTS: &[&str] = &["config.kdl"];
 
 lazy_static::lazy_static! {
     static ref HOME_DIR: PathBuf = dirs_next::home_dir().unwrap();
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Location {
+    Global,
+    Local,
 }
 
 #[derive(Debug, Error)]
@@ -74,11 +80,13 @@ impl Config {
 
         let config_path = util::get_config(CONF_PATH_COMPONENTS);
         if config_path.exists() {
+            println!("config exists");
             config = Config::from_path(config_path, Some(config))?;
         }
 
-        let local_path = util::get_config(CONF_PATH_COMPONENTS);
+        let local_path = util::get_local(CONF_PATH_COMPONENTS);
         if local_path.exists() {
+            println!("local exists");
             config = Config::from_path(local_path, Some(config))?;
         }
 
