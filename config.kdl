@@ -1,0 +1,30 @@
+// List of paths to be used to create the list of possible sessions.
+// Types:
+// - Workspace: root path to search for valid git repositories
+// - single: added directly as a valid session path
+//
+// paths {
+//   workspace "~/code"
+//   workspace "~/dev"
+//   workspace "~/work"
+//   single "~/.config/awesome"
+//   single "~/.dotfiles"
+// }
+
+// Search depth for workspace paths.
+// Default: 5
+//
+// depth 3
+
+// Height of the fuzzy finder selector. Value is a number [0-100] representing
+// the precentage of the terminal's height.
+// Default: 50
+//
+// height 40
+
+// Chosee what fuzzy finder to use when selecting between multiple options.
+// Options:
+//   - fzf (Default)
+//   - skim
+//
+// finder "skim"
