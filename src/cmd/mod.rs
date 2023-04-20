@@ -9,5 +9,5 @@ pub use crate::cmd::attach::use_cwd;
 pub use crate::cmd::cli::*;
 
 pub trait Run {
-    fn run(self) -> eyre::Result<()>;
+    fn run(self) -> miette::Result<()>;
 }

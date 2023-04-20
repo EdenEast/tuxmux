@@ -4,7 +4,7 @@ use std::{
     str::FromStr,
 };
 
-use eyre::{eyre, Context, Result};
+use miette::{miette, IntoDiagnostic, Result};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Location {
@@ -31,13 +31,13 @@ pub enum FinderChoice {
 pub const POSSIBLE_VALUES: &[&str] = &["fzf", "skim"];
 
 impl FromStr for FinderChoice {
-    type Err = eyre::Error;
+    type Err = miette::Error;
 
     fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
         match s {
             "fzf" => Ok(FinderChoice::Fzf),
             "skim" => Ok(FinderChoice::Skim),
-            _ => Err(eyre!(
+            _ => Err(miette!(
                 "Unknown finder choice. Possible values: {:?}",
                 POSSIBLE_VALUES
             )),
@@ -100,15 +100,16 @@ impl FinderChoice {
         if let Some(stdin) = child.stdin.as_mut() {
             let mut writer = BufWriter::new(stdin);
             for i in items {
-                writer.write_all(i.as_ref().as_bytes())?;
-                writer.write_all(b"\n")?;
+                writer.write_all(i.as_ref().as_bytes()).into_diagnostic()?;
+                writer.write_all(b"\n").into_diagnostic()?;
             }
         }
 
-        let out = child.wait_with_output()?;
+        let out = child.wait_with_output().into_diagnostic()?;
         let text = match out.status.code() {
             Some(0) | Some(1) | Some(2) => {
-                String::from_utf8(out.stdout).context("Invalid utf8 received from finder")?
+                String::from_utf8(out.stdout).into_diagnostic()?
+                // .context("Invalid utf8 received from finder")?
             }
             Some(130) => process::exit(130),
             _ => {

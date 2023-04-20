@@ -14,11 +14,10 @@ opt-level = 3
 [dependencies]
 clap = { version = "4.2.1", features = [ "cargo", "derive" ] }
 dirs-next = "2.0.0"
-eyre = "0.6.8"
 jwalk = "0.8.1"
 kdl = "4.6.0"
 lazy_static = "1.4.0"
-miette = "5.8.0"
+miette = { version = "5.8.0", features = ["fancy"] }
 rayon = "1.7.0"
 thiserror = "1.0.40"
 tmux_interface = "0.2.1"

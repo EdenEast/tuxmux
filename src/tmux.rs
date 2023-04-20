@@ -1,15 +1,18 @@
-use eyre::{Context, Result};
+use miette::{IntoDiagnostic, Result};
 use tmux_interface::{
     AttachSession, HasSession, KillSession, NewSession, NewWindow, SendKeys, Session, Sessions,
     SwitchClient, TmuxCommand, SESSION_ALL,
 };
 
 pub fn sessions() -> Result<Vec<Session>> {
-    Ok(Sessions::get(SESSION_ALL)?.into_iter().collect())
+    Ok(Sessions::get(SESSION_ALL)
+        .into_diagnostic()?
+        .into_iter()
+        .collect())
 }
 
 pub fn session_names() -> Result<Vec<String>> {
-    let tmux_sessions = Sessions::get(SESSION_ALL)?;
+    let tmux_sessions = Sessions::get(SESSION_ALL).into_diagnostic()?;
 
     Ok(tmux_sessions
         .into_iter()
@@ -41,12 +44,14 @@ pub fn attach_session(name: &str) -> Result<()> {
         SwitchClient::new()
             .target_session(name)
             .output()
-            .wrap_err_with(|| format!("Failed to switch to session {}", name))?;
+            .into_diagnostic()?;
+        // .wrap_err_with(|| format!("Failed to switch to session {}", name))?;
     } else {
         AttachSession::new()
             .target_session(name)
             .output()
-            .wrap_err_with(|| format!("Failed to attach to session {}", name))?;
+            .into_diagnostic()?;
+        // .wrap_err_with(|| format!("Failed to attach to session {}", name))?;
     }
 
     Ok(())
@@ -58,7 +63,8 @@ pub fn create_session(name: &str, path: &str) -> Result<()> {
         .session_name(name)
         .start_directory(path)
         .output()
-        .wrap_err_with(|| format!("Failed to create session `{}`", name))?;
+        .into_diagnostic()?;
+    // .wrap_err_with(|| format!("Failed to create session `{}`", name))?;
 
     Ok(())
 }
@@ -68,7 +74,8 @@ pub fn create_window(name: &str) -> Result<()> {
         .detached()
         .window_name(name)
         .output()
-        .wrap_err_with(|| format!("Failed to create window `{}`", name))?;
+        .into_diagnostic()?;
+    // .wrap_err_with(|| format!("Failed to create window `{}`", name))?;
 
     Ok(())
 }
@@ -78,7 +85,8 @@ pub fn send_keys(target: &str, key: &str) -> Result<()> {
         .target_pane(target)
         .key(key)
         .output()
-        .wrap_err_with(|| format!("Failed to send '{}' to pane `{}`", key, target))?;
+        .into_diagnostic()?;
+    // .wrap_err_with(|| format!("Failed to send '{}' to pane `{}`", key, target))?;
 
     Ok(())
 }
@@ -99,7 +107,8 @@ pub fn kill_session(name: &str) -> Result<()> {
     KillSession::new()
         .target_session(name)
         .output()
-        .wrap_err_with(|| format!("Failed to kill session `{}`", name))?;
+        .into_diagnostic()?;
+    // .wrap_err_with(|| format!("Failed to kill session `{}`", name))?;
 
     Ok(())
 }

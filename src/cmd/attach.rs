@@ -6,13 +6,13 @@ use std::{
 
 use crate::{cmd::cli::Attach, config::Config, finder::FinderOptions, tmux, util};
 
-use eyre::Result;
+use miette::{miette, IntoDiagnostic, Result};
 use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
 
 use super::Run;
 
 impl Run for Attach {
-    fn run(self) -> eyre::Result<()> {
+    fn run(self) -> Result<()> {
         let config = Config::load()?;
         let query = self.query.as_ref().map(|v| v.join(" "));
 
@@ -54,7 +54,7 @@ impl Run for Attach {
 }
 
 pub fn use_cwd() -> Result<()> {
-    execute_selected(&std::env::current_dir()?)
+    execute_selected(&std::env::current_dir().into_diagnostic()?)
 }
 
 fn execute_selected(selected: &Path) -> Result<()> {
@@ -70,11 +70,11 @@ fn get_selected(
 ) -> Result<Option<PathBuf>> {
     if let Some(path) = attach.path.as_ref() {
         if path.as_path() == Path::new(".") {
-            return Ok(Some(std::env::current_dir()?));
+            return Ok(Some(std::env::current_dir().into_diagnostic()?));
         }
 
         if !path.exists() {
-            return Err(eyre::eyre!("Invalid path: '{}'", path.display()));
+            return Err(miette!("Invalid path: '{}'", path.display()));
         }
 
         return Ok(Some(path.to_owned()));
@@ -86,9 +86,10 @@ fn get_selected(
             .filter(|v| v.contains(query))
             .collect::<Vec<_>>();
         if matches.len() == 1 {
-            return Ok(Some(PathBuf::from_str(
-                matches.first().expect("Matches length is 1"),
-            )?));
+            return Ok(Some(
+                PathBuf::from_str(matches.first().expect("Matches length is 1"))
+                    .into_diagnostic()?,
+            ));
         }
     }
 

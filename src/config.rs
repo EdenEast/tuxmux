@@ -1,9 +1,8 @@
 use std::{collections::HashSet, fs::File, io::Read, path::PathBuf, str::FromStr};
 
-use eyre::eyre;
 use jwalk::WalkDir;
 use kdl::KdlDocument;
-use thiserror::Error;
+use miette::{miette, IntoDiagnostic, Result};
 
 use crate::{finder::FinderChoice, util};
 
@@ -18,18 +17,6 @@ pub enum Location {
     Global,
     Local,
 }
-
-#[derive(Debug, Error)]
-pub enum ConfigError {
-    #[error(transparent)]
-    KdlError(#[from] kdl::KdlError),
-    #[error("IoError: {0}")]
-    Io(#[from] std::io::Error),
-    #[error("Eyre: {0}")]
-    Eyre(#[from] eyre::Error),
-}
-
-pub type ConfigResult = std::result::Result<Config, ConfigError>;
 
 #[derive(Debug)]
 pub struct Config {
@@ -59,7 +46,7 @@ macro_rules! kdl_first_entry_as_string_or_error {
             .iter()
             .next()
             .and_then(|s| s.value().as_string())
-            .ok_or(eyre!($error))?
+            .ok_or(miette!($error))?
     };
 }
 
@@ -70,30 +57,28 @@ macro_rules! kdl_first_entry_as_i64_or_error {
             .iter()
             .next()
             .and_then(|s| s.value().as_i64())
-            .ok_or(eyre!($error))?
+            .ok_or(miette!($error))?
     };
 }
 
 impl Config {
-    pub fn load() -> ConfigResult {
+    pub fn load() -> Result<Config> {
         let mut config = Config::default();
 
         let config_path = util::get_config(CONF_PATH_COMPONENTS);
         if config_path.exists() {
-            println!("config exists");
             config = Config::from_path(config_path, Some(config))?;
         }
 
         let local_path = util::get_local(CONF_PATH_COMPONENTS);
         if local_path.exists() {
-            println!("local exists");
             config = Config::from_path(local_path, Some(config))?;
         }
 
         Ok(config)
     }
 
-    pub fn from_location(location: Location) -> ConfigResult {
+    pub fn from_location(location: Location) -> Result<Config> {
         let mut config = Config::default();
         let path = match location {
             Location::Global => util::get_config(CONF_PATH_COMPONENTS),
@@ -107,17 +92,17 @@ impl Config {
         Ok(config)
     }
 
-    pub fn from_path<P>(path: P, default_config: Option<Config>) -> ConfigResult
+    pub fn from_path<P>(path: P, default_config: Option<Config>) -> Result<Config>
     where
         P: std::convert::AsRef<std::path::Path>,
     {
-        let mut file = File::open(path)?;
+        let mut file = File::open(path).into_diagnostic()?;
         let mut kdl_config = String::new();
-        file.read_to_string(&mut kdl_config)?;
+        file.read_to_string(&mut kdl_config).into_diagnostic()?;
         Config::from_kdl(&kdl_config, default_config)
     }
 
-    pub fn from_kdl(kdl_config: &str, base_config: Option<Config>) -> ConfigResult {
+    pub fn from_kdl(kdl_config: &str, base_config: Option<Config>) -> Result<Config> {
         let mut config = base_config.unwrap_or_default();
         let doc: KdlDocument = kdl_config.parse()?;
 
@@ -135,7 +120,7 @@ impl Config {
                         config.single.insert(to_path_buf(path));
                     }
                     c => {
-                        return Err(ConfigError::Eyre(eyre!("unknown path type: {}", c)));
+                        return Err(miette!("unknown path type: {}", c));
                     }
                 }
             }

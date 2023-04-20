@@ -1,16 +1,19 @@
 use std::{env, path::Path};
 
+use miette::IntoDiagnostic;
+
 use crate::{cmd::cli::Jump, jumplist::Jumplist, tmux};
 
 use super::Run;
 
 impl Run for Jump {
-    fn run(self) -> eyre::Result<()> {
+    fn run(self) -> miette::Result<()> {
         if self.edit {
             let editor = env::var("EDITOR").unwrap_or_else(|_| "vim".to_owned());
             std::process::Command::new(editor)
                 .arg(Jumplist::path())
-                .status()?;
+                .status()
+                .into_diagnostic()?;
 
             return Ok(());
         }
@@ -36,15 +39,15 @@ impl Run for Jump {
 
         let path = match self.path {
             Some(path) => path,
-            None => std::env::current_dir()?,
+            None => std::env::current_dir().into_diagnostic()?,
         };
 
         if !path.exists() {
             // TODO: Add logging with different types of sevarity
-            return Err(eyre::eyre!("Invalid path: {}", path.display()));
+            return Err(miette::miette!("Invalid path: {}", path.display()));
         }
 
-        list.add(path.canonicalize()?.display().to_string());
+        list.add(path.canonicalize().into_diagnostic()?.display().to_string());
         list.write()?;
 
         Ok(())

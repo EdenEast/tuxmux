@@ -3,7 +3,7 @@ use crate::{cmd::cli::List, tmux};
 use super::Run;
 
 impl Run for List {
-    fn run(self) -> eyre::Result<()> {
+    fn run(self) -> miette::Result<()> {
         let sessions = tmux::sessions()?;
 
         let max_name = sessions

@@ -1,6 +1,9 @@
 use clap::Parser;
-use eyre::Result;
-use tmgr::cmd::{self, Run};
+use miette::Result;
+use tmgr::{
+    cmd::{self, Run},
+    config::Config,
+};
 
 const VALID_FIRST_OPTIONS: [&str; 14] = [
     "attach", "a", "config", "c", "jump", "j", "kill", "k", "list", "ls", "path", "p", "wcmd", "w",

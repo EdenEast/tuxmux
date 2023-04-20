@@ -1,5 +1,5 @@
-use eyre::Result;
-
+use miette::IntoDiagnostic;
+use miette::Result;
 use std::fs::File;
 use std::fs::OpenOptions;
 use std::io::{Read, Write};
@@ -47,7 +47,10 @@ where
     P: AsRef<Path> + std::fmt::Debug,
 {
     let mut content = String::new();
-    std::fs::File::open(&path)?.read_to_string(&mut content)?;
+    std::fs::File::open(&path)
+        .into_diagnostic()?
+        .read_to_string(&mut content)
+        .into_diagnostic()?;
     Ok(content)
 }
 
@@ -55,14 +58,15 @@ pub fn write_content<P>(path: P, content: &str) -> Result<()>
 where
     P: AsRef<Path> + std::fmt::Debug,
 {
-    std::fs::create_dir_all(path.as_ref().parent().unwrap())?;
+    std::fs::create_dir_all(path.as_ref().parent().unwrap()).into_diagnostic()?;
     let mut file = OpenOptions::new()
         .write(true)
         .create(true)
         .truncate(true)
-        .open(&path)?;
+        .open(&path)
+        .into_diagnostic()?;
 
-    file.write_all(content.as_bytes())?;
+    file.write_all(content.as_bytes()).into_diagnostic()?;
 
     Ok(())
 }
@@ -72,12 +76,13 @@ where
     P: AsRef<Path>,
     F: FnOnce(&mut File) -> Result<()>,
 {
-    std::fs::create_dir_all(path.as_ref().parent().unwrap())?;
+    std::fs::create_dir_all(path.as_ref().parent().unwrap()).into_diagnostic()?;
     let mut file = OpenOptions::new()
         .write(true)
         .create(true)
         .truncate(true)
-        .open(&path)?;
+        .open(&path)
+        .into_diagnostic()?;
 
     write_fn(&mut file)
 }

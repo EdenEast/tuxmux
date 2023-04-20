@@ -5,7 +5,7 @@ use crate::{cmd::cli::Wcmd, tmux, util::intersperse};
 use super::Run;
 
 impl Run for Wcmd {
-    fn run(self) -> eyre::Result<()> {
+    fn run(self) -> miette::Result<()> {
         let name = Path::new(&self.window)
             .file_name()
             .unwrap()
