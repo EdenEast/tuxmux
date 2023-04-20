@@ -749,7 +749,6 @@ dependencies = [
  "lazy_static",
  "miette",
  "rayon",
- "thiserror",
  "tmux_interface",
 ]
 

@@ -19,7 +19,6 @@ kdl = "4.6.0"
 lazy_static = "1.4.0"
 miette = { version = "5.8.0", features = ["fancy"] }
 rayon = "1.7.0"
-thiserror = "1.0.40"
 tmux_interface = "0.2.1"
 
 [[bin]]

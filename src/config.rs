@@ -1,7 +1,11 @@
-use std::{collections::HashSet, fs::File, io::Read, path::PathBuf, str::FromStr};
+use std::{
+    collections::HashSet,
+    path::{Path, PathBuf},
+    str::FromStr,
+};
 
 use jwalk::WalkDir;
-use kdl::KdlDocument;
+use kdl::{KdlDocument, KdlError, KdlNode};
 use miette::{miette, IntoDiagnostic, Result};
 
 use crate::{finder::FinderChoice, util};
@@ -39,26 +43,101 @@ impl Default for Config {
     }
 }
 
-macro_rules! kdl_first_entry_as_string_or_error {
-    ( $node:expr, $error:expr ) => {
-        $node
-            .entries()
+#[derive(Debug)]
+struct Parser {
+    source: String,
+}
+
+impl Parser {
+    pub(crate) fn new(source: String) -> Self {
+        Self { source }
+    }
+
+    pub(crate) fn from_file(path: &Path) -> Result<Self> {
+        let source = std::fs::read_to_string(path).into_diagnostic()?;
+        Ok(Self { source })
+    }
+
+    pub(crate) fn parse(self, default_config: Option<Config>) -> Result<Config> {
+        let mut config = default_config.unwrap_or_default();
+        let doc: KdlDocument = self.source.parse()?;
+
+        if let Some(path_doc) = doc.get("paths").and_then(|p| p.children()) {
+            for node in path_doc.nodes() {
+                match node.name().value() {
+                    "workspace" => {
+                        let path = self.first_entry_as_string_or_error(
+                            node,
+                            "path node `workspace` to contain a string value",
+                        )?;
+                        config.workspace.insert(to_path_buf(path));
+                    }
+                    "single" => {
+                        let path = self.first_entry_as_string_or_error(
+                            node,
+                            "path node `single` to contain a string value",
+                        )?;
+                        config.workspace.insert(to_path_buf(path));
+                    }
+                    c => {
+                        return Err(miette!("unknown path type: {}", c));
+                    }
+                }
+            }
+        }
+
+        if let Some(node) = doc.get("depth") {
+            let value = self.first_entry_as_i64_or_error(node, "depth requires number")?;
+            config.depth = usize::try_from(value).unwrap_or(0);
+        }
+
+        if let Some(node) = doc.get("height") {
+            let value = self.first_entry_as_i64_or_error(node, "height requires number")?;
+            config.height = usize::try_from(value).unwrap_or(0);
+        }
+
+        if let Some(node) = doc.get("finder") {
+            let value = self.first_entry_as_string_or_error(node, "finder requires value")?;
+            config.finder = FinderChoice::from_str(value)?;
+        }
+
+        Ok(config)
+    }
+
+    fn first_entry_as_string_or_error<'a>(
+        &self,
+        node: &'a KdlNode,
+        msg: &'static str,
+    ) -> std::result::Result<&'a str, KdlError> {
+        node.entries()
             .iter()
             .next()
             .and_then(|s| s.value().as_string())
-            .ok_or(miette!($error))?
-    };
-}
-
-macro_rules! kdl_first_entry_as_i64_or_error {
-    ( $node:expr, $error:expr ) => {
-        $node
-            .entries()
+            .ok_or(KdlError {
+                input: self.source.clone(),
+                span: *node.span(),
+                label: None,
+                help: None,
+                kind: kdl::KdlErrorKind::Context(msg),
+            })
+    }
+    fn first_entry_as_i64_or_error(
+        &self,
+        node: &KdlNode,
+        msg: &'static str,
+    ) -> std::result::Result<i64, KdlError> {
+        node.entries()
             .iter()
             .next()
             .and_then(|s| s.value().as_i64())
-            .ok_or(miette!($error))?
-    };
+            .ok_or(KdlError {
+                input: self.source.clone(),
+                span: *node.span(),
+                label: None,
+                help: None,
+                kind: kdl::KdlErrorKind::Context(msg),
+            })
+    }
 }
 
 impl Config {
@@ -67,12 +146,12 @@ impl Config {
 
         let config_path = util::get_config(CONF_PATH_COMPONENTS);
         if config_path.exists() {
-            config = Config::from_path(config_path, Some(config))?;
+            config = Parser::from_file(&config_path)?.parse(Some(config))?;
         }
 
         let local_path = util::get_local(CONF_PATH_COMPONENTS);
         if local_path.exists() {
-            config = Config::from_path(local_path, Some(config))?;
+            config = Parser::from_file(&local_path)?.parse(Some(config))?;
         }
 
         Ok(config)
@@ -86,7 +165,7 @@ impl Config {
         };
 
         if path.exists() {
-            config = Config::from_path(path, Some(config))?;
+            config = Parser::from_file(&path)?.parse(Some(config))?;
         }
 
         Ok(config)
@@ -96,52 +175,11 @@ impl Config {
     where
         P: std::convert::AsRef<std::path::Path>,
     {
-        let mut file = File::open(path).into_diagnostic()?;
-        let mut kdl_config = String::new();
-        file.read_to_string(&mut kdl_config).into_diagnostic()?;
-        Config::from_kdl(&kdl_config, default_config)
+        Parser::from_file(path.as_ref())?.parse(default_config)
     }
 
     pub fn from_kdl(kdl_config: &str, base_config: Option<Config>) -> Result<Config> {
-        let mut config = base_config.unwrap_or_default();
-        let doc: KdlDocument = kdl_config.parse()?;
-
-        if let Some(path_doc) = doc.get("paths").and_then(|p| p.children()) {
-            for node in path_doc.nodes() {
-                match node.name().value() {
-                    "workspace" => {
-                        let path =
-                            kdl_first_entry_as_string_or_error!(node, "workspace requires value");
-                        config.workspace.insert(to_path_buf(path));
-                    }
-                    "single" => {
-                        let path =
-                            kdl_first_entry_as_string_or_error!(node, "single requires value");
-                        config.single.insert(to_path_buf(path));
-                    }
-                    c => {
-                        return Err(miette!("unknown path type: {}", c));
-                    }
-                }
-            }
-        }
-
-        if let Some(node) = doc.get("depth") {
-            let value = kdl_first_entry_as_i64_or_error!(node, "depth requires number");
-            config.depth = usize::try_from(value).unwrap_or(0);
-        }
-
-        if let Some(node) = doc.get("height") {
-            let value = kdl_first_entry_as_i64_or_error!(node, "height requires number");
-            config.height = usize::try_from(value).unwrap_or(0);
-        }
-
-        if let Some(node) = doc.get("finder") {
-            let value = kdl_first_entry_as_string_or_error!(node, "finder requires value");
-            config.finder = FinderChoice::from_str(&value)?;
-        }
-
-        Ok(config)
+        Parser::new(kdl_config.to_owned()).parse(base_config)
     }
 
     pub fn list_paths(&self) -> HashSet<String> {
@@ -191,5 +229,5 @@ fn to_path_buf(path: &str) -> PathBuf {
         );
     }
 
-    return PathBuf::from(path);
+    PathBuf::from(path)
 }
