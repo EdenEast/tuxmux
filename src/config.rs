@@ -1,8 +1,4 @@
-use std::{
-    collections::HashSet,
-    path::{Path, PathBuf},
-    str::FromStr,
-};
+use std::{collections::HashSet, path::Path, str::FromStr};
 
 use jwalk::WalkDir;
 use kdl::{KdlDocument, KdlError, KdlNode};
@@ -12,10 +8,6 @@ use crate::{finder::FinderChoice, util};
 
 const CONF_PATH_COMPONENTS: &[&str] = &["config.kdl"];
 
-lazy_static::lazy_static! {
-    static ref HOME_DIR: PathBuf = dirs_next::home_dir().unwrap();
-}
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Location {
     Global,
@@ -24,8 +16,9 @@ pub enum Location {
 
 #[derive(Debug)]
 pub struct Config {
-    pub workspace: HashSet<PathBuf>,
-    pub single: HashSet<PathBuf>,
+    pub workspace: HashSet<String>,
+    pub single: HashSet<String>,
+    pub exclude_path: Vec<String>,
     pub depth: usize,
     pub height: usize,
     pub finder: FinderChoice,
@@ -34,10 +27,11 @@ pub struct Config {
 impl Default for Config {
     fn default() -> Self {
         Self {
-            workspace: HashSet::new(),
+            workspace: HashSet::from_iter(vec![shellexpand::tilde("~").to_string()].into_iter()),
             single: HashSet::new(),
+            exclude_path: vec!["node_modules".to_string(), ".direnv".to_string()],
             depth: 5,
-            height: 40,
+            height: 50,
             finder: FinderChoice::default(),
         }
     }
@@ -62,22 +56,41 @@ impl Parser {
         let mut config = default_config.unwrap_or_default();
         let doc: KdlDocument = self.source.parse()?;
 
-        if let Some(path_doc) = doc.get("paths").and_then(|p| p.children()) {
-            for node in path_doc.nodes() {
+        if let Some(path_doc) = doc.get("paths") {
+            //.and_then(|p| p.children()) {
+            let default = match path_doc.get("default") {
+                Some(value) => value.value().as_bool().ok_or(KdlError {
+                    input: self.source.clone(),
+                    span: *value.span(),
+                    label: Some("invalid boolean"),
+                    help: None,
+                    kind: kdl::KdlErrorKind::Context("'default' requires a boolean value"),
+                })?,
+                None => true,
+            };
+
+            if !default {
+                config.workspace = HashSet::new();
+                config.single = HashSet::new();
+            }
+
+            for node in path_doc.children().map(|c| c.nodes()).unwrap_or_default() {
                 match node.name().value() {
                     "workspace" => {
-                        let path = self.first_entry_as_string_or_error(
+                        let path = self.first_entry_as_string(
                             node,
                             "path node `workspace` to contain a string value",
                         )?;
-                        config.workspace.insert(to_path_buf(path));
+                        config
+                            .workspace
+                            .insert(shellexpand::tilde(path).to_string());
                     }
                     "single" => {
-                        let path = self.first_entry_as_string_or_error(
+                        let path = self.first_entry_as_string(
                             node,
                             "path node `single` to contain a string value",
                         )?;
-                        config.workspace.insert(to_path_buf(path));
+                        config.single.insert(shellexpand::tilde(path).to_string());
                     }
                     c => {
                         return Err(miette!("unknown path type: {}", c));
@@ -86,25 +99,50 @@ impl Parser {
             }
         }
 
+        if let Some(exclude_doc) = doc.get("exclude_path") {
+            let values = doc
+                .get_dash_vals("exclude_path")
+                .into_iter()
+                .filter_map(|v| v.as_string().map(|s| s.to_string()))
+                .collect::<Vec<_>>();
+
+            let default = match exclude_doc.get("default") {
+                Some(value) => value.value().as_bool().ok_or(KdlError {
+                    input: self.source.clone(),
+                    span: *value.span(),
+                    label: Some("invalid boolean"),
+                    help: None,
+                    kind: kdl::KdlErrorKind::Context("'default' requires a boolean value"),
+                })?,
+                None => true,
+            };
+
+            if default {
+                config.exclude_path.extend(values.into_iter());
+            } else {
+                config.exclude_path = values;
+            }
+        }
+
         if let Some(node) = doc.get("depth") {
-            let value = self.first_entry_as_i64_or_error(node, "depth requires number")?;
+            let value = self.first_entry_as_i64(node, "depth requires number")?;
             config.depth = usize::try_from(value).unwrap_or(0);
         }
 
         if let Some(node) = doc.get("height") {
-            let value = self.first_entry_as_i64_or_error(node, "height requires number")?;
+            let value = self.first_entry_as_i64(node, "height requires number")?;
             config.height = usize::try_from(value).unwrap_or(0);
         }
 
         if let Some(node) = doc.get("finder") {
-            let value = self.first_entry_as_string_or_error(node, "finder requires value")?;
+            let value = self.first_entry_as_string(node, "finder requires value")?;
             config.finder = FinderChoice::from_str(value)?;
         }
 
         Ok(config)
     }
 
-    fn first_entry_as_string_or_error<'a>(
+    fn first_entry_as_string<'a>(
         &self,
         node: &'a KdlNode,
         msg: &'static str,
@@ -121,7 +159,8 @@ impl Parser {
                 kind: kdl::KdlErrorKind::Context(msg),
             })
     }
-    fn first_entry_as_i64_or_error(
+
+    fn first_entry_as_i64(
         &self,
         node: &KdlNode,
         msg: &'static str,
@@ -183,23 +222,32 @@ impl Config {
     }
 
     pub fn list_paths(&self) -> HashSet<String> {
-        let mut results: HashSet<String> = self
-            .single
-            .iter()
-            .map(|s| s.display().to_string())
-            .collect();
+        let mut results: HashSet<String> = self.single.clone();
 
-        let depth = self.depth;
         for ws_path in &self.workspace {
             let walker = WalkDir::new(ws_path)
                 .skip_hidden(false)
-                .max_depth(depth)
+                .max_depth(self.depth)
                 .into_iter()
                 .filter(|dir_entry_result| {
                     dir_entry_result
                         .as_ref()
                         .map(|dir_entry| {
                             if !dir_entry.file_type().is_dir() {
+                                return false;
+                            }
+
+                            // Check if path is excluded
+                            if dir_entry
+                                .path()
+                                .components()
+                                .last()
+                                .expect("always last component")
+                                .as_os_str()
+                                .to_str()
+                                .map(|s| self.exclude_path.iter().any(|x| x == s))
+                                .unwrap_or(true)
+                            {
                                 return false;
                             }
 
@@ -221,13 +269,5 @@ impl Config {
     }
 }
 
-fn to_path_buf(path: &str) -> PathBuf {
-    if path.starts_with("~/") {
-        return HOME_DIR.join(
-            path.strip_prefix("~/")
-                .expect("'~/' was checked before stripping prefix"),
-        );
-    }
-
-    PathBuf::from(path)
-}
+// TODO:
+// https://github.com/orogene/orogene/blob/main/crates/oro-config/src/kdl_source.rs

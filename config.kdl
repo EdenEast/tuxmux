@@ -3,6 +3,11 @@
 // - Workspace: root path to search for valid git repositories
 // - single: added directly as a valid session path
 //
+// Default:
+// paths default=true {
+//   workspace "~"
+// }
+//
 // paths {
 //   workspace "~/code"
 //   workspace "~/dev"
@@ -28,3 +33,18 @@
 //   - skim
 //
 // finder "skim"
+
+// Workspace directory crawler will prune the paths containing any of these components.
+// Options:
+//   - default: boolean = true # Append to default value if true.
+//
+// Default:
+// exclude_path default=true {
+//   - ".direnv"
+//   - "node_modules"
+// }
+//
+// exclude_path {
+//   - ".direnv"
+//   - "node_modules"
+// }

@@ -12,13 +12,13 @@ strip = "none"
 opt-level = 3
 
 [dependencies]
-clap = { version = "4.2.1", features = [ "cargo", "derive" ] }
+clap = { version = "4.2.4", features = [ "cargo", "derive" ] }
 dirs-next = "2.0.0"
 jwalk = "0.8.1"
 kdl = "4.6.0"
-lazy_static = "1.4.0"
 miette = { version = "5.8.0", features = ["fancy"] }
 rayon = "1.7.0"
+shellexpand = "3.1.0"
 tmux_interface = "0.2.1"
 
 [[bin]]
