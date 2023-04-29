@@ -1,5 +1,4 @@
 use std::{
-    collections::HashSet,
     path::{Path, PathBuf},
     str::FromStr,
 };
@@ -63,7 +62,7 @@ fn execute_selected(selected: &Path) -> Result<()> {
 }
 
 fn get_selected(
-    paths: &HashSet<String>,
+    paths: &Vec<String>,
     query: &Option<String>,
     attach: &Attach,
     config: &Config,

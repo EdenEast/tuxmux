@@ -48,3 +48,23 @@
 //   - ".direnv"
 //   - "node_modules"
 // }
+
+paths {
+  workspace default=true {
+    - "one"
+    - "two"
+    - "three"
+  }
+  single default=false {
+    - "~/.local/nyx"
+  }
+}
+
+workspaces default=false {
+  workspace "rust" layout="rust" {
+    files {
+      - "Cargo.toml"
+      - "Cargo.lock"
+    }
+  }
+}
