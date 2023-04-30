@@ -1,6 +1,5 @@
 use crate::{finder::FinderChoice, util};
 use indexmap::{indexmap, indexset, IndexMap, IndexSet};
-use jwalk::WalkDir;
 
 mod error;
 mod parser;
@@ -10,7 +9,7 @@ pub use error::ParseError;
 pub use parser::Parser;
 pub use source::Source;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct WorkspaceDefinition {
     pub name: String,
     pub files: Vec<String>,
@@ -82,55 +81,5 @@ impl Config {
         }
 
         Ok(config)
-    }
-
-    pub fn list_paths(&self) -> Vec<String> {
-        let mut results: Vec<String> = self.search.single.clone();
-
-        for ws_path in &self.search.workspace {
-            let walker = WalkDir::new(ws_path)
-                .skip_hidden(false)
-                .max_depth(self.depth)
-                .into_iter()
-                .filter(|dir_entry_result| {
-                    dir_entry_result
-                        .as_ref()
-                        .map(|dir_entry| {
-                            // Check if path is excluded
-                            if dir_entry
-                                .path()
-                                .components()
-                                .last()
-                                .expect("always last component")
-                                .as_os_str()
-                                .to_str()
-                                .map(|s| self.exclude_path.iter().any(|x| x == s))
-                                .unwrap_or(true)
-                            {
-                                dbg!(dir_entry);
-                                return false;
-                            }
-
-                            let mut found = false;
-                            for (_, def) in &self.definitions {
-                                for file in &def.files {
-                                    if dir_entry.path().join(file).exists() {
-                                        found = true;
-                                        break;
-                                    }
-                                }
-                            }
-
-                            found
-                        })
-                        .unwrap_or(false)
-                });
-
-            for entry in walker {
-                results.push(entry.unwrap().path().display().to_string());
-            }
-        }
-
-        results
     }
 }

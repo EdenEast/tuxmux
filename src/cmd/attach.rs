@@ -3,7 +3,7 @@ use std::{
     str::FromStr,
 };
 
-use crate::{cmd::cli::Attach, config::Config, finder::FinderOptions, tmux, util};
+use crate::{cmd::cli::Attach, config::Config, finder::FinderOptions, tmux, util, walker::Walker};
 
 use miette::{miette, IntoDiagnostic, Result};
 use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
@@ -41,7 +41,7 @@ impl Run for Attach {
             return Ok(());
         }
 
-        let paths = config.list_paths();
+        let paths = config.paths_from_walk();
         let selected = match get_selected(&paths, &query, &self, &config) {
             Ok(Some(s)) => s,
             Ok(None) => return Ok(()),
