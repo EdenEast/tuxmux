@@ -6,6 +6,7 @@ doc/tm.1
 
 ### direnv ###
 .direnv
+.envrc
 
 ### Linux ###
 *~
