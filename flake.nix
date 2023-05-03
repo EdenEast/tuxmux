@@ -1,104 +1,116 @@
 {
-  description = "Tmux utility for session and window management";
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-
     flake-utils = {
       url = "github:numtide/flake-utils";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
-    fenix = {
-      url = "github:nix-community/fenix";
+    rust-overlay = {
+      url = "github:oxalica/rust-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.flake-utils.follows = "flake-utils";
     };
-
-    naersk = {
-      url = "github:nix-community/naersk";
+    crane = {
+      url = "github:ipetkov/crane";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.flake-utils.follows = "flake-utils";
+      inputs.flake-compat.follows = "";
+      inputs.rust-overlay.follows = "";
     };
   };
 
-  outputs = { self, nixpkgs, fenix, naersk, ... }@inputs:
-    inputs.flake-utils.lib.eachDefaultSystem (system:
+  outputs = { self, nixpkgs, flake-utils, rust-overlay, crane }:
+    flake-utils.lib.eachDefaultSystem (system:
       let
-        pkgs = nixpkgs.legacyPackages."${system}";
-
-        toolchain = fenix.packages."${system}".stable;
-
-        naersk-lib = naersk.lib."${system}".override {
-          cargo = toolchain.cargo;
-          rustc = toolchain.rustc;
-        };
-
+        overlays = [ (import rust-overlay) ];
+        pkgs = import nixpkgs { inherit system overlays; };
         manifest = builtins.fromTOML (builtins.readFile ./Cargo.toml);
         version = manifest.package.version;
-        root = ./.;
-
-        tmgr = naersk-lib.buildPackage
-          {
-            inherit version root;
-            pname = "tmgr";
-
-            buildInputs = with pkgs; [ zstd ];
-            nativeBuildInputs = with pkgs; [ installShellFiles ];
-
-            overrideMain = _: {
-              preFixup = ''
-                installManPage ./target/man/*
-                installShellCompletion --bash ./target/completions/tm.bash
-                installShellCompletion --zsh ./target/completions/_tm
-                installShellCompletion --fish ./target/completions/tm.fish
-              '';
-            };
-
-            meta = with pkgs.lib; {
-              description = "Tmux utility for session and window management";
-              homepage = "https://github.com/EdenEast/tmgr";
-              license = with licenses; [ mit ];
-              mainProgram = "tm";
-            };
-          };
-
-        devShell = pkgs.mkShell {
-          name = "tmgr";
-          packages = with pkgs; with toolchain; [
-            # Core rust
-            rustc
-            cargo
-            rust-src
-
-            # Development tools
-            rust-analyzer
-            rustfmt
-            clippy
-
-            # Cargo extensions
-            cargo-bloat
-            cargo-deny
-            cargo-license
-            cargo-limit
-            cargo-whatfeatures
-
-            just
-            pandoc
-          ] ++ (pkgs.lib.optionals pkgs.stdenv.isDarwin [
-            libiconv
-          ]);
-
-          CARGO_BUILD_RUSTFLAGS = if pkgs.stdenv.isDarwin then "-C rpath" else null;
-          RUST_SRC_PATH = "${toolchain.rust-src}/lib/rustlib/src/rust/library";
+        rustToolchain = pkgs.rust-bin.stable.latest.default.override {
+          extensions = [ "rust-src" ];
         };
+
+        inherit (pkgs) lib;
+        craneLib = crane.lib.${system};
+
+        # Common configuration needed for crane to build the rust project
+        args = {
+          src = ./.;
+
+          # This is not required as this would just compile the project again
+          doCheck = false;
+          buildInputs = with pkgs; [
+            zstd
+            libiconv
+          ];
+        };
+
+        # Build *just* the cargo dependencies, so we can reuse all of that work between runs
+        # This also makes sure that the `build.rs` file is built. If buildPackage is just called
+        # the build.rs file was not being executed.
+        cargoArtifacts = craneLib.buildDepsOnly args;
+
+        tmgr = craneLib.buildPackage (args // {
+          inherit cargoArtifacts;
+
+          nativeBuildInputs = with pkgs; [
+            # Needed for installing shell completions and manpages
+            installShellFiles
+          ];
+
+          preFixup = ''
+            installManPage target/man/*
+            installShellCompletion --bash target/completions/tm.bash
+            installShellCompletion --zsh target/completions/_tm
+            installShellCompletion --fish target/completions/tm.fish
+          '';
+
+          meta = with pkgs.lib; {
+            description = "Tmux utility for session and window management";
+            homepage = "https://github.com/EdenEast/tmgr";
+            license = with licenses; [ mit ];
+            mainProgram = "tm";
+          };
+        });
+
       in
-      rec {
-        inherit devShell;
+      rec
+      {
+        checks = {
+          clippy = craneLib.cargoClippy (args // {
+            inherit cargoArtifacts;
+            cargoClippyExtraArgs = "--all-targets -- -D warnings";
+            doCheck = true;
+          });
+          tests = craneLib.cargoTest (args // {
+            inherit cargoArtifacts;
+            doCheck = true;
+          });
 
-        # `nix build`
-        packages.tmgr = tmgr;
-        defaultPackage = self.packages.${system}.tmgr;
+        };
 
-        # `nix run`
-        apps.tmgr = inputs.flake-utils.lib.mkApp { drv = packages.tmgr; };
-        defaultApp = apps.tmgr;
+        apps = {
+          tmgr = flake-utils.lib.mkApp {
+            dev = tmgr;
+          };
+          default = apps.tmgr;
+        };
+
+        packages = {
+          inherit tmgr;
+          default = tmgr;
+        };
+
+        devShells.default = pkgs.mkShell {
+          name = "tmgr";
+          inputsFrom = builtins.attrValues checks;
+          nativeBuildInputs = with pkgs; [
+            rustToolchain
+          ];
+          packages = with pkgs; [
+            just
+          ];
+          # RUST_SRC_PATH = "${toolchain.rust-src}/lib/rustlib/src/rust/library";
+        };
       });
 }
