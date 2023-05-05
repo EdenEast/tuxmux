@@ -10,7 +10,7 @@ pub trait Walker {
 
 impl Walker for Config {
     fn paths_from_walk(&self) -> Vec<String> {
-        let mut result = Vec::new();
+        let mut result = self.search.single.clone();
 
         let exclude_paths = Arc::new(self.exclude_path.clone());
         let definitions = Arc::new(self.definitions.clone());
