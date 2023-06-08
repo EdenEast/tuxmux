@@ -1,6 +1,6 @@
 use clap::Parser;
 use miette::Result;
-use tmgr::cmd::{self, Run};
+use tuxmux::cmd::{self, Run};
 
 const VALID_FIRST_OPTIONS: [&str; 14] = [
     "attach", "a", "config", "c", "jump", "j", "kill", "k", "list", "ls", "path", "p", "wcmd", "w",

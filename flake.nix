@@ -50,7 +50,7 @@
         # the build.rs file was not being executed.
         cargoArtifacts = craneLib.buildDepsOnly args;
 
-        tmgr = craneLib.buildPackage (args // {
+        tuxmux = craneLib.buildPackage (args // {
           inherit cargoArtifacts;
 
           nativeBuildInputs = with pkgs; [
@@ -67,7 +67,7 @@
 
           meta = with pkgs.lib; {
             description = "Tmux utility for session and window management";
-            homepage = "https://github.com/EdenEast/tmgr";
+            homepage = "https://github.com/EdenEast/tuxmux";
             license = with licenses; [ mit ];
             mainProgram = "tm";
           };
@@ -90,19 +90,19 @@
         };
 
         apps = {
-          tmgr = flake-utils.lib.mkApp {
-            dev = tmgr;
+          tuxmux = flake-utils.lib.mkApp {
+            dev = tuxmux;
           };
-          default = apps.tmgr;
+          default = apps.tuxmux;
         };
 
         packages = {
-          inherit tmgr;
-          default = tmgr;
+          inherit tuxmux;
+          default = tuxmux;
         };
 
         devShells.default = pkgs.mkShell {
-          name = "tmgr";
+          name = "tuxmux";
           inputsFrom = builtins.attrValues checks;
           nativeBuildInputs = with pkgs; [
             rustToolchain

@@ -1,4 +1,4 @@
-# Tmgr
+# Tuxmux
 
 Tmux workspace and management utility.
 

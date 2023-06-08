@@ -1,5 +1,5 @@
 [package]
-name = "tmgr"
+name = "tuxmux"
 version = "0.1.0"
 edition = "2021"
 description = "Tmux utility for session and window management"

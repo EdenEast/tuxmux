@@ -276,4 +276,4 @@ For `zsh`, move _tm to one of your `$fpath` directories.
 BUGS
 ====
 
-See GitHub Issues: <https://github.com/EdenEast/tmgr/issues>
+See GitHub Issues: <https://github.com/EdenEast/tuxmux/issues>
