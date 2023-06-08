@@ -8,7 +8,6 @@ ignore = [ ]
 
 [licenses]
 unlicensed = "warn"
-copyleft = "allow" # this can be re-enabled when skim is removed
 allow-osi-fsf-free = "either"
 default = "deny"
 
