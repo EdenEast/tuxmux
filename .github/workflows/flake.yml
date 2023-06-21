@@ -1,6 +1,7 @@
 name: nix flake update
 permissions:
   contents: write
+  pull-requests: write
 on:
   workflow_dispatch:
   schedule:
@@ -8,9 +9,6 @@ on:
 jobs:
   flake-update:
     runs-on: ubuntu-22.04
-    permissions:
-      contents: write
-      pull-requests: write
     steps:
       - uses: actions/checkout@v3
         with:
