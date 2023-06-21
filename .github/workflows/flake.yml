@@ -13,6 +13,9 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
+          # This is a workaround the limitations of GITHUB_TOKEN
+          # https://github.com/peter-evans/create-pull-request/blob/eebb6ccce1e609378f84426acf60c49144cf2d3a/docs/concepts-guidelines.md#push-using-ssh-deploy-keys
+          ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Install nix
         uses: cachix/install-nix-action@v22
