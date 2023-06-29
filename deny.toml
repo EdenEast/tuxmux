@@ -4,12 +4,16 @@ unmaintained = "deny"
 yanked = "deny"
 unsound = "deny"
 notice = "deny"
-ignore = [ ]
+ignore = [
+  # time/chrono therse is nothing that can be done at the moment.
+  "RUSTSEC-2020-0071",
+]
 
 [licenses]
 unlicensed = "warn"
 allow-osi-fsf-free = "either"
 default = "deny"
+allow = [ "MPL-2.0" ]
 
 [bans]
 multiple-versions = "allow"

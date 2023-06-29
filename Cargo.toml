@@ -21,6 +21,7 @@ kdl = "4.6.0"
 miette = { version = "5.8.0", features = ["fancy"] }
 rayon = "1.7.0"
 shellexpand = "3.1.0"
+skim = { version = "0.10.4", default-features = false }
 thiserror = "1.0.40"
 tmux_interface = "0.2.1"
 

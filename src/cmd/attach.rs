@@ -3,7 +3,13 @@ use std::{
     str::FromStr,
 };
 
-use crate::{cmd::cli::Attach, config::Config, finder::FinderOptions, tmux, util, walker::Walker};
+use crate::{
+    cmd::cli::Attach,
+    config::Config,
+    finder::{self, FinderOptions},
+    tmux, util,
+    walker::Walker,
+};
 
 use miette::{miette, IntoDiagnostic, Result};
 use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
@@ -19,19 +25,15 @@ impl Run for Attach {
             let names = crate::tmux::session_names()?;
             let opts = FinderOptions {
                 exact: self.exact,
-                query,
-                height: Some(config.height),
+                query: query.as_deref(),
+                mode: config.mode,
                 ..Default::default()
             };
 
             let selected = match names.len() {
                 0 => None,
                 1 => names.into_iter().next(),
-                _ => config
-                    .finder
-                    .execute(names.iter(), opts)?
-                    .into_iter()
-                    .next(),
+                _ => finder::find(names.iter(), opts).into_iter().next(),
             };
 
             if let Some(selected) = selected {
@@ -42,7 +44,7 @@ impl Run for Attach {
         }
 
         let paths = config.paths_from_walk();
-        let selected = match get_selected(&paths, &query, &self, &config) {
+        let selected = match self.get_selected(&paths, &query, &config) {
             Ok(Some(s)) => s,
             Ok(None) => return Ok(()),
             Err(e) => return Err(e),
@@ -61,48 +63,51 @@ fn execute_selected(selected: &Path) -> Result<()> {
     tmux::create_or_attach_session(&name, selected.to_str().unwrap())
 }
 
-fn get_selected(
-    paths: &Vec<String>,
-    query: &Option<String>,
-    attach: &Attach,
-    config: &Config,
-) -> Result<Option<PathBuf>> {
-    if let Some(path) = attach.path.as_ref() {
-        if path.as_path() == Path::new(".") {
-            return Ok(Some(std::env::current_dir().into_diagnostic()?));
+impl Attach {
+    fn get_selected(
+        &self,
+        paths: &Vec<String>,
+        query: &Option<String>,
+        config: &Config,
+    ) -> Result<Option<PathBuf>> {
+        if let Some(path) = self.path.as_ref() {
+            if path.as_path() == Path::new(".") {
+                return Ok(Some(std::env::current_dir().into_diagnostic()?));
+            }
+
+            if !path.exists() {
+                return Err(miette!("Invalid path: '{}'", path.display()));
+            }
+
+            return Ok(Some(path.to_owned()));
         }
 
-        if !path.exists() {
-            return Err(miette!("Invalid path: '{}'", path.display()));
+        if let Some(query) = &query {
+            let matches = paths
+                .par_iter()
+                .filter(|v| v.contains(query))
+                .collect::<Vec<_>>();
+            if matches.len() == 1 {
+                return Ok(Some(
+                    PathBuf::from_str(matches.first().expect("Matches length is 1"))
+                        .into_diagnostic()?,
+                ));
+            }
         }
 
-        return Ok(Some(path.to_owned()));
+        let opts = FinderOptions {
+            exact: self.exact,
+            query: query.as_deref(),
+            mode: config.mode.clone(),
+            ..Default::default()
+        };
+
+        Ok(finder::find(paths.iter(), opts)
+            .into_iter()
+            .next()
+            .map(PathBuf::from))
+
+        // Ok(finder::find(paths.iter(), opts)
+        //     .map(|r| r.into_iter().next().map(PathBuf::from).unwrap_or_default()))
     }
-
-    if let Some(query) = &query {
-        let matches = paths
-            .par_iter()
-            .filter(|v| v.contains(query))
-            .collect::<Vec<_>>();
-        if matches.len() == 1 {
-            return Ok(Some(
-                PathBuf::from_str(matches.first().expect("Matches length is 1"))
-                    .into_diagnostic()?,
-            ));
-        }
-    }
-
-    let opts = FinderOptions {
-        exact: attach.exact,
-        query: query.clone(),
-        height: Some(config.height),
-        ..Default::default()
-    };
-
-    Ok(config
-        .finder
-        .execute(paths.iter(), opts)?
-        .into_iter()
-        .next()
-        .map(PathBuf::from))
 }

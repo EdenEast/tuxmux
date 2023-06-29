@@ -1,4 +1,4 @@
-use crate::{finder::FinderChoice, util};
+use crate::util;
 use indexmap::{indexmap, indexset, IndexMap, IndexSet};
 
 mod error;
@@ -22,14 +22,25 @@ pub struct SearchPath {
     pub single: Vec<String>,
 }
 
+#[derive(Debug, Clone)]
+pub enum Mode {
+    Full,
+    Inline(u8),
+}
+
+impl Default for Mode {
+    fn default() -> Self {
+        Mode::Inline(50)
+    }
+}
+
 #[derive(Debug)]
 pub struct Config {
     pub search: SearchPath,
     pub definitions: IndexMap<String, WorkspaceDefinition>,
     pub exclude_path: IndexSet<String>,
     pub depth: usize,
-    pub height: usize,
-    pub finder: FinderChoice,
+    pub mode: Mode,
 }
 
 impl Default for WorkspaceDefinition {
@@ -57,8 +68,7 @@ impl Default for Config {
             search: SearchPath::default(),
             exclude_path: indexset! { "node_modules".to_string(), ".direnv".to_string() },
             depth: 5,
-            height: 50,
-            finder: FinderChoice::default(),
+            mode: Mode::default(),
             definitions: indexmap! {"default".to_string() => WorkspaceDefinition::default()},
         }
     }

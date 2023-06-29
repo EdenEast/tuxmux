@@ -53,18 +53,12 @@
 //
 // depth 3
 
-// Height of the fuzzy finder selector. Value is a number [0-100] representing
-// the precentage of the terminal's height.
+// Height of the fuzzy finder selector. Value is either a number [0-100] representing
+// the precentage of the terminal's height or the string "full" to denote fullscreen.
 // Default: 50
 //
-// height 40
+// height "full"
 
-// Chosee what fuzzy finder to use when selecting between multiple options.
-// Options:
-//   - fzf (Default)
-//   - skim
-//
-// finder "skim"
 
 // Workspace directory crawler will prune the paths containing any of these components.
 // Options:

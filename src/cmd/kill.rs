@@ -1,28 +1,34 @@
-use crate::{cmd::cli::Kill, config::Config, finder::FinderOptions, tmux};
+use crate::{
+    cmd::cli::Kill,
+    config::Config,
+    finder::{self, FinderOptions},
+    tmux,
+};
 
 use super::Run;
 
 impl Run for Kill {
     fn run(self) -> miette::Result<()> {
         let config = Config::load()?;
-        let query = self.query.as_ref().map(|v| v.join(" "));
+        let query = self.query.map(|v| v.join(" "));
 
         let names = tmux::session_names()?;
         let selected = if self.all {
             names
         } else {
             let opts = FinderOptions {
-                query,
                 multi: true,
-                height: Some(config.height),
+                query: query.as_deref(),
+                mode: config.mode,
                 ..Default::default()
             };
-            config.finder.execute(names.iter(), opts)?
+
+            finder::find(names.iter(), opts)
         };
 
         for sel in selected {
-            tmux::kill_session(&sel)?;
-            println!("Killed {}", sel);
+            tmux::kill_session(sel.as_str())?;
+            println!("Killed {}", &sel);
         }
 
         Ok(())

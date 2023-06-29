@@ -35,6 +35,7 @@ impl SourceCode for Source {
         let contents = self
             .raw
             .read_span(span, context_lines_before, context_lines_after)?;
+        dbg!(&self.path);
         Ok(Box::new(MietteSpanContents::new_named(
             self.path.clone(),
             contents.data(),

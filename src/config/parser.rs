@@ -2,9 +2,7 @@ use indexmap::IndexMap;
 use itertools::Itertools;
 use kdl::{KdlDocument, KdlEntry, KdlNode, KdlValue};
 
-use crate::finder::FinderChoice;
-
-use super::{error::ParseError, source::Source, Config, WorkspaceDefinition};
+use super::{error::ParseError, source::Source, Config, Mode, WorkspaceDefinition};
 
 #[derive(Debug)]
 pub struct Parser {
@@ -106,16 +104,30 @@ impl Parser {
         }
 
         if let Some(node) = doc.get("height") {
-            config.height = usize::try_from(self.first_entry_as_i64(node)?).unwrap_or(0);
-        }
-
-        if let Some(node) = doc.get("finder") {
-            let value = match self.first_entry_as_string(node)? {
-                "fzf" => Ok(FinderChoice::Fzf),
-                "skim" => Ok(FinderChoice::Skim),
-                _ => Err(ParseError::InvalidFinder(self.src.clone(), *node.span())),
-            }?;
-            config.finder = value;
+            let entry = self.first_entry(node)?;
+            let value = entry.value();
+            if let Some(n) = value.as_i64() {
+                let mode = match n {
+                    100 => Mode::Full,
+                    1..=99 => Mode::Inline(n as u8),
+                    _ => {
+                        return Err(ParseError::InvalidHeightRange(
+                            self.src.clone(),
+                            *entry.span(),
+                        ))
+                    }
+                };
+                config.mode = mode;
+            } else if let Some(s) = value.as_string() {
+                if s == "full" {
+                    config.mode = Mode::Full;
+                } else {
+                    return Err(ParseError::InvalidHeightString(
+                        self.src.clone(),
+                        *entry.span(),
+                    ));
+                }
+            }
         }
 
         Ok(config)
@@ -128,16 +140,16 @@ impl Parser {
             .ok_or(ParseError::MissingValue(self.src.clone(), *node.span()))
     }
 
-    fn first_entry_as_string<'a>(&'a self, node: &'a KdlNode) -> Result<&'a str, ParseError> {
-        self.first_entry(node).and_then(|entry| {
-            entry.value().as_string().ok_or(ParseError::TypeMismatch(
-                "string",
-                type_from_value(entry.value()),
-                self.src.clone(),
-                *entry.span(),
-            ))
-        })
-    }
+    // fn first_entry_as_string<'a>(&'a self, node: &'a KdlNode) -> Result<&'a str, ParseError> {
+    //     self.first_entry(node).and_then(|entry| {
+    //         entry.value().as_string().ok_or(ParseError::TypeMismatch(
+    //             "string",
+    //             type_from_value(entry.value()),
+    //             self.src.clone(),
+    //             *entry.span(),
+    //         ))
+    //     })
+    // }
 
     fn first_entry_as_i64<'a>(&'a self, node: &'a KdlNode) -> Result<i64, ParseError> {
         self.first_entry(node).and_then(|entry| {

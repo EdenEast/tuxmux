@@ -1,10 +1,12 @@
-use std::{
-    io::{BufWriter, Write},
-    process::{self, Command, Stdio},
-    str::FromStr,
+use std::{fmt::Display, io::Cursor};
+
+use itertools::Itertools;
+use skim::{
+    prelude::{SkimItemReader, SkimOptionsBuilder},
+    Skim,
 };
 
-use miette::{miette, IntoDiagnostic, Result};
+use crate::config::Mode;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Location {
@@ -12,113 +14,55 @@ pub enum Location {
     Local,
 }
 
-#[derive(Debug, Default, Clone)]
-pub struct FinderOptions {
-    pub height: Option<usize>,
-    // TODO: pass a string reference here
-    pub query: Option<String>,
+#[derive(Debug, Default)]
+pub struct FinderOptions<'a> {
+    pub mode: Mode,
+    pub query: Option<&'a str>,
     pub exact: bool,
     pub multi: bool,
 }
 
-#[derive(Debug, Default, Clone, Copy)]
-pub enum FinderChoice {
-    #[default]
-    Fzf,
-    Skim,
+pub fn find<'a, S, I>(iter: I, opts: FinderOptions) -> Vec<String>
+where
+    S: AsRef<str> + Display,
+    I: Iterator<Item = S>,
+{
+    inner(iter, opts).unwrap_or_default()
 }
 
-pub const POSSIBLE_VALUES: &[&str] = &["fzf", "skim"];
+fn inner<'a, S, I>(mut iter: I, opts: FinderOptions) -> Option<Vec<String>>
+where
+    S: AsRef<str> + Display,
+    I: Iterator<Item = S>,
+{
+    let height = match opts.mode {
+        Mode::Full => "100%".to_string(),
+        Mode::Inline(h) => format!("{}%", h),
+    };
 
-impl FromStr for FinderChoice {
-    type Err = miette::Error;
+    let skim_options = SkimOptionsBuilder::default()
+        .exact(opts.exact)
+        .multi(opts.multi)
+        .query(opts.query)
+        .reverse(true)
+        .height(Some(height.as_str()))
+        .build()
+        .ok()?;
 
-    fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
-        match s {
-            "fzf" => Ok(FinderChoice::Fzf),
-            "skim" => Ok(FinderChoice::Skim),
-            _ => Err(miette!(
-                "Unknown finder choice. Possible values: {:?}",
-                POSSIBLE_VALUES
-            )),
-        }
+    let input = iter.join("\n");
+    let item_reader = SkimItemReader::default();
+    let items = item_reader.of_bufread(Cursor::new(input));
+    let output = Skim::run_with(&skim_options, Some(items))?;
+
+    if output.is_abort {
+        return None;
     }
-}
 
-impl FinderChoice {
-    pub fn execute<S, I>(&self, items: I, opts: FinderOptions) -> Result<Vec<String>>
-    where
-        S: AsRef<str>,
-        I: Iterator<Item = S>,
-    {
-        let cmd = match self {
-            FinderChoice::Fzf => "fzf",
-            FinderChoice::Skim => "sk",
-        };
-
-        let mut command = Command::new(cmd);
-        command.args([
-            "--reverse",
-            "--keep-right",
-            "--exit-0",
-            "--select-1",
-            "--ansi",
-        ]);
-
-        if opts.exact {
-            command.args(["--exact"]);
-        }
-
-        if opts.multi {
-            command.args(["--multi"]);
-        }
-
-        if let Some(height) = opts.height {
-            command.args(["--height", &format!("{}%", height)]);
-        }
-
-        if let Some(query) = opts.query.as_ref() {
-            command.args(["--query", query]);
-        }
-
-        let mut child = match command.stdin(Stdio::piped()).stdout(Stdio::piped()).spawn() {
-            Ok(x) => x,
-            Err(_) => {
-                let repo = match self {
-                    Self::Fzf => "https://github.com/junegunn/fzf",
-                    Self::Skim => "https://github.com/lotabout/skim",
-                };
-                eprintln!(
-                    "tm was unable to call '{cmd}'. \
-                Please make sure it's correctly installed. \
-                Refer to {repo} for more info.",
-                );
-                std::process::exit(33)
-            }
-        };
-
-        if let Some(stdin) = child.stdin.as_mut() {
-            let mut writer = BufWriter::new(stdin);
-            for i in items {
-                writer.write_all(i.as_ref().as_bytes()).into_diagnostic()?;
-                writer.write_all(b"\n").into_diagnostic()?;
-            }
-        }
-
-        let out = child.wait_with_output().into_diagnostic()?;
-        let text = match out.status.code() {
-            Some(0) | Some(1) | Some(2) => {
-                String::from_utf8(out.stdout).into_diagnostic()?
-                // .context("Invalid utf8 received from finder")?
-            }
-            Some(130) => process::exit(130),
-            _ => {
-                let err = String::from_utf8(out.stderr)
-                    .unwrap_or_else(|_| "<stderr contains invalid UTF-8>".to_owned());
-                panic!("External command failed:\n {}", err)
-            }
-        };
-
-        Ok(text.lines().map(ToOwned::to_owned).collect())
-    }
+    Some(
+        output
+            .selected_items
+            .iter()
+            .map(|i| i.output().to_string())
+            .collect_vec(),
+    )
 }
