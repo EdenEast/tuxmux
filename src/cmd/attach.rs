@@ -11,6 +11,11 @@ use crate::{
     walker::Walker,
 };
 
+use dialoguer::{
+    console::{Style, Term},
+    theme::ColorfulTheme,
+    FuzzySelect, Select,
+};
 use miette::{miette, IntoDiagnostic, Result};
 use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
 
@@ -33,7 +38,7 @@ impl Run for Attach {
             let selected = match names.len() {
                 0 => None,
                 1 => names.into_iter().next(),
-                _ => finder::find(names.iter(), opts).into_iter().next(),
+                _ => finder::find(&names, opts)?, // _ => finder::find(names.iter(), opts).into_iter().next(),
             };
 
             if let Some(selected) = selected {
@@ -43,14 +48,70 @@ impl Run for Attach {
             return Ok(());
         }
 
+        if let Some(path) = self.path.as_ref() {
+            if path.as_path() == Path::new(".") {
+                let cwd = std::env::current_dir().into_diagnostic()?;
+                return execute_selected(&cwd);
+            }
+
+            if !path.exists() {
+                return Err(miette!("Path does not exist: '{}'", path.display()));
+            }
+
+            return execute_selected(path);
+        }
+
         let paths = config.paths_from_walk();
-        let selected = match self.get_selected(&paths, &query, &config) {
-            Ok(Some(s)) => s,
-            Ok(None) => return Ok(()),
-            Err(e) => return Err(e),
+
+        if let Some(query) = query.as_ref() {
+            // Check if there is one exact match if so then execute that
+            let matches = paths
+                .par_iter()
+                .filter(|v| v.contains(query))
+                .collect::<Vec<_>>();
+            if matches.len() == 1 {
+                return execute_selected(
+                    &PathBuf::from_str(matches.first().expect("Matches length is checked to be 1"))
+                        .into_diagnostic()?,
+                );
+            }
+        }
+
+        let mut theme = ColorfulTheme::default();
+        theme.fuzzy_match_highlight_style = Style::new().for_stderr().red();
+
+        let term = Term::stderr();
+        let (rows, _) = term.size();
+        let h = match config.mode {
+            crate::config::Mode::Full => rows as usize,
+            crate::config::Mode::Lines(lines) => lines as usize,
+            crate::config::Mode::Percentage(percentage) => (rows as f32 * percentage) as usize,
         };
 
-        execute_selected(&selected)
+        let selection = if self.exact {
+            Select::with_theme(&theme)
+                .default(0)
+                .items(&paths)
+                .max_length(h)
+                .interact_on_opt(&term)
+                .into_diagnostic()?
+        } else {
+            FuzzySelect::with_theme(&theme)
+                .default(0)
+                .items(&paths)
+                .with_initial_text(query.unwrap_or_default())
+                .max_length(h)
+                .interact_on_opt(&term)
+                .into_diagnostic()?
+        };
+
+        match selection {
+            Some(index) => {
+                let selected = PathBuf::from(&paths[index]);
+                execute_selected(&selected)
+            }
+            None => Ok(()),
+        }
     }
 }
 
@@ -61,53 +122,4 @@ pub fn use_cwd() -> Result<()> {
 fn execute_selected(selected: &Path) -> Result<()> {
     let name = util::format_name(selected.file_name().unwrap().to_str().unwrap());
     tmux::create_or_attach_session(&name, selected.to_str().unwrap())
-}
-
-impl Attach {
-    fn get_selected(
-        &self,
-        paths: &Vec<String>,
-        query: &Option<String>,
-        config: &Config,
-    ) -> Result<Option<PathBuf>> {
-        if let Some(path) = self.path.as_ref() {
-            if path.as_path() == Path::new(".") {
-                return Ok(Some(std::env::current_dir().into_diagnostic()?));
-            }
-
-            if !path.exists() {
-                return Err(miette!("Invalid path: '{}'", path.display()));
-            }
-
-            return Ok(Some(path.to_owned()));
-        }
-
-        if let Some(query) = &query {
-            let matches = paths
-                .par_iter()
-                .filter(|v| v.contains(query))
-                .collect::<Vec<_>>();
-            if matches.len() == 1 {
-                return Ok(Some(
-                    PathBuf::from_str(matches.first().expect("Matches length is 1"))
-                        .into_diagnostic()?,
-                ));
-            }
-        }
-
-        let opts = FinderOptions {
-            exact: self.exact,
-            query: query.as_deref(),
-            mode: config.mode.clone(),
-            ..Default::default()
-        };
-
-        Ok(finder::find(paths.iter(), opts)
-            .into_iter()
-            .next()
-            .map(PathBuf::from))
-
-        // Ok(finder::find(paths.iter(), opts)
-        //     .map(|r| r.into_iter().next().map(PathBuf::from).unwrap_or_default()))
-    }
 }
