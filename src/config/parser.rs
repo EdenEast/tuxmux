@@ -107,25 +107,34 @@ impl Parser {
             let entry = self.first_entry(node)?;
             let value = entry.value();
             if let Some(n) = value.as_i64() {
-                let mode = match n {
-                    100 => Mode::Full,
-                    1..=99 => Mode::Inline(n as u8),
-                    _ => {
-                        return Err(ParseError::InvalidHeightRange(
+                if n > 0 {
+                    config.mode = Mode::Lines(n as u16);
+                }
+            } else if let Some(s) = value.as_string() {
+                if s.ends_with("%") {
+                    let numeric_part = &s[..s.len() - 1]; // Remove the last character (% sign)
+                    let per = numeric_part.parse::<i32>()?;
+                    match per {
+                        100 => config.mode = Mode::Full,
+                        1..=99 => config.mode = Mode::Percentage(per as f32 / 100.0),
+                        _ => {
+                            return Err(ParseError::InvalidPercentage(
+                                self.src.clone(),
+                                *entry.span(),
+                            ))
+                        }
+                    }
+                } else if let Some(n) = value.as_i64() {
+                    config.mode = Mode::Lines(n as u16);
+                } else if let Some(s) = value.as_string() {
+                    if s == "full" {
+                        config.mode = Mode::Full;
+                    } else {
+                        return Err(ParseError::InvalidHeightString(
                             self.src.clone(),
                             *entry.span(),
-                        ))
+                        ));
                     }
-                };
-                config.mode = mode;
-            } else if let Some(s) = value.as_string() {
-                if s == "full" {
-                    config.mode = Mode::Full;
-                } else {
-                    return Err(ParseError::InvalidHeightString(
-                        self.src.clone(),
-                        *entry.span(),
-                    ));
                 }
             }
         }

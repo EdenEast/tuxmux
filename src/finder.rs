@@ -1,10 +1,9 @@
-use std::{fmt::Display, io::Cursor};
-
-use itertools::Itertools;
-use skim::{
-    prelude::{SkimItemReader, SkimOptionsBuilder},
-    Skim,
+use dialoguer::{
+    console::{Style, Term},
+    theme::ColorfulTheme,
+    FuzzySelect, MultiSelect, Select,
 };
+use miette::IntoDiagnostic;
 
 use crate::config::Mode;
 
@@ -19,50 +18,61 @@ pub struct FinderOptions<'a> {
     pub mode: Mode,
     pub query: Option<&'a str>,
     pub exact: bool,
-    pub multi: bool,
 }
 
-pub fn find<'a, S, I>(iter: I, opts: FinderOptions) -> Vec<String>
-where
-    S: AsRef<str> + Display,
-    I: Iterator<Item = S>,
-{
-    inner(iter, opts).unwrap_or_default()
-}
+pub fn find<T: ToString + Clone>(items: &[T], opts: FinderOptions) -> miette::Result<Option<T>> {
+    let mut theme = ColorfulTheme::default();
+    theme.fuzzy_match_highlight_style = Style::new().for_stderr().red();
+    let (term, height) = terminal_and_height(opts.mode);
 
-fn inner<'a, S, I>(mut iter: I, opts: FinderOptions) -> Option<Vec<String>>
-where
-    S: AsRef<str> + Display,
-    I: Iterator<Item = S>,
-{
-    let height = match opts.mode {
-        Mode::Full => "100%".to_string(),
-        Mode::Inline(h) => format!("{}%", h),
+    let selection = if opts.exact {
+        Select::with_theme(&theme)
+            .default(0)
+            .items(items)
+            .max_length(height)
+            .interact_on_opt(&term)
+            .into_diagnostic()?
+    } else {
+        FuzzySelect::with_theme(&theme)
+            .default(0)
+            .items(&items)
+            .with_initial_text(opts.query.unwrap_or_default())
+            .max_length(height)
+            .interact_on_opt(&term)
+            .into_diagnostic()?
     };
 
-    let skim_options = SkimOptionsBuilder::default()
-        .exact(opts.exact)
-        .multi(opts.multi)
-        .query(opts.query)
-        .reverse(true)
-        .height(Some(height.as_str()))
-        .build()
-        .ok()?;
+    Ok(selection.map(|i| items[i].clone()))
+}
 
-    let input = iter.join("\n");
-    let item_reader = SkimItemReader::default();
-    let items = item_reader.of_bufread(Cursor::new(input));
-    let output = Skim::run_with(&skim_options, Some(items))?;
+pub fn select_multi<T: ToString + Clone>(
+    items: &[T],
+    opts: FinderOptions,
+) -> miette::Result<Option<Vec<T>>> {
+    let (term, height) = terminal_and_height(opts.mode);
+    let selected = MultiSelect::with_theme(&ColorfulTheme::default())
+        .items(items)
+        .max_length(height)
+        .interact_on_opt(&term)
+        .into_diagnostic()?;
 
-    if output.is_abort {
-        return None;
-    }
+    Ok(selected.and_then(|idxs| {
+        let mut r = Vec::new();
+        for i in idxs {
+            r.push(items[i].clone());
+        }
+        Some(r)
+    }))
+}
 
-    Some(
-        output
-            .selected_items
-            .iter()
-            .map(|i| i.output().to_string())
-            .collect_vec(),
-    )
+fn terminal_and_height(mode: Mode) -> (Term, usize) {
+    let term = Term::stderr();
+    let (rows, _) = term.size();
+    let h = match mode {
+        crate::config::Mode::Full => rows as usize,
+        crate::config::Mode::Lines(lines) => lines as usize,
+        crate::config::Mode::Percentage(percentage) => (rows as f32 * percentage) as usize,
+    };
+
+    (term, h)
 }

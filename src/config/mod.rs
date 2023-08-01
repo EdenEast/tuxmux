@@ -22,15 +22,16 @@ pub struct SearchPath {
     pub single: Vec<String>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub enum Mode {
     Full,
-    Inline(u8),
+    Lines(u16),
+    Percentage(f32),
 }
 
 impl Default for Mode {
     fn default() -> Self {
-        Mode::Inline(50)
+        Mode::Percentage(0.5)
     }
 }
 

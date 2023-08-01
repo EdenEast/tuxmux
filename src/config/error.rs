@@ -89,6 +89,13 @@ pub enum ParseError {
         #[label("expected number in range 1..=100 inclusively")] SourceSpan,
     ),
 
+    #[error("Invalid percentage")]
+    #[diagnostic(code("tm::invalid_percentage"))]
+    InvalidPercentage(
+        #[source_code] Source,
+        #[label("expected a percentage from 1-100%")] SourceSpan,
+    ),
+
     #[error(transparent)]
     #[diagnostic(transparent)]
     Kdl(#[from] KdlError),
@@ -96,4 +103,12 @@ pub enum ParseError {
     #[error(transparent)]
     #[diagnostic()]
     Io(#[from] std::io::Error),
+
+    #[error(transparent)]
+    #[diagnostic()]
+    ParseFloatError(#[from] std::num::ParseFloatError),
+
+    #[error(transparent)]
+    #[diagnostic()]
+    ParseIntError(#[from] std::num::ParseIntError),
 }

@@ -53,11 +53,20 @@
 //
 // depth 3
 
-// Height of the fuzzy finder selector. Value is either a number [0-100] representing
-// the precentage of the terminal's height or the string "full" to denote fullscreen.
-// Default: 50
+// Height of the fuzzy finder selection window. The value can be either a number or a string.
+// A number represents the number of lines or entries to be displayed. A string can be either
+// the string "full" meaning fullscreen or a number followed by a '%' (percent sign).
+// The percentage is the percentage of the terminals hight to be used.
 //
-// height "full"
+// Example:
+//  "40%":  Hight is set to 40% of the terminal screen
+//  10:     Hight is set to 10 lines/enteries
+//  "full": Selection takes up the entire screen
+//
+// Default:
+//  "50%"
+//
+// height 10
 
 
 // Workspace directory crawler will prune the paths containing any of these components.
