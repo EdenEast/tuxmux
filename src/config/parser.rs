@@ -84,6 +84,10 @@ impl Parser {
             config.depth = usize::try_from(self.first_entry_as_i64(node)?).unwrap_or(0);
         }
 
+        if let Some(node) = doc.get("default_worktree") {
+            config.default_worktree = self.first_entry_as_bool(node).unwrap_or(false);
+        }
+
         if let Some(node) = doc.get("height") {
             let entry = self.first_entry(node)?;
             let value = entry.value();
@@ -145,6 +149,17 @@ impl Parser {
         self.first_entry(node).and_then(|entry| {
             entry.value().as_i64().ok_or(ParseError::TypeMismatch(
                 "number",
+                type_from_value(entry.value()),
+                self.src.clone(),
+                *entry.span(),
+            ))
+        })
+    }
+
+    fn first_entry_as_bool<'a>(&'a self, node: &'a KdlNode) -> Result<bool, ParseError> {
+        self.first_entry(node).and_then(|entry| {
+            entry.value().as_bool().ok_or(ParseError::TypeMismatch(
+                "bool",
                 type_from_value(entry.value()),
                 self.src.clone(),
                 *entry.span(),

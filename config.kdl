@@ -24,30 +24,6 @@
   // }
 // }
 
-// Workspace definition for tm.
-//
-// A workspace is how tm defines a valid possible session. When tm searches
-// though a workspace path (paths.workspace) it checks if the path matches any
-// workspace definition. To override the default workspace definition set
-// optional `default=false`.
-//
-// Default:
-// workspace "default" {
-//   files {
-//     - ".git"
-//     - ".bare"
-//   }
-// }
-//
-// workspaces default=true {
-//   workspace "rust" {
-//     files {
-//       - "Cargo.toml"
-//       - "Cargo.lock"
-//     }
-//   }
-// }
-
 // Search depth for workspace paths.
 // Default: 5
 //
@@ -68,6 +44,12 @@
 //
 // height 10
 
+// Select the repositories remote default branch if multiple worktrees are found. If the default
+// worktree cannot be found the fallback will be to select the correct one.
+//
+// Default: false
+//
+// default_worktree true
 
 // Workspace directory crawler will prune the paths containing any of these components.
 // Options:

@@ -64,7 +64,8 @@ pub enum Cmd {
 }
 
 /// Create or attach to a tmux session based on the path specified
-#[derive(Debug, Args)]
+#[rustfmt::skip]
+#[derive(Debug, Args, Default)]
 #[command(
     visible_alias("a"),
     bin_name("tm-attach"),
@@ -76,9 +77,14 @@ pub struct Attach {
     #[arg(short, long, default_value_t = false)]
     pub exists: bool,
 
-    /// Use exact match search instead of fuzzy
-    #[arg(short = 'x', long, default_value_t = false)]
-    pub exact: bool,
+    // Use exact match search instead of fuzzy
+    // TODO: add exact match to fuzzy searcher
+    // #[arg(short = 'x', long, default_value_t = false)]
+    // pub exact: bool,
+
+    /// Use the remote's default branch when multiple worktrees are detected
+    #[arg(short, long, default_value_t = false)]
+    pub default: bool,
 
     /// Exact path to either attach to existing session or create a new one if
     /// none exist
