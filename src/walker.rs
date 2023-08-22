@@ -13,11 +13,9 @@ impl Walker for Config {
         let mut result = self.search.single.clone();
 
         let exclude_paths = Arc::new(self.exclude_path.clone());
-        let definitions = Arc::new(self.definitions.clone());
 
         for workspace in &self.search.workspace {
             let exclude = exclude_paths.clone();
-            let defs = definitions.clone();
             let walker = WalkDir::new(workspace)
                 .skip_hidden(false)
                 .max_depth(self.depth)
@@ -40,20 +38,6 @@ impl Walker for Config {
                             .unwrap_or(false)
                     });
                 });
-
-            for entry in walker {
-                match entry {
-                    Ok(entry) => {
-                        for (_, def) in defs.as_ref() {
-                            if def.files.iter().any(|f| entry.path().join(f).exists()) {
-                                result.push(entry.path().display().to_string());
-                                break;
-                            }
-                        }
-                    }
-                    Err(_) => continue,
-                }
-            }
         }
 
         result

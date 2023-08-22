@@ -1,5 +1,5 @@
 use crate::util;
-use indexmap::{indexmap, indexset, IndexMap, IndexSet};
+use indexmap::{indexset, IndexSet};
 
 mod error;
 mod parser;
@@ -8,13 +8,6 @@ mod source;
 pub use error::ParseError;
 pub use parser::Parser;
 pub use source::Source;
-
-#[derive(Debug, Clone)]
-pub struct WorkspaceDefinition {
-    pub name: String,
-    pub files: Vec<String>,
-    pub layout: Option<String>,
-}
 
 #[derive(Debug)]
 pub struct SearchPath {
@@ -38,20 +31,9 @@ impl Default for Mode {
 #[derive(Debug)]
 pub struct Config {
     pub search: SearchPath,
-    pub definitions: IndexMap<String, WorkspaceDefinition>,
     pub exclude_path: IndexSet<String>,
     pub depth: usize,
     pub mode: Mode,
-}
-
-impl Default for WorkspaceDefinition {
-    fn default() -> Self {
-        Self {
-            name: "default".to_string(),
-            files: vec![".git".to_string(), ".bare".to_string()],
-            layout: None,
-        }
-    }
 }
 
 impl Default for SearchPath {
@@ -70,7 +52,6 @@ impl Default for Config {
             exclude_path: indexset! { "node_modules".to_string(), ".direnv".to_string() },
             depth: 5,
             mode: Mode::default(),
-            definitions: indexmap! {"default".to_string() => WorkspaceDefinition::default()},
         }
     }
 }

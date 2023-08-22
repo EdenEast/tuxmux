@@ -1,8 +1,7 @@
-use indexmap::IndexMap;
 use itertools::Itertools;
 use kdl::{KdlDocument, KdlEntry, KdlNode, KdlValue};
 
-use super::{error::ParseError, source::Source, Config, Mode, WorkspaceDefinition};
+use super::{error::ParseError, source::Source, Config, Mode};
 
 #[derive(Debug)]
 pub struct Parser {
@@ -45,24 +44,6 @@ impl Parser {
 
     fn inner_parse(self, mut config: Config) -> Result<Config, ParseError> {
         let doc: KdlDocument = self.src.raw.parse()?;
-
-        if let Some(workspace_node) = doc.get("workspaces") {
-            let default = self.get_default_optional(workspace_node)?;
-            if let Some(child) = workspace_node.children() {
-                let definitions: IndexMap<String, WorkspaceDefinition> = child
-                    .nodes()
-                    .iter()
-                    .map(|node| self.workspace_definition(node))
-                    .map(|r| r.map(|d| (d.name.clone(), d)))
-                    .try_collect()?;
-
-                if default {
-                    config.definitions.extend(definitions.into_iter());
-                } else {
-                    config.definitions = definitions;
-                }
-            }
-        }
 
         if let Some(exclude_node) = doc.get("exclude_path") {
             let default = self.get_default_optional(exclude_node)?;
@@ -225,91 +206,5 @@ impl Parser {
                     .map(|s| shellexpand::tilde(s).to_string())
             })
             .try_collect()
-    }
-
-    fn workspace_definition(&self, node: &KdlNode) -> Result<WorkspaceDefinition, ParseError> {
-        if node.name().value() != "workspace" {
-            return Err(ParseError::NodeMismatch(
-                "workspace",
-                node.name().value().to_string(),
-                self.src.clone(),
-                *node.span(),
-            ));
-        }
-
-        let name_node = node
-            .entries()
-            .first()
-            .and_then(|entry| match entry.name() {
-                Some(_) => None,
-                None => Some(entry),
-            })
-            .ok_or(ParseError::MissingPositionalEntry(
-                "name",
-                self.src.clone(),
-                *node.span(),
-            ))?;
-
-        let name = name_node
-            .value()
-            .as_string()
-            .ok_or(ParseError::TypeMismatch(
-                "string",
-                type_from_value(name_node.value()),
-                self.src.clone(),
-                *name_node.span(),
-            ))?
-            .to_string();
-
-        let layout = match node.get("layout") {
-            Some(entry) => Some(
-                entry
-                    .value()
-                    .as_string()
-                    .ok_or(ParseError::TypeMismatch(
-                        "string",
-                        type_from_value(entry.value()),
-                        self.src.clone(),
-                        *node.span(),
-                    ))?
-                    .to_string(),
-            ),
-            None => None,
-        };
-
-        let child = node.children().ok_or(ParseError::MissingNode(
-            "files",
-            self.src.clone(),
-            *node.span(),
-        ))?;
-
-        if child.get("files").is_none() {
-            return Err(ParseError::MissingNode(
-                "files",
-                self.src.clone(),
-                *node.span(),
-            ));
-        }
-
-        let files: Vec<String> = child
-            .get_dash_vals("files")
-            .into_iter()
-            .map(|f| {
-                f.as_string()
-                    .map(ToString::to_string)
-                    .ok_or(ParseError::TypeMismatch(
-                        "string",
-                        type_from_value(f),
-                        self.src.clone(),
-                        *node.span(),
-                    ))
-            })
-            .try_collect()?;
-
-        Ok(WorkspaceDefinition {
-            name,
-            files,
-            layout,
-        })
     }
 }
