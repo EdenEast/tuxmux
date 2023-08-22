@@ -49,7 +49,7 @@ impl Default for Config {
     fn default() -> Self {
         Self {
             search: SearchPath::default(),
-            exclude_path: indexset! { "node_modules".to_string(), ".direnv".to_string() },
+            exclude_path: indexset! { "node_modules".to_string(), ".direnv".to_string(), ".cache".to_string(), ".local".to_string()},
             depth: 5,
             mode: Mode::default(),
         }

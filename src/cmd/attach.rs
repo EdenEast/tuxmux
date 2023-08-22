@@ -16,6 +16,8 @@ use dialoguer::{
     theme::ColorfulTheme,
     FuzzySelect, Select,
 };
+use git2::Repository;
+use itertools::Itertools;
 use miette::{miette, IntoDiagnostic, Result};
 use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
 
@@ -121,5 +123,44 @@ pub fn use_cwd() -> Result<()> {
 
 fn execute_selected(selected: &Path) -> Result<()> {
     let name = util::format_name(selected.file_name().unwrap().to_str().unwrap());
-    tmux::create_or_attach_session(&name, selected.to_str().unwrap())
+    if tmux::session_exists(&name) {
+        return tmux::attach_session(&name);
+    }
+
+    let worktree = if let Ok(repo) = Repository::open(selected) {
+        if let Ok(trees) = repo.worktrees() {
+            let items = trees.iter().filter_map(|e| e).collect_vec();
+            let selected_index = match items.len() {
+                0 => None,
+                1 => Some(0),
+                _ => {
+                    let mut theme = ColorfulTheme::default();
+                    theme.fuzzy_match_highlight_style = Style::new().for_stderr().red();
+                    FuzzySelect::with_theme(&theme)
+                        .default(0)
+                        .items(&items)
+                        .interact()
+                        .into_diagnostic()
+                        .ok()
+                }
+            };
+
+            selected_index.map(|i| {
+                repo.find_worktree(items[i])
+                    .expect("string comes from repo")
+            })
+        } else {
+            None
+        }
+    } else {
+        None
+    };
+
+    tmux::create_session(&name, &selected.to_str().unwrap())?;
+    if let Some(worktree) = worktree {
+        tmux::send_command(&name, &format!("cd {}", worktree.path().display()))?;
+    }
+    tmux::attach_session(&name)?;
+
+    Ok(())
 }

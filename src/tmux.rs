@@ -86,8 +86,17 @@ pub fn send_keys(target: &str, key: &str) -> Result<()> {
         .key(key)
         .output()
         .into_diagnostic()?;
-    // .wrap_err_with(|| format!("Failed to send '{}' to pane `{}`", key, target))?;
 
+    Ok(())
+}
+
+pub fn send_command(session_name: &str, command: &str) -> Result<()> {
+    SendKeys::new()
+        .target_pane(session_name)
+        .key(command)
+        .key("C-m")
+        .output()
+        .into_diagnostic()?;
     Ok(())
 }
 
@@ -108,7 +117,6 @@ pub fn kill_session(name: &str) -> Result<()> {
         .target_session(name)
         .output()
         .into_diagnostic()?;
-    // .wrap_err_with(|| format!("Failed to kill session `{}`", name))?;
 
     Ok(())
 }

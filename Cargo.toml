@@ -15,6 +15,7 @@ opt-level = 3
 clap = { version = "4.2.4", features = [ "cargo", "derive" ] }
 dialoguer = { version = "0.10.4", default-features = false, features = ["fuzzy-select"] }
 dirs-next = "2.0.0"
+git2 = "0.17.2"
 indexmap = "1.9.3"
 itertools = "0.10.5"
 jwalk = "0.8.1"

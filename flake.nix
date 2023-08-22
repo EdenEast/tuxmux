@@ -40,8 +40,11 @@
           # This is not required as this would just compile the project again
           doCheck = false;
           buildInputs = with pkgs; [
-            zstd
             libiconv
+            openssl
+          ];
+          nativeBuildInputs = with pkgs; [
+            pkg-config
           ];
         };
 
