@@ -98,35 +98,6 @@ pub struct Attach {
     pub query: Option<Vec<String>>,
 }
 
-/// Get or set configuration options for tm
-#[derive(Debug, Args)]
-#[command(
-    visible_alias("c"),
-    bin_name("tm-config"),
-    disable_colored_help(true),
-    disable_version_flag(true)
-)]
-pub struct Config {
-    /// Name of configuration option
-    #[arg(value_parser = CONFIG_OPTIONS)]
-    pub name: Option<String>,
-
-    /// Value of the configuration option defined by name
-    pub value: Option<String>,
-
-    /// Save to global $XDG_CONFIG_HOME instead of $XDG_DATA_HOME
-    #[arg(short, long, default_value_t = false)]
-    pub global: bool,
-
-    /// Open config file in '$EDITOR'
-    #[arg(short, long, default_value_t = false)]
-    pub edit: bool,
-
-    /// List all config options and values
-    #[arg(short, long, default_value_t = false)]
-    pub list: bool,
-}
-
 /// Store paths and later jump to them by index
 #[derive(Debug, Args)]
 #[command(
