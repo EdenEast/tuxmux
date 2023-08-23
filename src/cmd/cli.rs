@@ -149,7 +149,7 @@ pub struct Kill {
     pub query: Option<Vec<String>>,
 }
 
-/// List current sessions
+/// List tmux sessions
 #[derive(Debug, Args)]
 #[command(
     visible_alias("ls"),
@@ -157,7 +157,11 @@ pub struct Kill {
     disable_colored_help(true),
     disable_version_flag(true)
 )]
-pub struct List {}
+pub struct List {
+    /// List all possible session that could be created
+    #[arg(short, long, default_value_t = false)]
+    pub all: bool,
+}
 
 /// Send a command to a execute in a tmux window
 #[derive(Debug, Args)]

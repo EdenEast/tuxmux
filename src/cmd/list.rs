@@ -1,9 +1,19 @@
-use crate::{cmd::cli::List, tmux};
+use crate::{cmd::cli::List, config::Config, tmux, walker::Walker};
 
 use super::Run;
 
 impl Run for List {
     fn run(self) -> miette::Result<()> {
+        if self.all {
+            let config = Config::load()?;
+
+            for path in config.paths_from_walk() {
+                println!("{}", path);
+            }
+
+            return Ok(());
+        }
+
         let sessions = tmux::sessions()?;
 
         let max_name = sessions
