@@ -21,8 +21,11 @@ pub struct FinderOptions<'a> {
 }
 
 pub fn find<T: ToString + Clone>(items: &[T], opts: FinderOptions) -> miette::Result<Option<T>> {
-    let mut theme = ColorfulTheme::default();
-    theme.fuzzy_match_highlight_style = Style::new().for_stderr().red();
+    let theme = ColorfulTheme {
+        fuzzy_match_highlight_style: Style::new().for_stderr().red(),
+        ..Default::default()
+    };
+
     let (term, height) = terminal_and_height(opts.mode);
 
     let selection = if opts.exact {
@@ -35,7 +38,7 @@ pub fn find<T: ToString + Clone>(items: &[T], opts: FinderOptions) -> miette::Re
     } else {
         FuzzySelect::with_theme(&theme)
             .default(0)
-            .items(&items)
+            .items(items)
             .with_initial_text(opts.query.unwrap_or_default())
             .max_length(height)
             .interact_on_opt(&term)
@@ -56,12 +59,12 @@ pub fn select_multi<T: ToString + Clone>(
         .interact_on_opt(&term)
         .into_diagnostic()?;
 
-    Ok(selected.and_then(|idxs| {
+    Ok(selected.map(|idxs| {
         let mut r = Vec::new();
         for i in idxs {
             r.push(items[i].clone());
         }
-        Some(r)
+        r
     }))
 }
 

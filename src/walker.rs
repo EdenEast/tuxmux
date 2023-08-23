@@ -30,7 +30,7 @@ impl Walker for Config {
         for workspace in &self.search.workspace {
             let exclude = exclude_paths.clone();
 
-            let walk = jwalk::WalkDirGeneric::<((), Option<PathBuf>)>::new(&Path::new(workspace))
+            let walk = jwalk::WalkDirGeneric::<((), Option<PathBuf>)>::new(Path::new(workspace))
                 .follow_links(false)
                 .skip_hidden(false);
 

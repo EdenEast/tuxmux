@@ -80,8 +80,10 @@ impl Run for Attach {
             }
         }
 
-        let mut theme = ColorfulTheme::default();
-        theme.fuzzy_match_highlight_style = Style::new().for_stderr().red();
+        let theme = ColorfulTheme {
+            fuzzy_match_highlight_style: Style::new().for_stderr().red(),
+            ..Default::default()
+        };
 
         let term = Term::stderr();
         let (rows, _) = term.size();
@@ -118,7 +120,7 @@ impl Attach {
 
         let worktree = if let Ok(repo) = Repository::open(selected) {
             if let Ok(trees) = repo.worktrees() {
-                let items = trees.iter().filter_map(|e| e).collect_vec();
+                let items = trees.iter().flatten().collect_vec();
                 let use_default = self.default || config.default_worktree;
                 let selected_index = match items.len() {
                     0 => None,
@@ -137,8 +139,10 @@ impl Attach {
                         match index {
                             Some(index) => Some(index),
                             None => {
-                                let mut theme = ColorfulTheme::default();
-                                theme.fuzzy_match_highlight_style = Style::new().for_stderr().red();
+                                let theme = ColorfulTheme {
+                                    fuzzy_match_highlight_style: Style::new().for_stderr().red(),
+                                    ..Default::default()
+                                };
                                 FuzzySelect::with_theme(&theme)
                                     .default(0)
                                     .items(&items)
@@ -160,7 +164,7 @@ impl Attach {
             None
         };
 
-        tmux::create_session(&name, &selected.to_str().unwrap())?;
+        tmux::create_session(&name, selected.to_str().unwrap())?;
         if let Some(worktree) = worktree {
             tmux::send_command(&name, &format!("cd {}", worktree.path().display()))?;
         }

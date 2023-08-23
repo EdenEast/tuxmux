@@ -96,9 +96,8 @@ impl Parser {
                     config.mode = Mode::Lines(n as u16);
                 }
             } else if let Some(s) = value.as_string() {
-                if s.ends_with("%") {
-                    let numeric_part = &s[..s.len() - 1]; // Remove the last character (% sign)
-                    let per = numeric_part.parse::<i32>()?;
+                if let Some(numeric) = s.strip_suffix('%') {
+                    let per = numeric.parse::<i32>()?;
                     match per {
                         100 => config.mode = Mode::Full,
                         1..=99 => config.mode = Mode::Percentage(per as f32 / 100.0),
