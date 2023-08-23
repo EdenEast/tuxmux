@@ -134,16 +134,18 @@ impl Attach {
                             None
                         };
 
-                        index.or_else(|| {
-                            let mut theme = ColorfulTheme::default();
-                            theme.fuzzy_match_highlight_style = Style::new().for_stderr().red();
-                            FuzzySelect::with_theme(&theme)
-                                .default(0)
-                                .items(&items)
-                                .interact()
-                                .into_diagnostic()
-                                .ok()
-                        })
+                        match index {
+                            Some(index) => Some(index),
+                            None => {
+                                let mut theme = ColorfulTheme::default();
+                                theme.fuzzy_match_highlight_style = Style::new().for_stderr().red();
+                                FuzzySelect::with_theme(&theme)
+                                    .default(0)
+                                    .items(&items)
+                                    .interact_opt()
+                                    .into_diagnostic()?
+                            }
+                        }
                     }
                 };
 
