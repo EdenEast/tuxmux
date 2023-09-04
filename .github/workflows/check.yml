@@ -42,9 +42,10 @@ jobs:
           components: clippy
 
       - name: cargo clippy
-        uses: actions-rs/clippy-check@v1
+        uses: LoliGothick/clippy-check@v0.3.1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          deny: warnings
 
   doc:
     runs-on: ubuntu-latest
