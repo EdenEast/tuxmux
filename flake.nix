@@ -57,9 +57,12 @@
         tuxmux = craneLib.buildPackage (args // {
           inherit cargoArtifacts;
 
+          doCheck = true;
+
           nativeBuildInputs = with pkgs; [
             # Needed for installing shell completions and manpages
             installShellFiles
+            pkg-config
           ];
 
           preFixup = ''
