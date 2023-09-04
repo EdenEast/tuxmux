@@ -50,7 +50,7 @@ impl Parser {
             let paths = self.try_get_dash_values_as_string(&doc, "exclude_path")?;
 
             if default {
-                config.exclude_path.extend(paths.into_iter());
+                config.exclude_path.extend(paths);
             } else {
                 config.exclude_path = paths.into_iter().collect();
             }
