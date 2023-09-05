@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     name: stable / fmt
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install stable
         uses: dtolnay/rust-toolchain@stable
@@ -36,7 +36,7 @@ jobs:
       matrix:
         toolchain: [stable, beta]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install ${{ matrix.toolchain }}
         uses: dtolnay/rust-toolchain@master
@@ -54,7 +54,7 @@ jobs:
     runs-on: ubuntu-latest
     name: nightly / doc
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install nightly
         uses: dtolnay/rust-toolchain@nightly
