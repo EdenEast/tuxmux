@@ -1,0 +1,29 @@
+= Installation
+
+== Cargo
+
+[source,sh]
+----
+cargo install tuxmux
+----
+
+== Nix
+
+[source,sh]
+----
+# Try out tuxmux with `nix run`
+nix run github:EdenEast/tuxmux
+
+# Create a devshell with `nix shell`
+nix shell github:EdenEast/tuxmux
+
+# Install into profile
+nix profile install github:EdenEast/tuxmux
+----
+
+== Source
+
+[source,sh]
+----
+cargo install --path .
+----

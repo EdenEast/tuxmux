@@ -1,0 +1,49 @@
+= Tuxmux
+
+:license_link: https://github.com/EdenEast/tuxmux/blob/main/LICENSE
+:apache: https://apache.org/licenses/LICENSE-2.0
+
+image:https://github.com/EdenEast/tuxmux/actions/workflows/check.yml/badge.svg?style=svg[ci-badge, link="https://github.com/EdenEast/tuxmux/actions/workflows/check.yml"]
+image:https://img.shields.io/badge/license-Apache2.0-blue.svg[license-badge, link="{apache}"]
+
+[sidebar]
+*_Tuxmux_ (_tm_)* is a session and window manager for tmux.
+
+---
+TODO: add demo gif here
+---
+
+== Features
+
+- Fuzzy find tmux sessions to create / attach.
+- Jump list to quickly open tmux sessions (harpoon like)
+- Keybinding support for jumping
+- Highly configurable
+- Support git worktrees on session creation
+
+include::installation.adoc[leveloffset=1]
+
+---
+TODO: add section explaining jumping and how do add tmux, and bash key bindings
+---
+
+---
+TODO: add section on git worktree support
+---
+
+include::configuration.adoc[leveloffset=1]
+
+== Development
+
+Tuxmux is currently under development and subject to change before a `v1` release. Have an idea for tuxmux? Open an
+issue or fork the project and create a PR.
+
+Tuxmux was originally a shell script in my link:{dotfiles}[dotfiles] and has grown into this utility program.
+
+:dotfiles: https://github.com/EdenEast/nyx/blob/7f0c07964222450ec33823ee76ff97dca190162b/bin/tm
+
+== Licence
+
+Tuxmux is licensed under link:{apache}[Apache] License (Version 2).
+
+See link:{license_link}[LICENSE] file for more details.

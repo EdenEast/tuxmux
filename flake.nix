@@ -116,7 +116,9 @@
             rustToolchain
           ];
           packages = with pkgs; [
+            asciidoctor-with-extensions
             just
+            pandoc
           ];
           # RUST_SRC_PATH = "${toolchain.rust-src}/lib/rustlib/src/rust/library";
         };
