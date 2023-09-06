@@ -99,6 +99,7 @@
         apps = {
           tuxmux = flake-utils.lib.mkApp {
             dev = tuxmux;
+            name = "tm";
           };
           default = apps.tuxmux;
         };
