@@ -150,6 +150,7 @@ impl Attach {
                                 ..Default::default()
                             };
                             FuzzySelect::with_theme(&theme)
+                                .with_prompt("Worktree")
                                 .default(0)
                                 .items(&items)
                                 .interact_opt()
