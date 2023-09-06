@@ -12,12 +12,12 @@ pub use iter::{intersperse, Intersperse};
 
 pub fn get_config(components: &[&str]) -> PathBuf {
     let mut path = match (
-        std::env::var("TM_CONFIG_PATH"),
+        std::env::var("TUXMUX_CONFIG_PATH"),
         std::env::var("XDG_CONFIG_HOME"),
     ) {
         (Ok(p), _) => PathBuf::from_str(&p).unwrap(),
-        (_, Ok(p)) => PathBuf::from_str(&p).unwrap().join("tm"),
-        _ => dirs_next::config_dir().unwrap().join("tm"),
+        (_, Ok(p)) => PathBuf::from_str(&p).unwrap().join("tuxmux"),
+        _ => dirs_next::config_dir().unwrap().join("tuxmux"),
     };
 
     path.extend(components);
@@ -30,12 +30,12 @@ pub fn format_name(name: &str) -> String {
 
 pub fn get_local(components: &[&str]) -> PathBuf {
     let mut path = match (
-        std::env::var("TM_DATA_PATH"),
+        std::env::var("TUXMUX_DATA_PATH"),
         std::env::var("XDG_DATA_HOME"),
     ) {
         (Ok(p), _) => PathBuf::from_str(&p).unwrap(),
-        (_, Ok(p)) => PathBuf::from_str(&p).unwrap().join("tm"),
-        _ => dirs_next::data_dir().unwrap().join("tm"),
+        (_, Ok(p)) => PathBuf::from_str(&p).unwrap().join("tuxmux"),
+        _ => dirs_next::data_dir().unwrap().join("tuxmux"),
     };
 
     path.extend(components);
