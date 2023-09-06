@@ -16,7 +16,7 @@ use dialoguer::{
     theme::ColorfulTheme,
     FuzzySelect,
 };
-use git2::{Branch, Repository};
+use git2::{Branch, Repository, Worktree};
 use itertools::Itertools;
 use miette::{miette, IntoDiagnostic, Result};
 use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
@@ -118,54 +118,55 @@ impl Attach {
             return tmux::attach_session(&name);
         }
 
-        let worktree = if let Ok(repo) = Repository::open(selected) {
-            if let Ok(trees) = repo.worktrees() {
-                let items = trees.iter().flatten().collect_vec();
-                let use_default = self.default || config.default_worktree;
-                let selected_index = match items.len() {
-                    0 => None,
-                    1 => Some(0),
-                    _ => {
-                        let index = if use_default {
-                            default_branch(&repo)
-                                .and_then(|(name, _)| {
-                                    items.iter().find_position(|item| **item == name.as_str())
-                                })
-                                .map(|(i, _)| i)
-                        } else {
-                            None
-                        };
+        let get_worktree = || -> Option<Worktree> {
+            let repo = Repository::open(selected).ok()?;
+            // TODO: add configuration option for toggling this option
+            if !repo.is_bare() {
+                return None;
+            }
 
-                        match index {
-                            Some(index) => Some(index),
-                            None => {
-                                let theme = ColorfulTheme {
-                                    fuzzy_match_highlight_style: Style::new().for_stderr().red(),
-                                    ..Default::default()
-                                };
-                                FuzzySelect::with_theme(&theme)
-                                    .default(0)
-                                    .items(&items)
-                                    .interact_opt()
-                                    .into_diagnostic()?
-                            }
+            let trees = repo.worktrees().ok()?;
+            let items = trees.iter().flatten().collect_vec();
+            let use_default = self.default || config.default_worktree;
+            let selected_index = match items.len() {
+                0 => None,
+                1 => Some(0),
+                _ => {
+                    let index = if use_default {
+                        default_branch(&repo)
+                            .and_then(|(name, _)| {
+                                items.iter().find_position(|item| **item == name.as_str())
+                            })
+                            .map(|(i, _)| i)
+                    } else {
+                        None
+                    };
+
+                    match index {
+                        Some(index) => Some(index),
+                        None => {
+                            let theme = ColorfulTheme {
+                                fuzzy_match_highlight_style: Style::new().for_stderr().red(),
+                                ..Default::default()
+                            };
+                            FuzzySelect::with_theme(&theme)
+                                .default(0)
+                                .items(&items)
+                                .interact_opt()
+                                .ok()?
                         }
                     }
-                };
+                }
+            };
 
-                selected_index.map(|i| {
-                    repo.find_worktree(items[i])
-                        .expect("string comes from repo")
-                })
-            } else {
-                None
-            }
-        } else {
-            None
+            selected_index.map(|i| {
+                repo.find_worktree(items[i])
+                    .expect("string comes from repo")
+            })
         };
 
         tmux::create_session(&name, selected.to_str().unwrap())?;
-        if let Some(worktree) = worktree {
+        if let Some(worktree) = get_worktree() {
             tmux::send_command(&name, &format!("cd {}", worktree.path().display()))?;
         }
         tmux::attach_session(&name)?;
