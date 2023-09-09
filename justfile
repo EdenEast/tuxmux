@@ -1,6 +1,6 @@
 default_bin := "tm"
 
-doc: man markdown
+doc: markdown
 
 readme:
   #!/usr/bin/env bash

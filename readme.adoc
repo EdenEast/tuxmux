@@ -10,9 +10,7 @@ image:https://img.shields.io/badge/license-Apache2.0-blue.svg[license-badge, lin
 [sidebar]
 *_Tuxmux_ (_tm_)* is a session and window manager for tmux.
 
----
-TODO: add demo gif here
----
+image:https://user-images.githubusercontent.com/2746374/266213849-a7c59c69-4f12-4846-9f06-45f552197890.gif[]
 
 == Features
 
@@ -56,13 +54,8 @@ cargo install --path .
 
 :leveloffset!:
 
----
-TODO: add section explaining jumping and how do add tmux, and bash key bindings
----
-
----
-TODO: add section on git worktree support
----
+// TODO: add section explaining jumping and how do add tmux, and bash key bindings
+// TODO: add section on git worktree support
 
 :leveloffset: 1
 
