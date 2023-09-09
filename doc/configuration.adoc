@@ -1,0 +1,148 @@
+= Configuration
+
+Tuxmux uses https://kdl.dev[KDL] as its configuration language.
+
+== Quickstart:
+
+[source,shell]
+----
+mkdir -p ~/.config/tuxmux
+tm --default-config > ~/.config/tuxmux/config.kdl
+----
+
+== File locations
+
+Tuxmux loads configuration information from two types of sources, local and global. The file is determined by searching
+each path for the first `config.kdl` file.
+
+|===
+|Local | Global
+
+|`$TUXMUX_DATA_PATH`
+|`$TUXMUX_CONFIG_PATH`
+
+|`$XDG_DATA_HOME/tuxmux`
+|`$XDG_CONFIG_HOME/tuxmux`
+
+|`~/.local/share/tuxmux`
+|`~/.config/tuxmux`
+|===
+
+Values defined in the local config file have presidence over global values. Values containing lists will be merged
+instead of overritten.
+
+== Options
+
+Full list of values defined in `config.kdl`.
+
+=== depth
+
+Sets the maximux search depth for workspace paths.
+
+[%hardbreaks]
+Type: `number`
+Default: `5`
+
+[source,javascript]
+----
+depth 3
+----
+
+=== height
+
+Height of the fuzzy finder selection window. The value can be either a number or a string.
+A number represents the number of lines or entries to be displayed. A string can be either
+the string "full" meaning fullscreen or a number followed by a '%' (percent sign).
+The percentage is the percentage of the terminals hight to be used.
+
+[%hardbreaks]
+Type: `string | number`
+Default: `50%`
+
+[source,javascript]
+----
+height 10
+----
+
+=== default_worktree
+
+Select the repositories remote default branch if multiple worktrees are found. If the default
+worktree cannot be found the fallback will be to select the correct one.
+
+[%hardbreaks]
+Type: `boolean`
+Default: `false`
+
+[source,javascript]
+----
+default_worktree true
+----
+
+=== exclude_paths
+
+Workspace directory crawler will prune the paths containing any of these components.
+
+Optional arguments:
+
+* default: (boolean) Append to default value if true (Default: true)
+
+[%hardbreaks]
+Type: `string list`
+Default: `{ - ".direnv" "node_modules" }`
+
+[source,javascript]
+----
+exclude_paths default=false {
+  - ".direnv"
+  - "node_modules"
+}
+----
+
+=== paths
+
+Configure the list of search paths used to search for valid workspaces.  Tm uses these valid workspaces as options to
+attach to.
+
+==== paths.workspace
+
+Workspace paths are paths to recursivly search to find valid workspaces.  Tm will recursivly search the workspace paths
+until the max depth is reached. To override the default workspace value set optional `default=false`
+
+Optional arguments:
+
+* default: (boolean) Append to default value if true (Default: true)
+
+[%hardbreaks]
+Type: `string list`
+Default: `{ - "~" }`
+
+[source, javascript]
+----
+paths {
+  workspaces default=false {
+    - "~/code"
+  }
+}
+----
+
+==== paths.single
+
+Single paths are paths that are added to the list of valid workspace paths. This is useful if you want to add a path
+that would not be defined as a valid workspace.
+
+Optional arguments:
+
+* default: (boolean) Append to default value if true (Default: true)
+
+[%hardbreaks]
+Type: `string list`
+Default: `{}`
+
+[source, javascript]
+----
+paths {
+  single default=false {
+    - "~/.config/nvim"
+  }
+}
+----

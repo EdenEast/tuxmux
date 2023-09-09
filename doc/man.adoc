@@ -1,0 +1,37 @@
+= tm(1)
+
+== Name
+
+tm - Tmux session manager
+
+== Synopsis
+
+*tm* [_OPTIONS_] _<SEARCH_QUERY>_
+*tm* [_OPTIONS_] _<COMMAND>_ [_ARGS_]
+*tm* [_OPTIONS_] *--version*
+*tm* [_OPTIONS_] *--help*
+
+== Descriptions
+
+---
+TODO: add Description here
+---
+
+include::configuration.adoc[leveloffset=1]
+
+== Examples
+
+---
+TODO: add example usage commands like `man cargo` has
+---
+
+== Version
+
+{version}
+
+== Homepage
+
+https://github.com/EdenEast/tuxmux
+
+Please report bugs and feature requests in the issue tracker.
+
