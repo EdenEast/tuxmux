@@ -1,9 +1,18 @@
 [package]
 name = "tuxmux"
 version = "0.1.0"
+authors = ["edenofest@gmail.com"]
 edition = "2021"
 description = "Tmux utility for session and window management"
+include = ["src/**/**", "Cargo.toml", "Cargo.lock", "readme.md"]
+homepage = "https://github.com/edeneast/tuxmux.git"
+repository = "https://github.com/edeneast/tuxmux.git"
 license = "Apache-2.0"
+readme = "readme.md"
+keywords = [
+  "cli",
+  "tmux",
+]
 
 [profile.release] # min rust size resource https://github.com/johnthagen/min-sized-rus
 codegen-units = 1 # There are some optimizations that prevented with multi units
