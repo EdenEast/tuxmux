@@ -21,19 +21,30 @@ fn main() -> Result<()> {
                 return cmd::Attach::default().use_cwd(&config);
             }
 
+            let starts_with_long = first.starts_with("--");
             let contains_help_or_version = HELP_AND_VERSION_FLAGS.iter().any(|v| *v == first);
-            if !contains_help_or_version && !VALID_FIRST_OPTIONS.iter().any(|v| *v == first) {
+            if !contains_help_or_version
+                && !starts_with_long
+                && !VALID_FIRST_OPTIONS.iter().any(|v| *v == first)
+            {
                 args.insert(1, "attach".to_owned());
             }
         }
         None => args.push("attach".to_owned()),
     }
 
-    match cmd::Cli::parse_from(args).command {
-        cmd::Cmd::Attach(c) => c.run(),
-        cmd::Cmd::Jump(c) => c.run(),
-        cmd::Cmd::Kill(c) => c.run(),
-        cmd::Cmd::List(c) => c.run(),
-        cmd::Cmd::Wcmd(c) => c.run(),
+    let cmd = cmd::Cli::parse_from(args);
+    if cmd.default_config {
+        println!("{}", cmd::DEFAULT_CONFIG);
+        return Ok(());
+    }
+
+    match cmd.command {
+        Some(cmd::Cmd::Attach(c)) => c.run(),
+        Some(cmd::Cmd::Jump(c)) => c.run(),
+        Some(cmd::Cmd::Kill(c)) => c.run(),
+        Some(cmd::Cmd::List(c)) => c.run(),
+        Some(cmd::Cmd::Wcmd(c)) => c.run(),
+        _ => Ok(()),
     }
 }

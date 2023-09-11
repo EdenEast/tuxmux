@@ -3,6 +3,8 @@ use std::path::PathBuf;
 use clap::{crate_description, crate_version, Subcommand};
 use clap::{Args, Parser};
 
+pub const DEFAULT_CONFIG: &str = include_str!("../../config.kdl");
+
 pub const CONFIG_OPTIONS: [&str; 3] = ["depth", "height", "finder"];
 
 const ARG_AFTER_HELP_MSG: &str = "\
@@ -51,7 +53,11 @@ EXAMPLES:
 )]
 pub struct Cli {
     #[command(subcommand)]
-    pub command: Cmd,
+    pub command: Option<Cmd>,
+
+    /// Dump the default configuration file to stdout
+    #[arg(long, default_value_t = false)]
+    pub default_config: bool,
 }
 
 #[derive(Debug, Subcommand)]
