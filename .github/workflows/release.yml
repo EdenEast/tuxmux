@@ -3,6 +3,9 @@
 # https://github.com/starship/starship/blob/master/.github/workflows/release.yml
 
 name: release please
+permissions:
+  contents: write
+  pull-requests: write
 on:
   workflow_dispatch:
   push:
