@@ -43,6 +43,9 @@ nix shell github:EdenEast/tuxmux
 
 # Install into profile
 nix profile install github:EdenEast/tuxmux
+
+# Install from nixpkgs
+nix-env -iA nixpkgs.tuxmux
 ----
 
 == Source
