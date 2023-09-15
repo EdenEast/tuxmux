@@ -1,3 +1,7 @@
+# cargo build  709.64s user 95.38s system 705% cpu 1:54.05 total
+#
+# cargo build  293.95s user 35.60s system 644% cpu 51.154 total
+
 name: check
 permissions:
   contents: read
@@ -54,12 +58,38 @@ jobs:
     runs-on: ubuntu-latest
     name: nightly / doc
     steps:
-      - uses: actions/checkout@v4
+      - name: Setup | Checkout
+        uses: actions/checkout@v4
 
-      - name: Install nightly
-        uses: dtolnay/rust-toolchain@nightly
+      - name: Setup | Rust nightly
+        uses: dtolnay/rust-toolchain@v1
+        with:
+          toolchain: nightly
 
-      - name: cargo doc
+      - name: Run | Cargo doc
         run: cargo doc --no-deps --all-features
         env:
           RUSTDOCFLAGS: --cfg docsrs
+
+  check:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+          - target: x86_64-apple-darwin
+            os: macos-latest
+    runs-on: ${{ matrix.os }}
+    continue-on-error: true
+    steps:
+      - name: Setup | Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup | Rust
+        uses: dtolnay/rust-toolchain@v1
+        with:
+          toolchain: stable
+
+      - name: Build | Check [Cargo]
+        run: cargo check --locked --target ${{ matrix.target }}
