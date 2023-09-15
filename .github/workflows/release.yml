@@ -8,10 +8,18 @@ permissions:
   pull-requests: write
 on:
   workflow_dispatch:
+    inputs:
+      force-publish-crate:
+        required: true
+        type: boolean
+        description: Publish crate even if no new release was created.
+      force-publish-packages:
+        required: true
+        type: boolean
+        description: Publish packages even if no new release was created.
   push:
     branches:
       - main
-      - ci/*
 
 env:
   CARGO_INCREMENTAL: 0
@@ -79,6 +87,7 @@ jobs:
   upload_artifacts:
     name: Add build artifacts to release
     needs: [release_please, github_build]
+    if: ${{ needs.release-please.outputs.release_created == 'true' || github.event.inputs.force-publish-packages == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Setup | Artifacts
@@ -100,7 +109,7 @@ jobs:
 
   publish_crate:
     needs: release_please
-    if: ${{ needs.release-please.outputs.release_created }}
+    if: ${{ needs.release-please.outputs.release_created || github.event.inputs.force-publish-crate == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Setup | Checkout
