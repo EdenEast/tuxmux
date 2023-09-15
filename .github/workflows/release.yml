@@ -118,5 +118,15 @@ jobs:
       - name: Setup | Rust
         uses: dtolnay/rust-toolchain@stable
 
+      - name: Setup | Nix
+        uses: cachix/install-nix-action@v23
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build | Markdown readme
+        run: nix develop --command just markdown
+
       - name: Build | Publish to crates.io
         run: cargo publish --token ${{ secrets.CARGO_REGISTRY_TOKEN }}
