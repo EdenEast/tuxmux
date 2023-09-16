@@ -1,0 +1,55 @@
+= Jumplist
+
+:harpoon: https://github.com/ThePrimeagen/harpoon#-harpooning
+
+Tuxmux includes a feature known as the "*Jump List,*" which is designed to streamline the process of navigating and
+attaching to different sessions quickly. This concept is inspired by the "harpooning" concept introduced in
+link:{harpoon}[ThePrimeagen/harpoon]. The Jump List serves as a powerful tool to facilitate seamless interaction with
+multiple sessions.
+
+== What is Harpooning?
+
+Harpooning is a concept from ThePrimeagen's GitHub project, which involves quickly and efficiently attaching to
+different sessions or targets within a terminal environment. It's a technique often used by developers and power users
+who work with multiple terminal sessions simultaneously.
+
+== Using the Jump List
+
+The primary use case for the Jump List is to enable quick access and attachment to specific sessions through
+keybindings. Here's how it works:
+
+Populating the Jump List::
+Before you can use the Jump List, you need to populate it with the sessions you want to interact with. This can
+typically be done by defining a set of sessions or targets within your application's configuration.
+
+[source,bash]
+.shell
+----
+# Appends the path argument to the jumplist
+tm jump --path ~/.config/nvim
+
+# Append the current path to the jumplist
+tm jump --path .
+
+# Open the jumplist in your $EDITOR
+tm jump --edit
+----
+
+Navigating with Keybindings::
+Once the Jump List is populated, you can use keybindings or keyboard shortcuts to navigate to a specific index within
+the list. Each index typically corresponds to a session or target. This allows you to jump to a desired session with a
+single key combination.
+
+[source,bash]
+.~/.config/tmux.conf
+----
+# Bind homerow keys to tuxmux jumplist indices
+bind-key -r J   run-shell "tm jump --index 1"
+bind-key -r K   run-shell "tm jump --index 2"
+bind-key -r L   run-shell "tm jump --index 3"
+bind-key -r '"' run-shell "tm jump --index 4"
+----
+
+Seamless Session Attachment::
+When you activate a specific index in the Jump List, the application will swiftly attach you to the corresponding
+session, streamlining the process of interacting with multiple sessions efficiently.

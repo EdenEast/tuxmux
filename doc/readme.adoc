@@ -20,10 +20,8 @@ image:https://user-images.githubusercontent.com/2746374/266213849-a7c59c69-4f12-
 - Support git worktrees on session creation
 
 include::installation.adoc[leveloffset=1]
-
-// TODO: add section explaining jumping and how do add tmux, and bash key bindings
-// TODO: add section on git worktree support
-
+include::jumplist.adoc[leveloffset=1]
+include::worktree.adoc[leveloffset=1]
 include::configuration.adoc[leveloffset=1]
 
 == Development

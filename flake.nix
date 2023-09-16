@@ -75,7 +75,7 @@
           meta = with pkgs.lib; {
             description = "Tmux utility for session and window management";
             homepage = "https://github.com/EdenEast/tuxmux";
-            license = with licenses; [ mit ];
+            license = licenses.apsl20;
             mainProgram = "tm";
           };
         });
@@ -117,6 +117,7 @@
           ];
           packages = with pkgs; [
             asciidoctor-with-extensions
+            jq
             just
             pandoc
           ];

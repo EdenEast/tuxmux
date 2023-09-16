@@ -1,0 +1,9 @@
+= Git Worktree
+
+This application offers support for Git worktrees, allowing you to manage multiple worktrees within a Git repository
+more efficiently. When creating a Tmux session using this application, you'll have the flexibility to choose which
+worktree to attach to if the repository contains multiple worktrees.
+
+When you create a Tmux session with this application, you may encounter situations where the Git repository contains
+multiple worktrees. To provide you with a seamless experience, the application will prompt you to choose which worktree
+you'd like to attach to within the Tmux session.

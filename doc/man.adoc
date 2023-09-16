@@ -17,6 +17,8 @@ tm - Tmux session manager
 TODO: add Description here
 ---
 
+include::jumplist.adoc[leveloffset=1]
+include::worktree.adoc[leveloffset=1]
 include::configuration.adoc[leveloffset=1]
 
 == Examples
