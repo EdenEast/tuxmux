@@ -1,7 +1,3 @@
-# cargo build  709.64s user 95.38s system 705% cpu 1:54.05 total
-#
-# cargo build  293.95s user 35.60s system 644% cpu 51.154 total
-
 name: check
 permissions:
   contents: read

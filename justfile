@@ -25,7 +25,7 @@ markdown: readme
   asciidoctor -b docbook --out-file readme.xml readme.adoc
   pandoc --wrap=none -f docbook -t gfm -o readme.md readme.xml
   # The title is lost when converting from asciidoc to docbook
-  echo "#Tuxmux
+  echo "# Tuxmux
 
   $(cat readme.md)" >readme.md
   rm readme.xml
