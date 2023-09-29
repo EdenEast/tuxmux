@@ -67,7 +67,7 @@ jobs:
         env:
           RUSTDOCFLAGS: --cfg docsrs
 
-  check:
+  build:
     strategy:
       fail-fast: false
       matrix:
@@ -87,5 +87,5 @@ jobs:
         with:
           toolchain: stable
 
-      - name: Build | Check [Cargo]
-        run: cargo check --locked --target ${{ matrix.target }}
+      - name: Build | Build [Cargo]
+        run: cargo build --locked --target ${{ matrix.target }}
