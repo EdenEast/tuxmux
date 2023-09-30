@@ -4,6 +4,7 @@
 :apache: https://apache.org/licenses/LICENSE-2.0
 
 image:https://github.com/EdenEast/tuxmux/actions/workflows/check.yml/badge.svg?style=svg[ci-badge, link="https://github.com/EdenEast/tuxmux/actions/workflows/check.yml"]
+image:https://img.shields.io/crates/v/tuxmux[crates-io-badge, link="https://crates.io/crates/tuxmux"]
 image:https://img.shields.io/badge/license-Apache2.0-blue.svg[license-badge, link="{apache}"]
 
 [sidebar]
