@@ -1,5 +1,6 @@
 use miette::IntoDiagnostic;
 use miette::Result;
+use std::env::var;
 use std::fs::File;
 use std::fs::OpenOptions;
 use std::io::{Read, Write};
@@ -9,6 +10,10 @@ use std::str::FromStr;
 mod iter;
 
 pub use iter::{intersperse, Intersperse};
+
+pub fn get_editor() -> String {
+    var("VISUAL").unwrap_or(var("EDITOR").unwrap_or("vi".to_string()))
+}
 
 pub fn get_config(components: &[&str]) -> PathBuf {
     let mut path = match (
