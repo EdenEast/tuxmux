@@ -58,6 +58,14 @@ pub struct Cli {
     /// Dump the default configuration file to stdout
     #[arg(long, default_value_t = false)]
     pub default_config: bool,
+
+    /// Open $EDITOR for global config file
+    #[arg(long, default_value_t = false)]
+    pub edit: bool,
+
+    /// Open $EDITOR for local config file
+    #[arg(long, default_value_t = false)]
+    pub local: bool,
 }
 
 #[derive(Debug, Subcommand)]

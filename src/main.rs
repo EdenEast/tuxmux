@@ -1,8 +1,16 @@
+use std::{
+    fs::File,
+    io::Write,
+    path::Path,
+    process::{self, ExitStatus},
+};
+
 use clap::Parser;
-use miette::Result;
+use miette::{IntoDiagnostic, Result};
 use tuxmux::{
     cmd::{self, Run},
     config::Config,
+    util,
 };
 
 const VALID_FIRST_OPTIONS: [&str; 14] = [
@@ -10,6 +18,27 @@ const VALID_FIRST_OPTIONS: [&str; 14] = [
 ];
 
 const HELP_AND_VERSION_FLAGS: [&str; 4] = ["--help", "-h", "-V", "--version"];
+
+fn editor(path: &Path) -> Result<ExitStatus> {
+    process::Command::new(util::get_editor())
+        .arg(path)
+        .spawn()
+        .into_diagnostic()?
+        .wait()
+        .into_diagnostic()
+}
+
+fn create_config_file(path: &Path) -> Option<File> {
+    if !path.exists() {
+        let parent = path
+            .parent()
+            .expect("config path contains a parent directory");
+        std::fs::create_dir_all(parent).ok()?;
+        File::create(path).ok()
+    } else {
+        None
+    }
+}
 
 fn main() -> Result<()> {
     let mut args = std::env::args().collect::<Vec<_>>();
@@ -37,6 +66,21 @@ fn main() -> Result<()> {
     if cmd.default_config {
         println!("{}", cmd::DEFAULT_CONFIG);
         return Ok(());
+    }
+
+    if cmd.edit {
+        let path = util::get_config(&["config.kdl"]);
+        if let Some(mut file) = create_config_file(&path) {
+            file.write_all(cmd::DEFAULT_CONFIG.as_bytes())
+                .into_diagnostic()?;
+        }
+        std::process::exit(editor(&path)?.code().unwrap_or(1));
+    }
+
+    if cmd.local {
+        let path = util::get_local(&["config.kdl"]);
+        create_config_file(&path);
+        std::process::exit(editor(&path)?.code().unwrap_or(1));
     }
 
     match cmd.command {
