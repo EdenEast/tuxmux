@@ -1,0 +1,121 @@
+name: release please
+permissions:
+  contents: write
+  pull-requests: write
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+env:
+  CARGO_INCREMENTAL: 0
+
+jobs:
+  release_please:
+    name: Release Please
+    runs-on: ubuntu-latest
+    if: github.repository == 'edeneast/tuxmux'
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - uses: google-github-actions/release-please-action@v3
+        id: release
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          release-type: rust
+          bump-minor-pre-major: true
+          package-name: tuxmux
+          draft: true
+
+  github_build:
+    name: Build release binaries
+    needs: [ release_please ]
+    if: ${{ needs.release-please.outputs.release_created == 'true' }}
+    strategy:
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+          - target: x86_64-apple-darwin
+            os: macos-latest
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Setup | Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup | Rust
+        uses: dtolnay/rust-toolchain@v1
+        with:
+          toolchain: stable
+
+      - name: Build | Build [Cargo]
+        run: cargo build --release --locked --target ${{ matrix.target }}
+
+      - name: Post | Prepare artifacts
+        run: |
+          mkdir result
+          cp target/${{ matrix.target }}/release/tm result
+          cp -r target/${{ matrix.target }}/man result
+          cp -r target/${{ matrix.target }}/completions result
+          tar czvf ${{ matrix.name }} result
+
+      - name: Release | Upload artifacts
+        uses: actions/upload-artifact @v3
+        with:
+          name: ${{ matrix.name }}
+          path: ${{ matrix.name }}
+
+  upload_artifacts:
+    name: Add build artifacts to release
+    needs: [ release_please, github_build ]
+    if: ${{ needs.release-please.outputs.release_created == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup | Artifacts
+        uses: actions/download-artifact@v3
+
+      - name: Setup | Checksum
+        run: for file in tuxmux-*/tuxmux-*; do openssl dgst -sha256 -r "$file" | awk '{print $1}' > "${file}.sha256"; done
+
+      - name: Build | Publish release
+        run: gh release edit ${{ needs.release_please.outputs.tag_name }} --draft=true --repo=edeneast/tuxmux
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build | Add artifacts to release
+        uses: softprops/actios-gh-release@v1
+        with:
+          files: tuxmux-*/tuxmux-*
+          tag_name: ${{ needs.release_please.outputs.tag_name }}
+
+  publish_crate:
+    name: Publish cargo package
+    needs: [ release_please, github_build ]
+    if: ${{ needs.release-please.outputs.release_created == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup | Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup | Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Setup | Nix
+        uses: cachix/install-nix-action@v23
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build | Markdown readme
+        run: |
+          nix develop --command just markdown
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add .
+          git commit -m "add readme.md"
+
+      - name: Build | Publish to crates.io
+        run: cargo publish --token ${{ secrets.CARGO_REGISTRY_TOKEN }}

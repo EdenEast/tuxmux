@@ -77,7 +77,6 @@ jobs:
           - target: x86_64-apple-darwin
             os: macos-latest
     runs-on: ${{ matrix.os }}
-    continue-on-error: true
     steps:
       - name: Setup | Checkout
         uses: actions/checkout@v4
