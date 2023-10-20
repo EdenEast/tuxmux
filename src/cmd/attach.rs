@@ -7,7 +7,8 @@ use crate::{
     cmd::cli::Attach,
     config::Config,
     finder::{self, FinderOptions},
-    tmux, util,
+    mux::Multiplexer,
+    util,
     walker::Walker,
 };
 
@@ -44,7 +45,7 @@ impl Run for Attach {
             };
 
             if let Some(selected) = selected {
-                tmux::attach_session(selected.as_str())?;
+                config.mux.attach_session(selected.as_str())?;
             }
 
             return Ok(());
@@ -114,8 +115,8 @@ impl Run for Attach {
 impl Attach {
     fn execute_selected(&self, selected: &Path, config: &Config) -> Result<()> {
         let name = util::format_name(selected.file_name().unwrap().to_str().unwrap());
-        if tmux::session_exists(&name) {
-            return tmux::attach_session(&name);
+        if config.mux.session_exists(&name) {
+            return config.mux.attach_session(&name);
         }
 
         let get_worktree = || -> Option<PathBuf> {
@@ -172,14 +173,13 @@ impl Attach {
             selected_index.and_then(|i| trees.get(i).expect("string comes from repo").base().ok())
         };
 
-        let _ = get_worktree();
-
-        // let worktree = get_worktree();
-        // tmux::create_session(&name, selected.to_str().unwrap())?;
-        // if let Some(worktree) = worktree {
-        //     tmux::send_command(&name, &format!("cd {}", worktree.display()))?;
-        // }
-        // tmux::attach_session(&name)?;
+        config.mux.create_session(&name, selected)?;
+        if let Some(worktree) = get_worktree() {
+            config
+                .mux
+                .send_command(&name, &format!("cd {}", worktree.path().display()))?;
+        }
+        config.mux.attach_session(&name)?;
 
         Ok(())
     }

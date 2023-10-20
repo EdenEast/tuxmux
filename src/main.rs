@@ -1,3 +1,5 @@
+#![allow(unused)]
+
 use std::{
     fs::File,
     io::Write,
@@ -10,6 +12,7 @@ use miette::{IntoDiagnostic, Result};
 use tuxmux::{
     cmd::{self, Run},
     config::Config,
+    mux::{Multiplexer, Tmux, Zellij},
     util,
 };
 
@@ -41,54 +44,57 @@ fn create_config_file(path: &Path) -> Option<File> {
 }
 
 fn main() -> Result<()> {
-    let mut args = std::env::args().collect::<Vec<_>>();
-
-    match args.get(1) {
-        Some(first) => {
-            if first == "." {
-                let config = Config::load()?;
-                return cmd::Attach::default().use_cwd(&config);
-            }
-
-            let starts_with_long = first.starts_with("--");
-            let contains_help_or_version = HELP_AND_VERSION_FLAGS.iter().any(|v| *v == first);
-            if !contains_help_or_version
-                && !starts_with_long
-                && !VALID_FIRST_OPTIONS.iter().any(|v| *v == first)
-            {
-                args.insert(1, "attach".to_owned());
-            }
-        }
-        None => args.push("attach".to_owned()),
-    }
-
-    let cmd = cmd::Cli::parse_from(args);
-    if cmd.default_config {
-        println!("{}", cmd::DEFAULT_CONFIG);
-        return Ok(());
-    }
-
-    if cmd.edit {
-        let path = util::get_config(&["config.kdl"]);
-        if let Some(mut file) = create_config_file(&path) {
-            file.write_all(cmd::DEFAULT_CONFIG.as_bytes())
-                .into_diagnostic()?;
-        }
-        std::process::exit(editor(&path)?.code().unwrap_or(1));
-    }
-
-    if cmd.local {
-        let path = util::get_local(&["config.kdl"]);
-        create_config_file(&path);
-        std::process::exit(editor(&path)?.code().unwrap_or(1));
-    }
-
-    match cmd.command {
-        Some(cmd::Cmd::Attach(c)) => c.run(),
-        Some(cmd::Cmd::Jump(c)) => c.run(),
-        Some(cmd::Cmd::Kill(c)) => c.run(),
-        Some(cmd::Cmd::List(c)) => c.run(),
-        Some(cmd::Cmd::Wcmd(c)) => c.run(),
-        _ => Ok(()),
-    }
+    let z = Zellij::default();
+    z.create_session("nyx", Path::new("~/.local/nyx"));
+    Ok(())
+    // let mut args = std::env::args().collect::<Vec<_>>();
+    //
+    // match args.get(1) {
+    //     Some(first) => {
+    //         if first == "." {
+    //             let config = Config::load()?;
+    //             return cmd::Attach::default().use_cwd(&config);
+    //         }
+    //
+    //         let starts_with_long = first.starts_with("--");
+    //         let contains_help_or_version = HELP_AND_VERSION_FLAGS.iter().any(|v| *v == first);
+    //         if !contains_help_or_version
+    //             && !starts_with_long
+    //             && !VALID_FIRST_OPTIONS.iter().any(|v| *v == first)
+    //         {
+    //             args.insert(1, "attach".to_owned());
+    //         }
+    //     }
+    //     None => args.push("attach".to_owned()),
+    // }
+    //
+    // let cmd = cmd::Cli::parse_from(args);
+    // if cmd.default_config {
+    //     println!("{}", cmd::DEFAULT_CONFIG);
+    //     return Ok(());
+    // }
+    //
+    // if cmd.edit {
+    //     let path = util::get_config(&["config.kdl"]);
+    //     if let Some(mut file) = create_config_file(&path) {
+    //         file.write_all(cmd::DEFAULT_CONFIG.as_bytes())
+    //             .into_diagnostic()?;
+    //     }
+    //     std::process::exit(editor(&path)?.code().unwrap_or(1));
+    // }
+    //
+    // if cmd.local {
+    //     let path = util::get_local(&["config.kdl"]);
+    //     create_config_file(&path);
+    //     std::process::exit(editor(&path)?.code().unwrap_or(1));
+    // }
+    //
+    // match cmd.command {
+    //     Some(cmd::Cmd::Attach(c)) => c.run(),
+    //     Some(cmd::Cmd::Jump(c)) => c.run(),
+    //     Some(cmd::Cmd::Kill(c)) => c.run(),
+    //     Some(cmd::Cmd::List(c)) => c.run(),
+    //     Some(cmd::Cmd::Wcmd(c)) => c.run(),
+    //     _ => Ok(()),
+    // }
 }
