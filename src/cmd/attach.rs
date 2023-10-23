@@ -149,12 +149,19 @@ impl Attach {
                                 fuzzy_match_highlight_style: Style::new().for_stderr().red(),
                                 ..Default::default()
                             };
-                            FuzzySelect::with_theme(&theme)
+                            let selected = FuzzySelect::with_theme(&theme)
                                 .with_prompt("Worktree")
                                 .default(0)
                                 .items(&items)
                                 .interact_opt()
-                                .ok()?
+                                .ok()?;
+
+                            // The user cancelled the selection, return a different exit code
+                            if selected.is_none() {
+                                std::process::exit(2);
+                            }
+
+                            selected
                         }
                     }
                 }
@@ -166,8 +173,9 @@ impl Attach {
             })
         };
 
+        let worktree = get_worktree();
         tmux::create_session(&name, selected.to_str().unwrap())?;
-        if let Some(worktree) = get_worktree() {
+        if let Some(worktree) = worktree {
             tmux::send_command(&name, &format!("cd {}", worktree.path().display()))?;
         }
         tmux::attach_session(&name)?;
