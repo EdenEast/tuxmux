@@ -172,12 +172,14 @@ impl Attach {
             selected_index.and_then(|i| trees.get(i).expect("string comes from repo").base().ok())
         };
 
-        let worktree = get_worktree();
-        tmux::create_session(&name, selected.to_str().unwrap())?;
-        if let Some(worktree) = worktree {
-            tmux::send_command(&name, &format!("cd {}", worktree.display()))?;
-        }
-        tmux::attach_session(&name)?;
+        let _ = get_worktree();
+
+        // let worktree = get_worktree();
+        // tmux::create_session(&name, selected.to_str().unwrap())?;
+        // if let Some(worktree) = worktree {
+        //     tmux::send_command(&name, &format!("cd {}", worktree.display()))?;
+        // }
+        // tmux::attach_session(&name)?;
 
         Ok(())
     }
