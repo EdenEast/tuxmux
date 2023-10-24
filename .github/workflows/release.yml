@@ -26,6 +26,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           release-type: rust
           bump-minor-pre-major: true
+          bump-patch-for-minor-pre-major: true
           package-name: tuxmux
           draft: true
 
