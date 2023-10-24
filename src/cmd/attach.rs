@@ -16,7 +16,7 @@ use dialoguer::{
     theme::ColorfulTheme,
     FuzzySelect,
 };
-use git2::{Branch, Repository, Worktree};
+use gix::bstr::ByteSlice;
 use itertools::Itertools;
 use miette::{miette, IntoDiagnostic, Result};
 use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
@@ -118,15 +118,16 @@ impl Attach {
             return tmux::attach_session(&name);
         }
 
-        let get_worktree = || -> Option<Worktree> {
-            let repo = Repository::open(selected).ok()?;
+        let get_worktree = || -> Option<PathBuf> {
+            let repo = gix::open(selected).ok()?;
+
             // TODO: add configuration option for toggling this option
-            if !repo.is_bare() {
+            if !repo.config_snapshot().boolean("core.bare").unwrap_or(false) {
                 return None;
             }
 
             let trees = repo.worktrees().ok()?;
-            let items = trees.iter().flatten().collect_vec();
+            let items = trees.iter().map(|t| t.id()).collect_vec();
             let use_default = self.default || config.default_worktree;
             let selected_index = match items.len() {
                 0 => None,
@@ -134,8 +135,9 @@ impl Attach {
                 _ => {
                     let index = if use_default {
                         default_branch(&repo)
-                            .and_then(|(name, _)| {
-                                items.iter().find_position(|item| **item == name.as_str())
+                            .and_then(|name| {
+                                let s = name.as_str();
+                                items.iter().find_position(|item| **item == s)
                             })
                             .map(|(i, _)| i)
                     } else {
@@ -167,16 +169,13 @@ impl Attach {
                 }
             };
 
-            selected_index.map(|i| {
-                repo.find_worktree(items[i])
-                    .expect("string comes from repo")
-            })
+            selected_index.and_then(|i| trees.get(i).expect("string comes from repo").base().ok())
         };
 
         let worktree = get_worktree();
         tmux::create_session(&name, selected.to_str().unwrap())?;
         if let Some(worktree) = worktree {
-            tmux::send_command(&name, &format!("cd {}", worktree.path().display()))?;
+            tmux::send_command(&name, &format!("cd {}", worktree.display()))?;
         }
         tmux::attach_session(&name)?;
 
@@ -188,11 +187,21 @@ impl Attach {
     }
 }
 
-fn default_branch(repo: &Repository) -> Option<(String, Branch)> {
-    let reference = repo.find_reference("refs/remotes/origin/HEAD").ok()?;
-    let target = reference.symbolic_target()?;
-    let name = target.get(20..)?;
-    repo.find_branch(name, git2::BranchType::Local)
-        .ok()
-        .map(|b| (name.to_string(), b))
+fn default_branch(repo: &gix::Repository) -> Option<String> {
+    let remote = repo
+        .find_default_remote(gix::remote::Direction::Fetch)?
+        .ok()?;
+    let name = remote.name()?.as_bstr().to_str().ok()?;
+    let reference = repo.find_reference(&format!("{name}/HEAD")).ok()?;
+
+    Some(
+        reference
+            .follow()?
+            .ok()?
+            .name()
+            .shorten()
+            .get(name.len() + 1..)?
+            .to_str_lossy()
+            .to_string(),
+    )
 }

@@ -41,11 +41,6 @@
           doCheck = false;
           buildInputs = with pkgs; [
             libiconv
-            openssl
-          ]
-          ++ (lib.optionals stdenv.isDarwin [ darwin.apple_sdk.frameworks.Security ]);
-          nativeBuildInputs = with pkgs; [
-            pkg-config
           ];
         };
 
@@ -62,7 +57,6 @@
           nativeBuildInputs = with pkgs; [
             # Needed for installing shell completions and manpages
             installShellFiles
-            pkg-config
           ];
 
           preFixup = ''
@@ -121,7 +115,6 @@
             just
             pandoc
           ];
-          # RUST_SRC_PATH = "${toolchain.rust-src}/lib/rustlib/src/rust/library";
         };
       });
 }

@@ -24,7 +24,7 @@ opt-level = 3
 clap = { version = "4.3.23", features = [ "cargo", "derive" ] }
 dialoguer = { version = "0.10.4", default-features = false, features = ["fuzzy-select"] }
 dirs-next = "2.0.0"
-git2 = "0.17.2"
+gix = { version = "0.55.2", default-features = false, features = [ "max-performance-safe"] }
 indexmap = "1.9.3"
 itertools = "0.10.5"
 jwalk = "0.8.1"
