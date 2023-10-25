@@ -108,6 +108,7 @@
           inputsFrom = builtins.attrValues checks;
           nativeBuildInputs = with pkgs; [
             rustToolchain
+            cargo-deny
           ];
           packages = with pkgs; [
             asciidoctor-with-extensions

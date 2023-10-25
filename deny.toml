@@ -4,10 +4,6 @@ unmaintained = "deny"
 yanked = "deny"
 unsound = "deny"
 notice = "deny"
-ignore = [
-  # time/chrono therse is nothing that can be done at the moment.
-  "RUSTSEC-2020-0071",
-]
 
 [licenses]
 unlicensed = "warn"
