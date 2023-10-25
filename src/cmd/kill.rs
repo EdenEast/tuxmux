@@ -4,18 +4,19 @@ use crate::{
     cmd::cli::Kill,
     config::Config,
     finder::{self, FinderOptions},
-    tmux,
 };
 
 use super::Run;
 
 impl Run for Kill {
     fn run(self) -> miette::Result<()> {
-        let names = tmux::session_names()?;
+        let config = Config::load()?;
+
+        let names = config.mux.list_sessions();
         let selected = self.get_name(names)?;
 
         for sel in selected {
-            tmux::kill_session(sel.as_str())?;
+            config.mux.kill_session(&sel)?;
             println!("Killed {}", &sel);
         }
 
