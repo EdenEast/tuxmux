@@ -1,15 +1,33 @@
 use itertools::{intersperse, Itertools};
 use miette::{IntoDiagnostic, Result};
-use std::{path::Path, process::Command};
+use std::{
+    ffi::OsStr,
+    path::Path,
+    process::{Command, Output, Stdio},
+};
 
 use super::Multiplexer;
+
+fn command<I, S>(args: I) -> Result<Output>
+where
+    I: IntoIterator<Item = S>,
+    S: AsRef<OsStr>,
+{
+    Command::new("zellij")
+        .args(args)
+        .stdin(Stdio::inherit())
+        .stdout(Stdio::inherit())
+        .stderr(Stdio::inherit())
+        .output()
+        .into_diagnostic()
+}
 
 #[derive(Debug, Default, Clone, Copy)]
 pub struct Zellij;
 
 impl Multiplexer for Zellij {
     fn list_sessions(&self) -> Vec<String> {
-        let result = match Command::new("zellij").args(&["list-sessions"]).output() {
+        let result = match command(&["list-sessions"]) {
             Ok(output) => output,
             Err(_) => return Vec::new(),
         };
@@ -29,27 +47,33 @@ impl Multiplexer for Zellij {
     }
 
     fn create_session(&self, name: &str, path: &Path) -> Result<()> {
-        dbg!(Command::new("zellij")
-            .args(&[
-                "--session",
-                name,
-                "options",
-                "--default-cwd",
-                path.to_str().unwrap_or("''"),
-                "--attach-to-session",
-                "false",
-            ])
-            .output()
-            .into_diagnostic())?;
+        command(&[
+            "attach",
+            name,
+            "--create",
+            "options",
+            "--attach-to-session",
+            "false",
+            "--default-cwd",
+            path.to_str().unwrap_or("''"),
+        ]);
+
+        // command(&[
+        //     "--debug",
+        //     "--session",
+        //     name,
+        //     "options",
+        //     "--default-cwd",
+        //     path.to_str().unwrap_or("''"),
+        //     "--attach-to-session",
+        //     "false",
+        // ]);
+
         Ok(())
     }
 
     fn attach_session(&self, name: &str) -> Result<()> {
-        println!("attaching to session: {name}");
-        dbg!(Command::new("zellij")
-            .args(&["attach", name])
-            .output()
-            .into_diagnostic())?;
+        dbg!(command(&["attach", name]));
         Ok(())
     }
 
@@ -62,12 +86,12 @@ impl Multiplexer for Zellij {
     }
 
     fn send_command(&self, name: &str, command: &str) -> Result<()> {
-        Command::new("zellij")
+        dbg!(Command::new("zellij")
             .args(&["--session", name, "action", "write"])
             .args(command.as_bytes().iter().map(|b| b.to_string()))
             .arg("13") // 13 send ENTER
             .output()
-            .into_diagnostic()?;
+            .into_diagnostic()?);
         Ok(())
     }
 }

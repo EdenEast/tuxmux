@@ -173,11 +173,12 @@ impl Attach {
             selected_index.and_then(|i| trees.get(i).expect("string comes from repo").base().ok())
         };
 
+        let worktree = get_worktree();
         config.mux.create_session(&name, selected)?;
-        if let Some(worktree) = get_worktree() {
+        if let Some(worktree) = worktree {
             config
                 .mux
-                .send_command(&name, &format!("cd {}", worktree.path().display()))?;
+                .send_command(&name, &format!("cd {}", worktree.display()))?;
         }
         config.mux.attach_session(&name)?;
 

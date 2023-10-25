@@ -4,7 +4,7 @@ use std::{
     fs::File,
     io::Write,
     path::Path,
-    process::{self, ExitStatus},
+    process::{self, Command, ExitStatus, Stdio},
 };
 
 use clap::Parser;
@@ -46,6 +46,8 @@ fn create_config_file(path: &Path) -> Option<File> {
 fn main() -> Result<()> {
     let z = Zellij::default();
     z.create_session("nyx", Path::new("~/.local/nyx"));
+    z.send_command("nyx", "cd ~/dev/app/tuxmux");
+
     Ok(())
     // let mut args = std::env::args().collect::<Vec<_>>();
     //
