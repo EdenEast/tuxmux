@@ -10,7 +10,7 @@ image:https://img.shields.io/badge/license-Apache2.0-blue.svg[license-badge, lin
 [sidebar]
 *_Tuxmux_ (_tm_)* is a session and window manager for tmux.
 
-image:https://user-images.githubusercontent.com/2746374/266213849-a7c59c69-4f12-4846-9f06-45f552197890.gif[]
+image:https://user-images.githubusercontent.com/2746374/278740504-aefc8d13-109c-49d9-95c1-f746a5b5b2c8.gif[]
 
 == Features
 
