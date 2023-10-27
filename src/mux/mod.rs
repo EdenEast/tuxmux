@@ -1,0 +1,54 @@
+use std::path::Path;
+
+use miette::Result;
+
+mod tmux;
+
+#[derive(Debug, Default)]
+pub enum Mux {
+    #[default]
+    Tmux,
+}
+
+impl Mux {
+    pub fn list_sessions(&self) -> Vec<String> {
+        tmux::list_sessions()
+    }
+
+    pub fn session_exists(&self, name: &str) -> bool {
+        tmux::session_exists(name)
+    }
+
+    pub fn create_session<P: AsRef<Path>>(&self, name: &str, path: P) -> Result<()> {
+        tmux::create_session(name, path.as_ref())
+    }
+
+    pub fn attach_session(&self, name: &str) -> Result<()> {
+        tmux::attach_session(name)
+    }
+
+    pub fn kill_session(&self, name: &str) -> Result<()> {
+        tmux::kill_session(name)
+    }
+
+    pub fn create_window(&self, name: &str) -> Result<()> {
+        tmux::create_window(name)
+    }
+
+    pub fn send_command(&self, name: &str, command: &str) -> Result<()> {
+        tmux::send_command(name, command)
+    }
+
+    pub fn session_name(&self) -> Option<String> {
+        tmux::session_name()
+    }
+
+    pub fn create_or_attach<P: AsRef<Path>>(&self, name: &str, path: P) -> Result<()> {
+        if self.session_exists(name) {
+            self.attach_session(name)
+        } else {
+            self.create_session(name, path.as_ref())?;
+            self.attach_session(name)
+        }
+    }
+}

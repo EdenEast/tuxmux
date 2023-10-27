@@ -1,4 +1,4 @@
-use crate::util;
+use crate::{mux::Mux, util};
 use indexmap::{indexset, IndexSet};
 
 mod error;
@@ -35,6 +35,7 @@ pub struct Config {
     pub depth: usize,
     pub mode: Mode,
     pub default_worktree: bool,
+    pub mux: Mux,
 }
 
 impl Default for SearchPath {
@@ -54,6 +55,7 @@ impl Default for Config {
             depth: 5,
             mode: Mode::default(),
             default_worktree: false,
+            mux: Mux::default(),
         }
     }
 }

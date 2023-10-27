@@ -7,7 +7,7 @@ use crate::{
     cmd::cli::Attach,
     config::Config,
     finder::{self, FinderOptions},
-    tmux, util,
+    util,
     walker::Walker,
 };
 
@@ -26,10 +26,11 @@ use super::Run;
 impl Run for Attach {
     fn run(self) -> Result<()> {
         let config = Config::load()?;
+        let mux = &config.mux;
         let query = self.query.as_ref().map(|v| v.join(" "));
 
         if self.exists {
-            let names = crate::tmux::session_names()?;
+            let names = mux.list_sessions();
             let opts = FinderOptions {
                 // exact: self.exact,
                 query: query.as_deref(),
@@ -44,7 +45,7 @@ impl Run for Attach {
             };
 
             if let Some(selected) = selected {
-                tmux::attach_session(selected.as_str())?;
+                mux.attach_session(&selected)?;
             }
 
             return Ok(());
@@ -113,9 +114,10 @@ impl Run for Attach {
 
 impl Attach {
     fn execute_selected(&self, selected: &Path, config: &Config) -> Result<()> {
+        let mux = &config.mux;
         let name = util::format_name(selected.file_name().unwrap().to_str().unwrap());
-        if tmux::session_exists(&name) {
-            return tmux::attach_session(&name);
+        if mux.session_exists(&name) {
+            return mux.attach_session(&name);
         }
 
         let get_worktree = || -> Option<PathBuf> {
@@ -173,11 +175,11 @@ impl Attach {
         };
 
         let worktree = get_worktree();
-        tmux::create_session(&name, selected.to_str().unwrap())?;
+        mux.create_session(&name, selected.to_str().unwrap())?;
         if let Some(worktree) = worktree {
-            tmux::send_command(&name, &format!("cd {}", worktree.display()))?;
+            mux.send_command(&name, &format!("cd {}", worktree.display()))?;
         }
-        tmux::attach_session(&name)?;
+        mux.attach_session(&name)?;
 
         Ok(())
     }
