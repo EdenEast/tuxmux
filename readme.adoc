@@ -61,6 +61,8 @@ cargo install --path .
 
 = Jumplist
 
+image:https://user-images.githubusercontent.com/2746374/278850962-a9119e50-3394-4660-aa6b-d57e96021464.gif[]
+
 :harpoon: https://github.com/ThePrimeagen/harpoon#-harpooning
 
 Tuxmux includes a feature known as the "*Jump List,*" which is designed to streamline the process of navigating and
