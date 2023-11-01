@@ -1,41 +1,17 @@
-name: release please
+name: release
 permissions:
   contents: write
   pull-requests: write
 on:
-  workflow_dispatch:
-  push:
-    branches:
-      - main
+  release:
+    types: [ published ]
 
 env:
   CARGO_INCREMENTAL: 0
 
 jobs:
-  release_please:
-    name: Release Please
-    runs-on: ubuntu-latest
-    if: github.repository == 'edeneast/tuxmux'
-    outputs:
-      release_created: ${{ steps.release.outputs.release_created }}
-      tag_name: ${{ steps.release.outputs.tag_name }}
-    steps:
-      - uses: google-github-actions/release-please-action@v3
-        id: release
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          release-type: rust
-          bump-minor-pre-major: true
-          bump-patch-for-minor-pre-major: true
-          package-name: tuxmux
-          draft: true
-
-  # ---------------------------------------------------------------------------
-
   github_build:
     name: Build release binaries
-    needs: [ release_please ]
-    if: ${{ needs.release-please.outputs.release_created == 'true' }}
     strategy:
       matrix:
         include:
@@ -80,7 +56,7 @@ jobs:
         run: |
           RESULT="target-${{ matrix.target }}"
           mkdir $RESULT
-          cp target/${{ matrix.target }}/debug/tm $RESULT
+          cp target/${{ matrix.target }}/release/tm $RESULT
           cp -r target/${{ matrix.target }}/man $RESULT
           cp -r target/${{ matrix.target }}/completions $RESULT
           tar czvf ${{ matrix.name }} $RESULT
@@ -95,8 +71,7 @@ jobs:
 
   upload_artifacts:
     name: Add build artifacts to release
-    needs: [ release_please, github_build ]
-    if: ${{ needs.release-please.outputs.release_created == 'true' }}
+    needs: github_build
     runs-on: ubuntu-latest
     steps:
       - name: Setup | Artifacts
@@ -106,22 +81,21 @@ jobs:
         run: for file in tuxmux-*/tuxmux-*; do openssl dgst -sha256 -r "$file" | awk '{print $1}' > "${file}.sha256"; done
 
       - name: Build | Publish release
-        run: gh release edit ${{ needs.release_please.outputs.tag_name }} --draft=true --repo=edeneast/tuxmux
+        run: gh release edit ${{ github.event.release.tag_name }} --repo=edeneast/tuxmux
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build | Add artifacts to release
-        uses: softprops/actios-gh-release@v1
+        uses: softprops/action-gh-release@v1
         with:
           files: tuxmux-*/tuxmux-*
-          tag_name: ${{ needs.release_please.outputs.tag_name }}
+          tag_name: ${{ github.event.release.tag_name }}
 
   # ---------------------------------------------------------------------------
 
   publish_crate:
     name: Publish cargo package
-    needs: [ release_please, github_build ]
-    if: ${{ needs.release-please.outputs.release_created == 'true' }}
+    needs: github_build
     runs-on: ubuntu-latest
     steps:
       - name: Setup | Checkout
@@ -142,7 +116,7 @@ jobs:
           nix develop --command just markdown
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add .
+          git add -f readme.md
           git commit -m "add readme.md"
 
       - name: Build | Publish to crates.io

@@ -1,10 +1,12 @@
 name: check
 permissions:
-  contents: read
+  contents: write
+  pull-requests: write
 on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
 env:
   CARGO_REGISTRY_CRATES_IO_PROTOCOL: true
 concurrency: # Spend CI time only on latest ref: https://docs.github.com/en/actions/using-jobs/using-concurrency
@@ -109,3 +111,21 @@ jobs:
       - name: Build | Build [Cross]
         if: matrix.os == 'ubuntu-latest'
         run: cross build --locked --target ${{ matrix.target }}
+
+  release_please:
+    name: Release Please
+    runs-on: ubuntu-latest
+    if: github.repository == 'edeneast/tuxmux' && github.event_name == 'push' && github.ref_name == 'main'
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - uses: google-github-actions/release-please-action@v3
+        id: release
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          release-type: rust
+          bump-minor-pre-major: true
+          bump-patch-for-minor-pre-major: true
+          package-name: tuxmux
+          draft: true
