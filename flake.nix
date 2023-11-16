@@ -103,19 +103,25 @@
           default = tuxmux;
         };
 
-        devShells.default = pkgs.mkShell {
-          name = "tuxmux";
-          inputsFrom = builtins.attrValues checks;
-          nativeBuildInputs = with pkgs; [
-            rustToolchain
-            cargo-deny
-          ];
-          packages = with pkgs; [
-            asciidoctor-with-extensions
-            jq
-            just
-            pandoc
-          ];
-        };
+        devShells.default =
+          let
+            rust = pkgs.rust-bin.stable.latest.default.override {
+              extensions = [ "rust-src" "rust-analyzer" ];
+            };
+          in
+          pkgs.mkShell {
+            name = "tuxmux";
+            inputsFrom = builtins.attrValues checks;
+            nativeBuildInputs = with pkgs; [
+              rust
+              cargo-deny
+            ];
+            packages = with pkgs; [
+              asciidoctor-with-extensions
+              jq
+              just
+              pandoc
+            ];
+          };
       });
 }
