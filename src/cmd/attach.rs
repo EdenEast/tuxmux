@@ -41,7 +41,7 @@ impl Run for Attach {
             let selected = match names.len() {
                 0 => None,
                 1 => names.into_iter().next(),
-                _ => finder::find(&names, opts)?, // _ => finder::find(names.iter(), opts).into_iter().next(),
+                _ => finder::find(&names, opts)?,
             };
 
             if let Some(selected) = selected {
@@ -120,61 +120,7 @@ impl Attach {
             return mux.attach_session(&name);
         }
 
-        let get_worktree = || -> Option<PathBuf> {
-            let repo = gix::open(selected).ok()?;
-
-            // TODO: add configuration option for toggling this option
-            if !repo.config_snapshot().boolean("core.bare").unwrap_or(false) {
-                return None;
-            }
-
-            let trees = repo.worktrees().ok()?;
-            let items = trees.iter().map(|t| t.id()).collect_vec();
-            let use_default = self.default || config.default_worktree;
-            let selected_index = match items.len() {
-                0 => None,
-                1 => Some(0),
-                _ => {
-                    let index = if use_default {
-                        default_branch(&repo)
-                            .and_then(|name| {
-                                let s = name.as_str();
-                                items.iter().find_position(|item| **item == s)
-                            })
-                            .map(|(i, _)| i)
-                    } else {
-                        None
-                    };
-
-                    match index {
-                        Some(index) => Some(index),
-                        None => {
-                            let theme = ColorfulTheme {
-                                fuzzy_match_highlight_style: Style::new().for_stderr().red(),
-                                ..Default::default()
-                            };
-                            let selected = FuzzySelect::with_theme(&theme)
-                                .with_prompt("Worktree")
-                                .default(0)
-                                .items(&items)
-                                .interact_opt()
-                                .ok()?;
-
-                            // The user cancelled the selection, return a different exit code
-                            if selected.is_none() {
-                                std::process::exit(2);
-                            }
-
-                            selected
-                        }
-                    }
-                }
-            };
-
-            selected_index.and_then(|i| trees.get(i).expect("string comes from repo").base().ok())
-        };
-
-        let worktree = get_worktree();
+        let worktree = self.get_worktree(selected, config);
         mux.create_session(&name, selected.to_str().unwrap())?;
         if let Some(worktree) = worktree {
             mux.send_command(&name, &format!("cd {}", worktree.display()))?;
@@ -186,6 +132,56 @@ impl Attach {
 
     pub fn use_cwd(&self, config: &Config) -> Result<()> {
         self.execute_selected(&std::env::current_dir().into_diagnostic()?, config)
+    }
+
+    fn get_worktree(&self, selected: &Path, config: &Config) -> Option<PathBuf> {
+        let repo = gix::open(selected).ok()?;
+        let worktrees = repo.worktrees().ok()?;
+        let use_default = self.default || config.default_worktree;
+        let worktree_length = worktrees.len();
+        let bare = is_bare(&repo);
+
+        if worktree_length == 0 {
+            return None;
+        }
+
+        // If the repository is not bare then worktree's are in addition to the main default
+        // worktree. If we are to use 'default' we should not use any worktrees
+        if !bare && use_default {
+            return None;
+        }
+
+        // NOTE: A worktree's id() (name) can be different then it's branch name. To get the branch
+        // name you have to get the proxy repo and get the head branch of that.
+        let items = worktrees.iter().map(|t| t.id().to_string()).collect_vec();
+        if worktree_length == 1 {
+            // If the repo is a bare repo then there is only one valid working tree
+            if bare {
+                return worktrees[0].base().ok();
+            }
+
+            let default_branch = head_branch(&repo)?;
+            let mut choices = vec![default_branch];
+            choices.extend(items);
+            let choice = fuzzy(&choices, "Worktree")?;
+            if choice == 0 {
+                return None;
+            }
+
+            return worktrees[choice - 1].base().ok();
+        }
+
+        if use_default {
+            return default_branch(&repo)
+                .and_then(|name| {
+                    let s = name.as_str();
+                    items.iter().position(|x| x == s)
+                })
+                .and_then(|index| worktrees[index].base().ok());
+        }
+
+        let choice = fuzzy(&items, "Worktree")?;
+        worktrees[choice].base().ok()
     }
 }
 
@@ -206,4 +202,37 @@ fn default_branch(repo: &gix::Repository) -> Option<String> {
             .to_str_lossy()
             .to_string(),
     )
+}
+
+fn head_branch(repo: &gix::Repository) -> Option<String> {
+    repo.head()
+        .ok()?
+        .referent_name()
+        .map(|r| r.shorten().to_string())
+}
+
+fn is_bare(repo: &gix::Repository) -> bool {
+    repo.config_snapshot()
+        .boolean("core.bare")
+        .unwrap_or_default()
+}
+
+fn fuzzy<T: ToString>(items: &[T], prompt: &str) -> Option<usize> {
+    let theme = ColorfulTheme {
+        fuzzy_match_highlight_style: Style::new().for_stderr().red(),
+        ..Default::default()
+    };
+    let selected = FuzzySelect::with_theme(&theme)
+        .with_prompt(prompt)
+        .default(0)
+        .items(items)
+        .interact_opt()
+        .ok()?;
+
+    // The user cancelled the selection, return a different exit code
+    if selected.is_none() {
+        std::process::exit(2);
+    }
+
+    selected
 }
