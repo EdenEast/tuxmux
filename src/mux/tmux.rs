@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::{borrow::Cow, path::Path};
 
 use itertools::Itertools;
 use miette::{IntoDiagnostic, Result};
@@ -25,15 +25,13 @@ pub fn session_exists(name: &str) -> bool {
         .unwrap_or(false)
 }
 
-pub fn create_session(name: &str, path: &Path) -> Result<()> {
-    Tmux::with_command(
-        NewSession::new()
-            .detached()
-            .session_name(name)
-            .start_directory(path.to_string_lossy()),
-    )
-    .output()
-    .into_diagnostic()?;
+pub fn create_session(name: &str, path: &Path, window_name: Option<&str>) -> Result<()> {
+    let mut command = NewSession::new()
+        .detached()
+        .session_name(name)
+        .start_directory(path.to_string_lossy());
+    command.window_name = window_name.map(Cow::Borrowed);
+    Tmux::with_command(command).output().into_diagnostic()?;
     Ok(())
 }
 

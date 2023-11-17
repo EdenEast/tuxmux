@@ -19,8 +19,13 @@ impl Mux {
         tmux::session_exists(name)
     }
 
-    pub fn create_session<P: AsRef<Path>>(&self, name: &str, path: P) -> Result<()> {
-        tmux::create_session(name, path.as_ref())
+    pub fn create_session<P: AsRef<Path>>(
+        &self,
+        name: &str,
+        path: P,
+        window_name: Option<&str>,
+    ) -> Result<()> {
+        tmux::create_session(name, path.as_ref(), window_name)
     }
 
     pub fn attach_session(&self, name: &str) -> Result<()> {
@@ -47,7 +52,7 @@ impl Mux {
         if self.session_exists(name) {
             self.attach_session(name)
         } else {
-            self.create_session(name, path.as_ref())?;
+            self.create_session(name, path.as_ref(), None)?;
             self.attach_session(name)
         }
     }

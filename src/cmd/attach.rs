@@ -16,7 +16,7 @@ use dialoguer::{
     theme::ColorfulTheme,
     FuzzySelect,
 };
-use gix::bstr::ByteSlice;
+use gix::{bstr::ByteSlice, Repository};
 use itertools::Itertools;
 use miette::{miette, IntoDiagnostic, Result};
 use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
@@ -120,8 +120,11 @@ impl Attach {
             return mux.attach_session(&name);
         }
 
-        let worktree = self.get_worktree(selected, config);
-        mux.create_session(&name, selected.to_str().unwrap())?;
+        let repo = gix::open(selected).ok();
+        let worktree = self.get_worktree(repo.as_ref(), config);
+        let branch = repo.as_ref().and_then(head_branch);
+        mux.create_session(&name, selected.to_str().unwrap(), branch.as_deref())?;
+
         if let Some(worktree) = worktree {
             mux.send_command(&name, &format!("cd {}", worktree.display()))?;
         }
@@ -134,12 +137,12 @@ impl Attach {
         self.execute_selected(&std::env::current_dir().into_diagnostic()?, config)
     }
 
-    fn get_worktree(&self, selected: &Path, config: &Config) -> Option<PathBuf> {
-        let repo = gix::open(selected).ok()?;
+    fn get_worktree(&self, repo: Option<&Repository>, config: &Config) -> Option<PathBuf> {
+        let repo = repo?;
         let worktrees = repo.worktrees().ok()?;
         let use_default = self.default || config.default_worktree;
         let worktree_length = worktrees.len();
-        let bare = is_bare(&repo);
+        let bare = is_bare(repo);
 
         if worktree_length == 0 {
             return None;
@@ -160,7 +163,7 @@ impl Attach {
                 return worktrees[0].base().ok();
             }
 
-            let default_branch = head_branch(&repo)?;
+            let default_branch = head_branch(repo)?;
             let mut choices = vec![default_branch];
             choices.extend(items);
             let choice = fuzzy(&choices, "Worktree")?;
@@ -172,7 +175,7 @@ impl Attach {
         }
 
         if use_default {
-            return default_branch(&repo)
+            return default_branch(repo)
                 .and_then(|name| {
                     let s = name.as_str();
                     items.iter().position(|x| x == s)
