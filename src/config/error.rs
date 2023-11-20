@@ -96,6 +96,35 @@ pub enum ParseError {
         #[label("expected a percentage from 1-100%")] SourceSpan,
     ),
 
+    #[error("Invalid worktree mode")]
+    #[diagnostic(
+        code("tm::invalid_worktree_mode"),
+        help("possible values ['all', 'deafult', 'ask']")
+    )]
+    InvalidWorktreeMode(
+        #[source_code] Source,
+        #[label("unknown worktree mode")] SourceSpan,
+    ),
+
+    #[error("Unknown configuration option")]
+    #[diagnostic(code("tm::unknown_configuration_option"))]
+    UnknownConfigurationOption(
+        /// Name of unknown option
+        String,
+        #[source_code] Source,
+        #[label("Unknown option '{0}'")] SourceSpan,
+    ),
+
+    #[error("Deprecated option 'worktree'")]
+    #[diagnostic(
+        code("tm::deprecated_default_worktree"),
+        help("Replaced with 'worktree'")
+    )]
+    DeprecatedDefaultWorktree(
+        #[source_code] Source,
+        #[label("Deprecated option 'default_worktree'")] SourceSpan,
+    ),
+
     #[error(transparent)]
     #[diagnostic(transparent)]
     Kdl(#[from] KdlError),

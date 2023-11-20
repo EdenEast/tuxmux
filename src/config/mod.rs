@@ -34,7 +34,7 @@ pub struct Config {
     pub exclude_path: IndexSet<String>,
     pub depth: usize,
     pub mode: Mode,
-    pub default_worktree: bool,
+    pub worktree_mode: WorktreeMode,
     pub mux: Mux,
 }
 
@@ -54,10 +54,18 @@ impl Default for Config {
             exclude_path: indexset! { "node_modules".to_string(), ".direnv".to_string(), ".cache".to_string(), ".local".to_string()},
             depth: 5,
             mode: Mode::default(),
-            default_worktree: false,
+            worktree_mode: WorktreeMode::default(),
             mux: Mux::default(),
         }
     }
+}
+
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
+pub enum WorktreeMode {
+    All,
+    Default,
+    #[default]
+    Ask,
 }
 
 impl Config {

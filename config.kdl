@@ -44,12 +44,16 @@
 //
 // height 10
 
-// Select the repositories remote default branch if multiple worktrees are found. If the default
-// worktree cannot be found the fallback will be to select the correct one.
+// Specifies the handling of git worktrees. There are three available modes:
 //
-// Default: false
+// - 'ask':     Lists all worktrees and prompts the user for selection.
+// - 'default': For bare repositories, uses the worktree related to the default branch; for non-bare repositories
+//              uses the default working directory.
+// - 'all':     Opens a separate window for each worktree.
 //
-// default_worktree true
+// Default "ask"
+//
+// worktree "default"
 
 // Workspace directory crawler will prune the paths containing any of these components.
 // Options:

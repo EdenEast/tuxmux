@@ -36,8 +36,8 @@ impl Mux {
         tmux::kill_session(name)
     }
 
-    pub fn create_window(&self, name: &str) -> Result<()> {
-        tmux::create_window(name)
+    pub fn create_window(&self, name: &str, path: Option<&Path>) -> Result<()> {
+        tmux::create_window(name, path)
     }
 
     pub fn send_command(&self, name: &str, command: &str) -> Result<()> {

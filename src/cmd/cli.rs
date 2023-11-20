@@ -100,6 +100,10 @@ pub struct Attach {
     #[arg(short, long, default_value_t = false)]
     pub default: bool,
 
+    /// Create mux window for each worktree
+    #[arg(short, long, default_value_t = false)]
+    pub all: bool,
+
     /// Exact path to either attach to existing session or create a new one if
     /// none exist
     #[arg(short, long, default_value = None)]

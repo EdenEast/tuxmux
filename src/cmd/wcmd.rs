@@ -23,7 +23,7 @@ impl Run for Wcmd {
         let target = format!("{}:{}", session_name.trim(), name);
 
         if !mux.session_exists(&target) {
-            mux.create_window(name)?;
+            mux.create_window(name, None)?;
         }
 
         let cmd: String = intersperse(self.cmds.iter().map(|f| f.as_str()), " ").collect();

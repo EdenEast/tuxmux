@@ -55,10 +55,14 @@ pub fn kill_session(name: &str) -> Result<()> {
     Ok(())
 }
 
-pub fn create_window(name: &str) -> Result<()> {
-    Tmux::with_command(NewWindow::new().window_name(name))
-        .output()
-        .into_diagnostic()?;
+pub fn create_window(name: &str, path: Option<&Path>) -> Result<()> {
+    let window = match path {
+        Some(path) => NewWindow::new()
+            .window_name(name)
+            .start_directory(path.to_string_lossy()),
+        None => NewWindow::new().window_name(name),
+    };
+    Tmux::with_command(window).output().into_diagnostic()?;
     Ok(())
 }
 

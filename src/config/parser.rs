@@ -1,7 +1,7 @@
 use itertools::Itertools;
 use kdl::{KdlDocument, KdlEntry, KdlNode, KdlValue};
 
-use super::{error::ParseError, source::Source, Config, Mode};
+use super::{error::ParseError, source::Source, Config, Mode, WorktreeMode};
 
 #[derive(Debug)]
 pub struct Parser {
@@ -45,80 +45,118 @@ impl Parser {
     fn inner_parse(self, mut config: Config) -> Result<Config, ParseError> {
         let doc: KdlDocument = self.src.raw.parse()?;
 
-        if let Some(exclude_node) = doc.get("exclude_path") {
-            let default = self.get_default_optional(exclude_node)?;
-            let paths = self.try_get_dash_values_as_string(&doc, "exclude_path")?;
+        for node in doc.nodes() {
+            match node.name().value() {
+                "paths" => {
+                    if let Some(doc) = node.children() {
+                        if let Some(workspace_node) = doc.get("workspace") {
+                            let default = self.get_default_optional(workspace_node)?;
+                            let mut workspaces =
+                                self.try_get_dash_values_as_valid_paths(doc, "workspace")?;
 
-            if default {
-                config.exclude_path.extend(paths);
-            } else {
-                config.exclude_path = paths.into_iter().collect();
-            }
-        }
+                            if default {
+                                config.search.workspace.append(&mut workspaces);
+                            } else {
+                                config.search.workspace = workspaces;
+                            }
+                        }
 
-        if let Some(doc) = doc.get("paths").and_then(|node| node.children()) {
-            if let Some(workspace_node) = doc.get("workspace") {
-                let default = self.get_default_optional(workspace_node)?;
-                let mut workspaces = self.try_get_dash_values_as_valid_paths(doc, "workspace")?;
+                        if let Some(single_node) = doc.get("single") {
+                            let default = self.get_default_optional(single_node)?;
+                            let mut singles =
+                                self.try_get_dash_values_as_valid_paths(doc, "single")?;
 
-                if default {
-                    config.search.workspace.append(&mut workspaces);
-                } else {
-                    config.search.workspace = workspaces;
+                            if default {
+                                config.search.single.append(&mut singles);
+                            } else {
+                                config.search.single = singles;
+                            }
+                        }
+                    }
                 }
-            }
+                "exclude_path" => {
+                    let default = self.get_default_optional(node)?;
+                    let paths = self.try_get_dash_values_as_string(&doc, "exclude_path")?;
 
-            if let Some(single_node) = doc.get("single") {
-                let default = self.get_default_optional(single_node)?;
-                let mut singles = self.try_get_dash_values_as_valid_paths(doc, "single")?;
-
-                if default {
-                    config.search.single.append(&mut singles);
-                } else {
-                    config.search.single = singles;
+                    if default {
+                        config.exclude_path.extend(paths);
+                    } else {
+                        config.exclude_path = paths.into_iter().collect();
+                    }
                 }
-            }
-        }
-
-        if let Some(node) = doc.get("depth") {
-            config.depth = usize::try_from(self.first_entry_as_i64(node)?).unwrap_or(0);
-        }
-
-        if let Some(node) = doc.get("default_worktree") {
-            config.default_worktree = self.first_entry_as_bool(node).unwrap_or(false);
-        }
-
-        if let Some(node) = doc.get("height") {
-            let entry = self.first_entry(node)?;
-            let value = entry.value();
-            if let Some(n) = value.as_i64() {
-                if n > 0 {
-                    config.mode = Mode::Lines(n as u16);
+                "depth" => {
+                    config.depth = usize::try_from(self.first_entry_as_i64(node)?).unwrap_or(0);
                 }
-            } else if let Some(s) = value.as_string() {
-                if let Some(numeric) = s.strip_suffix('%') {
-                    let per = numeric.parse::<i32>()?;
-                    match per {
-                        100 => config.mode = Mode::Full,
-                        1..=99 => config.mode = Mode::Percentage(per as f32 / 100.0),
+                "height" => {
+                    let entry = self.first_entry(node)?;
+                    let value = entry.value();
+                    if let Some(n) = value.as_i64() {
+                        if n > 0 {
+                            config.mode = Mode::Lines(n as u16);
+                        }
+                    } else if let Some(s) = value.as_string() {
+                        if let Some(numeric) = s.strip_suffix('%') {
+                            let per = numeric.parse::<i32>()?;
+                            match per {
+                                100 => config.mode = Mode::Full,
+                                1..=99 => config.mode = Mode::Percentage(per as f32 / 100.0),
+                                _ => {
+                                    return Err(ParseError::InvalidPercentage(
+                                        self.src.clone(),
+                                        *entry.span(),
+                                    ))
+                                }
+                            }
+                        } else if let Some(n) = value.as_i64() {
+                            config.mode = Mode::Lines(n as u16);
+                        } else if let Some(s) = value.as_string() {
+                            if s == "full" {
+                                config.mode = Mode::Full;
+                            } else {
+                                return Err(ParseError::InvalidHeightString(
+                                    self.src.clone(),
+                                    *entry.span(),
+                                ));
+                            }
+                        }
+                    }
+                }
+                "worktree" => {
+                    let entry = self.first_entry(node)?;
+                    let value = entry.value();
+                    let mode = self.first_entry(node)?.value().as_string().ok_or(
+                        ParseError::TypeMismatch(
+                            "string",
+                            type_from_value(value),
+                            self.src.clone(),
+                            *entry.span(),
+                        ),
+                    )?;
+
+                    config.worktree_mode = match mode {
+                        "all" => WorktreeMode::All,
+                        "default" => WorktreeMode::Default,
+                        "ask" => WorktreeMode::Ask,
                         _ => {
-                            return Err(ParseError::InvalidPercentage(
+                            return Err(ParseError::InvalidWorktreeMode(
                                 self.src.clone(),
                                 *entry.span(),
                             ))
                         }
-                    }
-                } else if let Some(n) = value.as_i64() {
-                    config.mode = Mode::Lines(n as u16);
-                } else if let Some(s) = value.as_string() {
-                    if s == "full" {
-                        config.mode = Mode::Full;
-                    } else {
-                        return Err(ParseError::InvalidHeightString(
-                            self.src.clone(),
-                            *entry.span(),
-                        ));
-                    }
+                    };
+                }
+                "default_worktree" => {
+                    return Err(ParseError::DeprecatedDefaultWorktree(
+                        self.src.clone(),
+                        *node.name().span(),
+                    ))
+                }
+                option => {
+                    return Err(ParseError::UnknownConfigurationOption(
+                        option.to_owned(),
+                        self.src.clone(),
+                        *node.name().span(),
+                    ));
                 }
             }
         }
@@ -155,16 +193,16 @@ impl Parser {
         })
     }
 
-    fn first_entry_as_bool<'a>(&'a self, node: &'a KdlNode) -> Result<bool, ParseError> {
-        self.first_entry(node).and_then(|entry| {
-            entry.value().as_bool().ok_or(ParseError::TypeMismatch(
-                "bool",
-                type_from_value(entry.value()),
-                self.src.clone(),
-                *entry.span(),
-            ))
-        })
-    }
+    // fn first_entry_as_bool<'a>(&'a self, node: &'a KdlNode) -> Result<bool, ParseError> {
+    //     self.first_entry(node).and_then(|entry| {
+    //         entry.value().as_bool().ok_or(ParseError::TypeMismatch(
+    //             "bool",
+    //             type_from_value(entry.value()),
+    //             self.src.clone(),
+    //             *entry.span(),
+    //         ))
+    //     })
+    // }
 
     fn get_default_optional(&self, node: &KdlNode) -> Result<bool, ParseError> {
         match node.get("default") {
