@@ -96,6 +96,15 @@ pub enum ParseError {
         #[label("expected a percentage from 1-100%")] SourceSpan,
     ),
 
+    #[error("Unknown configuration option")]
+    #[diagnostic(code("tm::unknown_configuration_option"))]
+    UnknownConfigurationOption(
+        /// Name of unknown option
+        String,
+        #[source_code] Source,
+        #[label("Unknown option '{0}'")] SourceSpan,
+    ),
+
     #[error(transparent)]
     #[diagnostic(transparent)]
     Kdl(#[from] KdlError),
