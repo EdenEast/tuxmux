@@ -1,8 +1,8 @@
 // Configure the list of search paths used to search for valid workspaces.
-// Tm uses these valid workspaces as options to attach to.
+// Tux uses these valid workspaces as options to attach to.
 // paths {
   // Workspace paths are paths to recursivly search to find valid workspaces.
-  // Tm will recursivly search the workspace paths until the max depth is
+  // Tux will recursivly search the workspace paths until the max depth is
   // reached. To override the default workspace value set optional
   // `default=false`.
   //

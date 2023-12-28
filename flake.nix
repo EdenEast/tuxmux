@@ -61,16 +61,16 @@
 
           preFixup = ''
             installManPage target/man/*
-            installShellCompletion --bash target/completions/tm.bash
-            installShellCompletion --zsh target/completions/_tm
-            installShellCompletion --fish target/completions/tm.fish
+            installShellCompletion --bash target/completions/tux.bash
+            installShellCompletion --zsh target/completions/tux
+            installShellCompletion --fish target/completions/tux.fish
           '';
 
           meta = with pkgs.lib; {
             description = "Tmux utility for session and window management";
             homepage = "https://github.com/EdenEast/tuxmux";
             license = licenses.apsl20;
-            mainProgram = "tm";
+            mainProgram = "tux";
           };
         });
 
@@ -93,7 +93,7 @@
         apps = {
           tuxmux = flake-utils.lib.mkApp {
             dev = tuxmux;
-            name = "tm";
+            name = "tux";
           };
           default = apps.tuxmux;
         };

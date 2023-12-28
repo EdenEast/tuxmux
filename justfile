@@ -1,4 +1,4 @@
-default_bin := "tm"
+default_bin := "tux"
 
 doc: markdown
 
@@ -12,11 +12,11 @@ readme:
 
 man:
   #!/usr/bin/env bash
-  rm -f ./doc/tm.1
+  rm -f ./doc/tux.1
   version=$(cargo metadata --format-version 1 | jq -r '.packages[]|select(.name == "tuxmux")|.version')
   asciidoctor-reducer --output man.adoc ./doc/man.adoc
-  asciidoctor --attribute version="$version" --doctype manpage --backend manpage --out-file ./doc/tm.1 man.adoc
-  chmod 0444 ./doc/tm.1
+  asciidoctor --attribute version="$version" --doctype manpage --backend manpage --out-file ./doc/tux.1 man.adoc
+  chmod 0444 ./doc/tux.1
   rm man.adoc
 
 markdown: readme
@@ -33,13 +33,13 @@ markdown: readme
 
 release:
   #/usr/bin/env bash
-  cargo build --release --bin tm
+  cargo build --release --bin tux
   mkdir -p release/{completions,man}
   cp -f ./{LICENSE,readme.md} ./release
-  cp -f ./target/release/tm ./release
-  ./release/tm completions bash > ./release/completions/tm.bash
-  ./release/tm completions zsh > ./release/completions/_tm
-  ./release/tm completions fish > ./release/completions/tm.fish
-  ./release/tm completions powershell > ./release/completions/_tm.ps1
-  ./release/tm completions elvish > ./release/completions/tm.elv
-  pandoc --standalone --to man doc/tm.md -o release/man/tm.1
+  cp -f ./target/release/tux ./release
+  ./release/tux completions bash > ./release/completions/tux.bash
+  ./release/tux completions zsh > ./release/completions/tux
+  ./release/tux completions fish > ./release/completions/tux.fish
+  ./release/tux completions powershell > ./release/completions/tux.ps1
+  ./release/tux completions elvish > ./release/completions/tux.elv
+  pandoc --standalone --to man doc/tux.md -o release/man/tux.1

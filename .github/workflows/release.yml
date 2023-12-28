@@ -56,7 +56,7 @@ jobs:
         run: |
           RESULT="target-${{ matrix.target }}"
           mkdir $RESULT
-          cp target/${{ matrix.target }}/release/tm $RESULT
+          cp target/${{ matrix.target }}/release/tux $RESULT
           cp -r target/${{ matrix.target }}/man $RESULT
           cp -r target/${{ matrix.target }}/completions $RESULT
           tar czvf ${{ matrix.name }} $RESULT

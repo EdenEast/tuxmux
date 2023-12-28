@@ -11,7 +11,7 @@ use std::{
     path,
 };
 
-const BIN_NAME: &str = "tm";
+const BIN_NAME: &str = "tux";
 
 include!("src/cmd/cli.rs");
 

@@ -1,15 +1,15 @@
-= tm(1)
+= tux(1)
 
 == Name
 
-tm - Tmux session manager
+tux - Tmux session manager
 
 == Synopsis
 
-*tm* [_OPTIONS_] _<SEARCH_QUERY>_
-*tm* [_OPTIONS_] _<COMMAND>_ [_ARGS_]
-*tm* [_OPTIONS_] *--version*
-*tm* [_OPTIONS_] *--help*
+*tux* [_OPTIONS_] _<SEARCH_QUERY>_
+*tux* [_OPTIONS_] _<COMMAND>_ [_ARGS_]
+*tux* [_OPTIONS_] *--version*
+*tux* [_OPTIONS_] *--help*
 
 == Descriptions
 
