@@ -36,7 +36,7 @@ thiserror = "1.0.47"
 tmux_interface = "0.3.1"
 
 [[bin]]
-name = "tm"
+name = "tux"
 path = "src/main.rs"
 
 [build-dependencies]

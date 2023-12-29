@@ -1,6 +1,6 @@
 = Jumplist
 
-image:https://user-images.githubusercontent.com/2746374/278850962-a9119e50-3394-4660-aa6b-d57e96021464.gif[]
+image:https://private-user-images.githubusercontent.com/2746374/293401660-fcaf25f9-409f-40f8-a8e8-872655f07ffd.gif?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3MDM4NzA4ODEsIm5iZiI6MTcwMzg3MDU4MSwicGF0aCI6Ii8yNzQ2Mzc0LzI5MzQwMTY2MC1mY2FmMjVmOS00MDlmLTQwZjgtYThlOC04NzI2NTVmMDdmZmQuZ2lmP1gtQW16LUFsZ29yaXRobT1BV1M0LUhNQUMtU0hBMjU2JlgtQW16LUNyZWRlbnRpYWw9QUtJQVZDT0RZTFNBNTNQUUs0WkElMkYyMDIzMTIyOSUyRnVzLWVhc3QtMSUyRnMzJTJGYXdzNF9yZXF1ZXN0JlgtQW16LURhdGU9MjAyMzEyMjlUMTcyMzAxWiZYLUFtei1FeHBpcmVzPTMwMCZYLUFtei1TaWduYXR1cmU9N2M5NzRlODZlYTZjMDQ1NjgzMjdmYjcxOTM5NWIxYzg4ZDdhYjExZDBjNWY4YWRlOWU3YjJlMDNmMDEyMTc4ZiZYLUFtei1TaWduZWRIZWFkZXJzPWhvc3QmYWN0b3JfaWQ9MCZrZXlfaWQ9MCZyZXBvX2lkPTAifQ.w2PtClvo-BBPwXCtbupenuxMg8Uo_PyF6UC3bWCwQKA[]
 
 :harpoon: https://github.com/ThePrimeagen/harpoon#-harpooning
 
@@ -28,13 +28,13 @@ typically be done by defining a set of sessions or targets within your applicati
 .shell
 ----
 # Appends the path argument to the jumplist
-tm jump --path ~/.config/nvim
+tux jump --path ~/.config/nvim
 
 # Append the current path to the jumplist
-tm jump --path .
+tux jump --path .
 
 # Open the jumplist in your $EDITOR
-tm jump --edit
+tux jump --edit
 ----
 
 Navigating with Keybindings::
@@ -46,10 +46,10 @@ single key combination.
 .~/.config/tmux.conf
 ----
 # Bind homerow keys to tuxmux jumplist indices
-bind-key -r J   run-shell "tm jump --index 1"
-bind-key -r K   run-shell "tm jump --index 2"
-bind-key -r L   run-shell "tm jump --index 3"
-bind-key -r '"' run-shell "tm jump --index 4"
+bind-key -r J   run-shell "tux jump --index 1"
+bind-key -r K   run-shell "tux jump --index 2"
+bind-key -r L   run-shell "tux jump --index 3"
+bind-key -r '"' run-shell "tux jump --index 4"
 ----
 
 Seamless Session Attachment::

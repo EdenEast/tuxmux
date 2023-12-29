@@ -9,9 +9,9 @@ image:https://img.shields.io/crates/v/tuxmux[crates-io-badge, link="https://crat
 image:https://img.shields.io/badge/license-Apache2.0-blue.svg[license-badge, link="{apache}"]
 
 [sidebar]
-*_Tuxmux_ (_tm_)* is a session and window manager for tmux.
+*_Tuxmux_ (_tux_)* is a session and window manager for tmux.
 
-image:https://user-images.githubusercontent.com/2746374/278740504-aefc8d13-109c-49d9-95c1-f746a5b5b2c8.gif[]
+image:https://private-user-images.githubusercontent.com/2746374/293403109-26a7462f-8e97-4842-8fb0-6beeb7fe0244.gif?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3MDM4NzE1NjQsIm5iZiI6MTcwMzg3MTI2NCwicGF0aCI6Ii8yNzQ2Mzc0LzI5MzQwMzEwOS0yNmE3NDYyZi04ZTk3LTQ4NDItOGZiMC02YmVlYjdmZTAyNDQuZ2lmP1gtQW16LUFsZ29yaXRobT1BV1M0LUhNQUMtU0hBMjU2JlgtQW16LUNyZWRlbnRpYWw9QUtJQVZDT0RZTFNBNTNQUUs0WkElMkYyMDIzMTIyOSUyRnVzLWVhc3QtMSUyRnMzJTJGYXdzNF9yZXF1ZXN0JlgtQW16LURhdGU9MjAyMzEyMjlUMTczNDI0WiZYLUFtei1FeHBpcmVzPTMwMCZYLUFtei1TaWduYXR1cmU9ODgzNDE0MGFkYjA3YzVlNmZiYzlkY2M2ODlkM2MwZWY2NjQ1MTE2YTYwMjA5ZWM3ZmY4MzMxZmE4YjY4ZDcwMiZYLUFtei1TaWduZWRIZWFkZXJzPWhvc3QmYWN0b3JfaWQ9MCZrZXlfaWQ9MCZyZXBvX2lkPTAifQ.SO12CXuXTGtOZCStW2ootD48qKeS45QJ1_iE5_SC4cA[]
 
 == Features
 
@@ -61,7 +61,7 @@ cargo install --path .
 
 = Jumplist
 
-image:https://user-images.githubusercontent.com/2746374/278850962-a9119e50-3394-4660-aa6b-d57e96021464.gif[]
+image:https://private-user-images.githubusercontent.com/2746374/293401660-fcaf25f9-409f-40f8-a8e8-872655f07ffd.gif?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3MDM4NzA4ODEsIm5iZiI6MTcwMzg3MDU4MSwicGF0aCI6Ii8yNzQ2Mzc0LzI5MzQwMTY2MC1mY2FmMjVmOS00MDlmLTQwZjgtYThlOC04NzI2NTVmMDdmZmQuZ2lmP1gtQW16LUFsZ29yaXRobT1BV1M0LUhNQUMtU0hBMjU2JlgtQW16LUNyZWRlbnRpYWw9QUtJQVZDT0RZTFNBNTNQUUs0WkElMkYyMDIzMTIyOSUyRnVzLWVhc3QtMSUyRnMzJTJGYXdzNF9yZXF1ZXN0JlgtQW16LURhdGU9MjAyMzEyMjlUMTcyMzAxWiZYLUFtei1FeHBpcmVzPTMwMCZYLUFtei1TaWduYXR1cmU9N2M5NzRlODZlYTZjMDQ1NjgzMjdmYjcxOTM5NWIxYzg4ZDdhYjExZDBjNWY4YWRlOWU3YjJlMDNmMDEyMTc4ZiZYLUFtei1TaWduZWRIZWFkZXJzPWhvc3QmYWN0b3JfaWQ9MCZrZXlfaWQ9MCZyZXBvX2lkPTAifQ.w2PtClvo-BBPwXCtbupenuxMg8Uo_PyF6UC3bWCwQKA[]
 
 :harpoon: https://github.com/ThePrimeagen/harpoon#-harpooning
 
@@ -89,13 +89,13 @@ typically be done by defining a set of sessions or targets within your applicati
 .shell
 ----
 # Appends the path argument to the jumplist
-tm jump --path ~/.config/nvim
+tux jump --path ~/.config/nvim
 
 # Append the current path to the jumplist
-tm jump --path .
+tux jump --path .
 
 # Open the jumplist in your $EDITOR
-tm jump --edit
+tux jump --edit
 ----
 
 Navigating with Keybindings::
@@ -107,10 +107,10 @@ single key combination.
 .~/.config/tmux.conf
 ----
 # Bind homerow keys to tuxmux jumplist indices
-bind-key -r J   run-shell "tm jump --index 1"
-bind-key -r K   run-shell "tm jump --index 2"
-bind-key -r L   run-shell "tm jump --index 3"
-bind-key -r '"' run-shell "tm jump --index 4"
+bind-key -r J   run-shell "tux jump --index 1"
+bind-key -r K   run-shell "tux jump --index 2"
+bind-key -r L   run-shell "tux jump --index 3"
+bind-key -r '"' run-shell "tux jump --index 4"
 ----
 
 Seamless Session Attachment::
@@ -142,7 +142,7 @@ Tuxmux uses https://kdl.dev[KDL] as its configuration language.
 [source,shell]
 ----
 mkdir -p ~/.config/tuxmux
-tm --default-config > ~/.config/tuxmux/config.kdl
+tux --default-config > ~/.config/tuxmux/config.kdl
 ----
 
 == File locations
@@ -235,12 +235,12 @@ exclude_paths default=false {
 
 === paths
 
-Configure the list of search paths used to search for valid workspaces.  Tm uses these valid workspaces as options to
+Configure the list of search paths used to search for valid workspaces.  Tux uses these valid workspaces as options to
 attach to.
 
 ==== paths.workspace
 
-Workspace paths are paths to recursivly search to find valid workspaces.  Tm will recursivly search the workspace paths
+Workspace paths are paths to recursivly search to find valid workspaces.  Tux will recursivly search the workspace paths
 until the max depth is reached. To override the default workspace value set optional `default=false`
 
 Optional arguments:

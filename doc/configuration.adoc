@@ -7,7 +7,7 @@ Tuxmux uses https://kdl.dev[KDL] as its configuration language.
 [source,shell]
 ----
 mkdir -p ~/.config/tuxmux
-tm --default-config > ~/.config/tuxmux/config.kdl
+tux --default-config > ~/.config/tuxmux/config.kdl
 ----
 
 == File locations
@@ -100,12 +100,12 @@ exclude_paths default=false {
 
 === paths
 
-Configure the list of search paths used to search for valid workspaces.  Tm uses these valid workspaces as options to
+Configure the list of search paths used to search for valid workspaces.  Tux uses these valid workspaces as options to
 attach to.
 
 ==== paths.workspace
 
-Workspace paths are paths to recursivly search to find valid workspaces.  Tm will recursivly search the workspace paths
+Workspace paths are paths to recursivly search to find valid workspaces.  Tux will recursivly search the workspace paths
 until the max depth is reached. To override the default workspace value set optional `default=false`
 
 Optional arguments:

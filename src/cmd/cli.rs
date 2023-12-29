@@ -14,7 +14,7 @@ command 'attach' will be assumed. \
 
 const JUMP_LONG_ABOUT: &str = "\
 Store a list of paths and jump to that index. This is useful for keybindings \
-where you set keybindingd to jump to index 1, 2, 3, ... and tm will check \
+where you set keybindingd to jump to index 1, 2, 3, ... and tux will check \
 the list of stored paths and use that to jump to that tmux session.
 
 By default if no options are passed then the cwd is added to the jump list \
@@ -37,14 +37,14 @@ have to be after '--'.
 
 const WCMD_EXAMPLE_AFTER_HELP: &str = "\
 EXAMPLES:
-  tm wcmd server cd backend
-  tm w foo/bar/baz -- make test
+  tux wcmd server cd backend
+  tux w foo/bar/baz -- make test
 ";
 
 #[derive(Debug, Parser)]
 #[command(
-    name = "tm",
-    bin_name("tm"),
+    name = "tux",
+    bin_name("tux"),
     after_help = ARG_AFTER_HELP_MSG,
     about = crate_description!(),
     version = crate_version!(),
@@ -82,7 +82,7 @@ pub enum Cmd {
 #[derive(Debug, Args, Default)]
 #[command(
     visible_alias("a"),
-    bin_name("tm-attach"),
+    bin_name("tux-attach"),
     disable_colored_help(true),
     disable_version_flag(true)
 )]
@@ -116,7 +116,7 @@ pub struct Attach {
 #[derive(Debug, Args)]
 #[command(
     visible_alias("j"),
-    bin_name("tm-jump"),
+    bin_name("tux-jump"),
     disable_colored_help(true),
     disable_version_flag(true),
     long_about = JUMP_LONG_ABOUT,
@@ -143,7 +143,7 @@ pub struct Jump {
 #[derive(Debug, Args)]
 #[command(
     visible_alias("k"),
-    bin_name("tm-kill"),
+    bin_name("tux-kill"),
     disable_colored_help(true),
     disable_version_flag(true)
 )]
@@ -167,7 +167,7 @@ pub struct Kill {
 #[derive(Debug, Args)]
 #[command(
     visible_alias("ls"),
-    bin_name("tm-list"),
+    bin_name("tux-list"),
     disable_colored_help(true),
     disable_version_flag(true)
 )]
@@ -181,7 +181,7 @@ pub struct List {
 #[derive(Debug, Args)]
 #[command(
     visible_alias("w"),
-    bin_name("tm-wcmd"),
+    bin_name("tux-wcmd"),
     disable_colored_help(true),
     disable_version_flag(true),
     after_help = WCMD_EXAMPLE_AFTER_HELP,
