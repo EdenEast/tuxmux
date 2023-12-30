@@ -22,6 +22,7 @@ opt-level = "z"
 
 [dependencies]
 clap = { version = "4.3.23", features = [ "cargo", "derive" ] }
+clap_complete = "4.3.2"
 dialoguer = { version = "0.11.0", default-features = false, features = ["fuzzy-select"] }
 dirs-next = "2.0.0"
 gix = { version = "0.55.2", default-features = false, features = [ "max-performance-safe"] }

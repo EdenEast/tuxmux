@@ -56,6 +56,75 @@ nix-env -iA nixpkgs.tuxmux
 cargo install --path .
 ----
 
+== Completion
+
+.Bash
+[%collapsible]
+====
+Add this to the end of your config file (usually `~/.bashrc`):
+
+[source,bash]
+----
+eval "$(tux completion bash)"
+----
+====
+
+.Elvish
+[%collapsible]
+====
+Add this to the end of your config file (usually `~/.elvish/rc.elv`):
+
+[source,bash]
+----
+eval (tux completion elvish | slurp)
+----
+====
+
+.Fish
+[%collapsible]
+====
+Add this to the end of your config file (usually ~/.config/fish/config.fish):
+
+[source,bash]
+----
+tux completion fish | source
+----
+====
+
+.Powershell
+[%collapsible]
+====
+Add this to the end of your config file (find it by running echo `$profile` in PowerShell):
+
+[source,powershell]
+----
+Invoke-Expression (& { (tux compltion powershell | Out-String) })
+----
+====
+
+.Zsh
+[%collapsible]
+====
+Add this to the end of your config file (usually `~/.zshrc`):
+
+[source,zsh]
+----
+eval "$(tux completion zsh)"
+----
+
+[IMPORTANT]
+For completions to work, the above line must be added after compinit is called.
+You may have to rebuild your completions cache by running rm ~/.zcompdump*; compinit.
+====
+
+=== Nix
+
+If installed with nix the following are installed by default:
+
+- `Bash`
+- `Fish`
+- `Zsh`
+
 :leveloffset!:
 :leveloffset: 1
 
