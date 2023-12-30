@@ -1,5 +1,6 @@
 mod attach;
 mod cli;
+mod completion;
 mod jump;
 mod kill;
 mod list;

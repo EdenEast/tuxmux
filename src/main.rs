@@ -13,8 +13,22 @@ use tuxmux::{
     util,
 };
 
-const VALID_FIRST_OPTIONS: [&str; 14] = [
-    "attach", "a", "config", "c", "jump", "j", "kill", "k", "list", "ls", "path", "p", "wcmd", "w",
+const VALID_FIRST_OPTIONS: [&str; 15] = [
+    "attach",
+    "a",
+    "config",
+    "c",
+    "completion",
+    "jump",
+    "j",
+    "kill",
+    "k",
+    "list",
+    "ls",
+    "path",
+    "p",
+    "wcmd",
+    "w",
 ];
 
 const HELP_AND_VERSION_FLAGS: [&str; 4] = ["--help", "-h", "-V", "--version"];
@@ -85,6 +99,7 @@ fn main() -> Result<()> {
 
     match cmd.command {
         Some(cmd::Cmd::Attach(c)) => c.run(),
+        Some(cmd::Cmd::Completion(c)) => c.run(),
         Some(cmd::Cmd::Jump(c)) => c.run(),
         Some(cmd::Cmd::Kill(c)) => c.run(),
         Some(cmd::Cmd::List(c)) => c.run(),

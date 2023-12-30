@@ -2,6 +2,7 @@ use std::path::PathBuf;
 
 use clap::{crate_description, crate_version, Subcommand};
 use clap::{Args, Parser};
+use clap_complete::Shell;
 
 pub const DEFAULT_CONFIG: &str = include_str!("../../config.kdl");
 
@@ -71,6 +72,7 @@ pub struct Cli {
 #[derive(Debug, Subcommand)]
 pub enum Cmd {
     Attach(Attach),
+    Completion(Completion),
     Jump(Jump),
     Kill(Kill),
     List(List),
@@ -110,6 +112,18 @@ pub struct Attach {
     /// field will be presented.
     #[arg(default_value = None)]
     pub query: Option<Vec<String>>,
+}
+
+/// Genreate tm shell completions for your shell to stdout
+#[derive(Debug, Args)]
+#[command(
+    bin_name("tux-completion"),
+    disable_colored_help(true),
+    disable_version_flag(true)
+)]
+pub struct Completion {
+    /// Type of shell to generate completions for
+    pub generator: Shell,
 }
 
 /// Store paths and later jump to them by index
