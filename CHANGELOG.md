@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/EdenEast/tuxmux/compare/v0.2.0...v0.2.1) (2023-12-31)
+
+
+### Bug Fixes
+
+* **docs:** use non-private image links in docs ([#42](https://github.com/EdenEast/tuxmux/issues/42)) ([057ee4e](https://github.com/EdenEast/tuxmux/commit/057ee4e6e6d3065d7af9cad2633681485af42b98))
+
 ## [0.2.0](https://github.com/EdenEast/tuxmux/compare/v0.1.1...v0.2.0) (2023-12-30)
 
 
