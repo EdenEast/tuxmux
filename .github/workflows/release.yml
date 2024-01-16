@@ -105,7 +105,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
 
       - name: Setup | Nix
-        uses: cachix/install-nix-action@v24
+        uses: cachix/install-nix-action@v25
         with:
           extra_nix_config: |
             experimental-features = nix-command flakes
