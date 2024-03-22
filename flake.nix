@@ -62,7 +62,7 @@
           preFixup = ''
             installManPage target/man/*
             installShellCompletion --bash target/completions/tux.bash
-            installShellCompletion --zsh target/completions/tux
+            installShellCompletion --zsh target/completions/_tux
             installShellCompletion --fish target/completions/tux.fish
           '';
 
