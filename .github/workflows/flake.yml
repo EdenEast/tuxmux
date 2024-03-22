@@ -33,6 +33,10 @@ jobs:
       - name: Test nix build
         run: nix build
 
+      - name: Test nix develop
+        run: nix develop --profile ./dev-env '.#'
+
+
       - name: Get commit message
         id: commit
         run: |
