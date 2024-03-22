@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.2](https://github.com/EdenEast/tuxmux/compare/v0.2.1...v0.2.2) (2024-03-22)
+
+
+### Bug Fixes
+
+* **nix:** change zsh to correct completion ([d977c9f](https://github.com/EdenEast/tuxmux/commit/d977c9fce3c211089b0ea1e9d8cceb3301f46ea9))
+
 ## [0.2.1](https://github.com/EdenEast/tuxmux/compare/v0.2.0...v0.2.1) (2023-12-31)
 
 
