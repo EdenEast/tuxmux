@@ -21,26 +21,26 @@ strip = true
 opt-level = "z"
 
 [dependencies]
-clap = { version = "4.3.23", features = [ "cargo", "derive" ] }
-clap_complete = "4.3.2"
+clap = { version = "4.5.4", features = [ "cargo", "derive" ] }
+clap_complete = "4.5.2"
 dialoguer = { version = "0.11.0", default-features = false, features = ["fuzzy-select"] }
 dirs-next = "2.0.0"
 gix = { version = "0.62.0", default-features = false, features = [ "max-performance-safe"] }
-indexmap = "2.0.2"
+indexmap = "2.2.6"
 itertools = "0.11.0"
 jwalk = "0.8.1"
 kdl = "4.6.0"
 miette = { version = "5.10.0", features = ["fancy"] }
-rayon = "1.7.0"
+rayon = "1.10.0"
 shellexpand = "3.1.0"
-thiserror = "1.0.47"
-tmux_interface = "0.3.1"
+thiserror = "1.0.60"
+tmux_interface = "0.3.2"
 
 [[bin]]
 name = "tux"
 path = "src/main.rs"
 
 [build-dependencies]
-clap = { version = "4.3.23", features = [ "cargo", "derive" ] }
-clap_complete = "4.3.2"
-clap_mangen = "0.2.12"
+clap = { version = "4.5.4", features = [ "cargo", "derive" ] }
+clap_complete = "4.5.2"
+clap_mangen = "0.2.20"
