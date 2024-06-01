@@ -1532,7 +1532,7 @@ checksum = "3885889703554d7b0dd515111432fc3b2f9cceb15b2139f9b12da73365299c05"
 
 [[package]]
 name = "tuxmux"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "clap",
  "clap_complete",
