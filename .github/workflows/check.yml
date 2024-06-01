@@ -123,7 +123,7 @@ jobs:
       release_created: ${{ steps.release.outputs.release_created }}
       tag_name: ${{ steps.release.outputs.tag_name }}
     steps:
-      - uses: google-github-actions/release-please-action@v3
+      - uses: googleapis/release-please-action@v4
         id: release
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -131,6 +131,3 @@ jobs:
           release-type: rust
           config-file: .github/release-please-config.json
           manifest-file: .github/release-please-manifest.json
-          bump-minor-pre-major: true
-          bump-patch-for-minor-pre-major: true
-          draft: true
