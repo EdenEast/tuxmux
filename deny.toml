@@ -1,15 +1,12 @@
-[advisories]
-vulnerability = "deny"
-unmaintained = "deny"
-yanked = "deny"
-unsound = "deny"
-notice = "deny"
-
 [licenses]
-unlicensed = "warn"
-allow-osi-fsf-free = "either"
-default = "deny"
-allow = [ "MPL-2.0" ]
+allow = [
+  "Apache-2.0",
+  "BSD-3-Clause",
+  "ISC",
+  "MIT",
+  "MPL-2.0",
+  "Unicode-DFS-2016"
+]
 
 [bans]
 multiple-versions = "allow"
