@@ -23,7 +23,7 @@ opt-level = "z"
 [dependencies]
 clap = { version = "4.5.4", features = [ "cargo", "derive" ] }
 clap_complete = "4.5.2"
-dialoguer = { version = "0.11.0", default-features = false, features = ["fuzzy-select"] }
+crossterm = "0.27.0"
 dirs-next = "2.0.0"
 gix = { version = "0.63.0", default-features = false, features = [ "max-performance-safe"] }
 indexmap = "2.2.6"
@@ -31,6 +31,8 @@ itertools = "0.11.0"
 jwalk = "0.8.1"
 kdl = "4.6.0"
 miette = { version = "5.10.0", features = ["fancy"] }
+nucleo = "0.5.0"
+ratatui = "0.26.3"
 rayon = "1.10.0"
 shellexpand = "3.1.0"
 thiserror = "1.0.60"

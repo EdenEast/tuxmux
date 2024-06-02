@@ -75,20 +75,6 @@ pub enum ParseError {
         #[label("Not a valid finder")] SourceSpan,
     ),
 
-    #[error("Invalid height string")]
-    #[diagnostic(code("tm::invalid_height_string"))]
-    InvalidHeightString(
-        #[source_code] Source,
-        #[label(r#"expected string "full""#)] SourceSpan,
-    ),
-
-    #[error("Invalid height range")]
-    #[diagnostic(code("tm::invalid_height_range"))]
-    InvalidHeightRange(
-        #[source_code] Source,
-        #[label("expected number in range 1..=100 inclusively")] SourceSpan,
-    ),
-
     #[error("Invalid percentage")]
     #[diagnostic(code("tm::invalid_percentage"))]
     InvalidPercentage(
