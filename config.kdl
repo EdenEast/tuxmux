@@ -29,21 +29,6 @@
 //
 // depth 3
 
-// Height of the fuzzy finder selection window. The value can be either a number or a string.
-// A number represents the number of lines or entries to be displayed. A string can be either
-// the string "full" meaning fullscreen or a number followed by a '%' (percent sign).
-// The percentage is the percentage of the terminals hight to be used.
-//
-// Example:
-//  "40%":  Hight is set to 40% of the terminal screen
-//  10:     Hight is set to 10 lines/enteries
-//  "full": Selection takes up the entire screen
-//
-// Default:
-//  "50%"
-//
-// height 10
-
 // Select the repositories remote default branch if multiple worktrees are found. If the default
 // worktree cannot be found the fallback will be to select the correct one.
 //

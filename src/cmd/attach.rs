@@ -3,19 +3,8 @@ use std::{
     str::FromStr,
 };
 
-use crate::{
-    cmd::cli::Attach,
-    config::Config,
-    finder::{self, FinderOptions},
-    util,
-    walker::Walker,
-};
+use crate::{cmd::cli::Attach, config::Config, ui::Picker, util, walker::Walker};
 
-use dialoguer::{
-    console::{Style, Term},
-    theme::ColorfulTheme,
-    FuzzySelect,
-};
 use gix::{bstr::ByteSlice, Repository};
 use itertools::Itertools;
 use miette::{miette, IntoDiagnostic, Result};
@@ -31,17 +20,13 @@ impl Run for Attach {
 
         if self.exists {
             let names = mux.list_sessions();
-            let opts = FinderOptions {
-                // exact: self.exact,
-                query: query.as_deref(),
-                mode: config.mode,
-                ..Default::default()
-            };
-
             let selected = match names.len() {
                 0 => None,
                 1 => names.into_iter().next(),
-                _ => finder::find(&names, opts)?,
+                _ => Picker::new()
+                    .prompt("> ")
+                    .filter(query.as_deref())
+                    .select()?,
             };
 
             if let Some(selected) = selected {
@@ -81,34 +66,25 @@ impl Run for Attach {
             }
         }
 
-        let theme = ColorfulTheme {
-            fuzzy_match_highlight_style: Style::new().for_stderr().red(),
-            ..Default::default()
-        };
+        // let mut picker = Picker::new(&paths, "> ".into());
+        // let choice = match picker.get_selection()? {
+        //     crate::ui::PickerSelection::Selection(s) => s,
+        //     crate::ui::PickerSelection::ModifiedSelection(s) => s,
+        //     crate::ui::PickerSelection::None => todo!(),
+        // };
 
-        let term = Term::stderr();
-        let (rows, _) = term.size();
-        let h = match config.mode {
-            crate::config::Mode::Full => rows as usize,
-            crate::config::Mode::Lines(lines) => lines as usize,
-            crate::config::Mode::Percentage(percentage) => (rows as f32 * percentage) as usize,
-        };
-
-        let selection = FuzzySelect::with_theme(&theme)
-            .default(0)
+        let choice = match Picker::new()
             .items(&paths)
-            .with_initial_text(query.unwrap_or_default())
-            .max_length(h)
-            .interact_on_opt(&term)
-            .into_diagnostic()?;
+            .filter(query.as_deref())
+            .prompt("> ")
+            .select()?
+        {
+            Some(s) => s,
+            None => return Ok(()),
+        };
 
-        match selection {
-            Some(index) => {
-                let selected = PathBuf::from(&paths[index]);
-                self.execute_selected(&selected, &config)
-            }
-            None => Ok(()),
-        }
+        let choice = Path::new(&choice);
+        self.execute_selected(choice, &config)
     }
 }
 
@@ -128,6 +104,7 @@ impl Attach {
         if let Some(worktree) = worktree {
             mux.send_command(&name, &format!("cd {}", worktree.display()))?;
         }
+
         mux.attach_session(&name)?;
 
         Ok(())
@@ -166,12 +143,18 @@ impl Attach {
             let default_branch = head_branch(repo)?;
             let mut choices = vec![default_branch];
             choices.extend(items);
-            let choice = fuzzy(&choices, "Worktree")?;
-            if choice == 0 {
-                return None;
-            }
 
-            return worktrees[choice - 1].base().ok();
+            let choice = Picker::new()
+                .items(&choices)
+                .prompt("Worktree: ")
+                .select()
+                .ok()??;
+
+            let choice = Path::new(&choice);
+            return worktrees
+                .into_iter()
+                .find(|proxy| proxy.git_dir() == choice)
+                .and_then(|proxy| proxy.base().ok());
         }
 
         if use_default {
@@ -183,8 +166,17 @@ impl Attach {
                 .and_then(|index| worktrees[index].base().ok());
         }
 
-        let choice = fuzzy(&items, "Worktree")?;
-        worktrees[choice].base().ok()
+        let choice = Picker::new()
+            .items(&items)
+            .prompt("Worktree: ")
+            .select()
+            .ok()??;
+
+        let choice = Path::new(&choice);
+        worktrees
+            .into_iter()
+            .find(|proxy| proxy.git_dir() == choice)
+            .and_then(|proxy| proxy.base().ok())
     }
 }
 
@@ -218,24 +210,4 @@ fn is_bare(repo: &gix::Repository) -> bool {
     repo.config_snapshot()
         .boolean("core.bare")
         .unwrap_or_default()
-}
-
-fn fuzzy<T: ToString>(items: &[T], prompt: &str) -> Option<usize> {
-    let theme = ColorfulTheme {
-        fuzzy_match_highlight_style: Style::new().for_stderr().red(),
-        ..Default::default()
-    };
-    let selected = FuzzySelect::with_theme(&theme)
-        .with_prompt(prompt)
-        .default(0)
-        .items(items)
-        .interact_opt()
-        .ok()?;
-
-    // The user cancelled the selection, return a different exit code
-    if selected.is_none() {
-        std::process::exit(2);
-    }
-
-    selected
 }

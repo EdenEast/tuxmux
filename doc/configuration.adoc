@@ -48,22 +48,6 @@ Default: `5`
 depth 3
 ----
 
-=== height
-
-Height of the fuzzy finder selection window. The value can be either a number or a string.
-A number represents the number of lines or entries to be displayed. A string can be either
-the string "full" meaning fullscreen or a number followed by a '%' (percent sign).
-The percentage is the percentage of the terminals hight to be used.
-
-[%hardbreaks]
-Type: `string | number`
-Default: `50%`
-
-[source,javascript]
-----
-height 10
-----
-
 === default_worktree
 
 Select the repositories remote default branch if multiple worktrees are found. If the default

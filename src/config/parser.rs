@@ -1,7 +1,7 @@
 use itertools::Itertools;
 use kdl::{KdlDocument, KdlEntry, KdlNode, KdlValue};
 
-use super::{error::ParseError, source::Source, Config, Mode};
+use super::{error::ParseError, source::Source, Config};
 
 #[derive(Debug)]
 pub struct Parser {
@@ -86,40 +86,6 @@ impl Parser {
                 }
                 "depth" => {
                     config.depth = usize::try_from(self.first_entry_as_i64(node)?).unwrap_or(0);
-                }
-                "height" => {
-                    let entry = self.first_entry(node)?;
-                    let value = entry.value();
-                    if let Some(n) = value.as_i64() {
-                        if n > 0 {
-                            config.mode = Mode::Lines(n as u16);
-                        }
-                    } else if let Some(s) = value.as_string() {
-                        if let Some(numeric) = s.strip_suffix('%') {
-                            let per = numeric.parse::<i32>()?;
-                            match per {
-                                100 => config.mode = Mode::Full,
-                                1..=99 => config.mode = Mode::Percentage(per as f32 / 100.0),
-                                _ => {
-                                    return Err(ParseError::InvalidPercentage(
-                                        self.src.clone(),
-                                        *entry.span(),
-                                    ))
-                                }
-                            }
-                        } else if let Some(n) = value.as_i64() {
-                            config.mode = Mode::Lines(n as u16);
-                        } else if let Some(s) = value.as_string() {
-                            if s == "full" {
-                                config.mode = Mode::Full;
-                            } else {
-                                return Err(ParseError::InvalidHeightString(
-                                    self.src.clone(),
-                                    *entry.span(),
-                                ));
-                            }
-                        }
-                    }
                 }
                 "default_worktree" => {
                     config.default_worktree = self.first_entry_as_bool(node).unwrap_or(false);
