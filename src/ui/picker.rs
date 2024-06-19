@@ -21,6 +21,8 @@ use ratatui::{
     Frame, Terminal,
 };
 
+use crate::config::Config;
+
 use super::event::{Event, EventHandler};
 use super::tui::Tui;
 
@@ -32,6 +34,7 @@ pub struct Picker {
     cursor_pos: u16,
     prompt: String,
     should_exit: bool,
+    select_single: bool,
 }
 
 impl Default for Picker {
@@ -53,7 +56,14 @@ impl Picker {
             cursor_pos: 0,
             prompt: String::default(),
             should_exit: false,
+            select_single: true,
         }
+    }
+
+    pub fn from_config(config: &Config) -> Self {
+        let mut picker = Picker::new();
+        picker.select_single = config.picker.select_single;
+        picker
     }
 
     pub fn items(self, list: &[String]) -> Self {
@@ -76,7 +86,30 @@ impl Picker {
         self
     }
 
+    pub fn set_select_only(mut self, value: bool) -> Self {
+        self.select_single = value;
+        self
+    }
+
     pub fn select(mut self) -> Result<Option<String>> {
+        // If we have set a pre-filter then have to update the state and check if there is only
+        // one match
+        if !self.filter.is_empty() {
+            self.cursor_pos = self.filter.len() as u16;
+            self.update_matcher_pattern(self.filter.clone().as_ref());
+
+            if self.select_single {
+                self.matcher.tick(10);
+                let snapshot = self.matcher.snapshot();
+                if snapshot.matched_item_count() == 1 {
+                    let s = snapshot
+                        .get_matched_item(0)
+                        .expect("There is only one matched item");
+                    return Ok(Some(s.data.to_string()));
+                }
+            }
+        }
+
         let backend = CrosstermBackend::new(std::io::stderr());
         let terminal = Terminal::new(backend).into_diagnostic()?;
         let events = EventHandler::new(Duration::from_millis(15));

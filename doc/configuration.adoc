@@ -82,6 +82,26 @@ exclude_paths default=false {
 }
 ----
 
+=== picker
+
+Configuration for the interactive finder. The interactive finder is used to select a workspace when there are multiple
+matches.
+
+==== picker.select_single
+
+If there is only one match for the initial query, do not start the interactive finder and select the only match.
+
+[%hardbreaks]
+Type: `boolean`
+Default: `true`
+
+[source,javascript]
+----
+picker {
+  select_single true
+}
+----
+
 === paths
 
 Configure the list of search paths used to search for valid workspaces.  Tux uses these valid workspaces as options to

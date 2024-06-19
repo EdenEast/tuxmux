@@ -24,6 +24,17 @@
   // }
 // }
 
+// Configuration for the interactive finder. The interactive finder is used to select a workspace
+// when there are multiple matches.
+// picker {
+  // If there is only one match for the initial query, do not start the interactive finder
+  // and select the only match.
+  //
+  // Default: true
+  //
+  // select_single false
+// }
+
 // Search depth for workspace paths.
 // Default: 5
 //

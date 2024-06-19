@@ -74,6 +74,14 @@ impl Parser {
                         }
                     }
                 }
+                "picker" => {
+                    if let Some(doc) = node.children() {
+                        if let Some(select_single) = doc.get("select_single") {
+                            config.picker.select_single =
+                                self.first_entry_as_bool(select_single)?;
+                        }
+                    }
+                }
                 "exclude_path" => {
                     let default = self.get_default_optional(node)?;
                     let paths = self.try_get_dash_values_as_string(&doc, "exclude_path")?;

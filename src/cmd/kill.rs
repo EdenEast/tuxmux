@@ -11,7 +11,7 @@ impl Run for Kill {
         let selected = if self.all {
             names
         } else {
-            let choice = match Picker::new()
+            let choice = match Picker::from_config(&config)
                 .items(&names)
                 .filter(query.as_deref())
                 .prompt("> ")

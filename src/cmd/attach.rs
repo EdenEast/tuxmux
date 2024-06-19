@@ -23,7 +23,7 @@ impl Run for Attach {
             let selected = match names.len() {
                 0 => None,
                 1 => names.into_iter().next(),
-                _ => Picker::new()
+                _ => Picker::from_config(&config)
                     .items(&names)
                     .prompt("> ")
                     .filter(query.as_deref())
@@ -53,28 +53,25 @@ impl Run for Attach {
         let paths = config.paths_from_walk();
 
         if let Some(query) = query.as_ref() {
-            // Check if there is one exact match if so then execute that
-            let matches = paths
-                .par_iter()
-                .filter(|v| v.contains(query))
-                .collect::<Vec<_>>();
-            if matches.len() == 1 {
-                return self.execute_selected(
-                    &PathBuf::from_str(matches.first().expect("Matches length is checked to be 1"))
+            if config.picker.select_single {
+                // Check if there is one exact match if so then execute that
+                let matches = paths
+                    .par_iter()
+                    .filter(|v| v.contains(query))
+                    .collect::<Vec<_>>();
+                if matches.len() == 1 {
+                    return self.execute_selected(
+                        &PathBuf::from_str(
+                            matches.first().expect("Matches length is checked to be 1"),
+                        )
                         .into_diagnostic()?,
-                    &config,
-                );
+                        &config,
+                    );
+                }
             }
         }
 
-        // let mut picker = Picker::new(&paths, "> ".into());
-        // let choice = match picker.get_selection()? {
-        //     crate::ui::PickerSelection::Selection(s) => s,
-        //     crate::ui::PickerSelection::ModifiedSelection(s) => s,
-        //     crate::ui::PickerSelection::None => todo!(),
-        // };
-
-        let choice = match Picker::new()
+        let choice = match Picker::from_config(&config)
             .items(&paths)
             .filter(query.as_deref())
             .prompt("> ")
@@ -145,7 +142,7 @@ impl Attach {
             let mut choices = vec![default_branch];
             choices.extend(items);
 
-            let choice = Picker::new()
+            let choice = Picker::from_config(&config)
                 .items(&choices)
                 .prompt("Worktree: ")
                 .select()
@@ -167,7 +164,7 @@ impl Attach {
                 .and_then(|index| worktrees[index].base().ok());
         }
 
-        let choice = Picker::new()
+        let choice = Picker::from_config(&config)
             .items(&items)
             .prompt("Worktree: ")
             .select()

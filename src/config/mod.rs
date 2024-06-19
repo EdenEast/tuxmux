@@ -16,6 +16,19 @@ pub struct SearchPath {
 }
 
 #[derive(Debug, Clone, Copy)]
+pub struct PickerConfig {
+    pub select_single: bool,
+}
+
+impl Default for PickerConfig {
+    fn default() -> Self {
+        Self {
+            select_single: true,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
 pub enum Mode {
     Full,
     Lines(u16),
@@ -36,6 +49,7 @@ pub struct Config {
     pub mode: Mode,
     pub default_worktree: bool,
     pub mux: Mux,
+    pub picker: PickerConfig,
 }
 
 impl Default for SearchPath {
@@ -56,6 +70,7 @@ impl Default for Config {
             mode: Mode::default(),
             default_worktree: false,
             mux: Mux::default(),
+            picker: PickerConfig::default(),
         }
     }
 }
