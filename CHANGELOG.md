@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.3.0](https://github.com/EdenEast/tuxmux/compare/tuxmux-v0.2.2...tuxmux-v0.3.0) (2024-06-22)
+
+
+### ⚠ BREAKING CHANGES
+
+* **ui:** Removed hight from config file
+
+### Features
+
+* **ui:** add custom tui and fuzzy search ([#56](https://github.com/EdenEast/tuxmux/issues/56)) ([3eb933c](https://github.com/EdenEast/tuxmux/commit/3eb933cf9cc2dc1b3eee1457df49b98e4a387eb3))
+
+
+### Bug Fixes
+
+* **attach:** existing session list passed to picker ([03b4f05](https://github.com/EdenEast/tuxmux/commit/03b4f0550b8bcc436a48102326b848c31ecf2990))
+
 ## [0.2.2](https://github.com/EdenEast/tuxmux/compare/tuxmux-v0.2.1...tuxmux-v0.2.2) (2024-06-01)
 
 
