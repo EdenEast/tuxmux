@@ -24,6 +24,7 @@ impl Run for Attach {
                 0 => None,
                 1 => names.into_iter().next(),
                 _ => Picker::new()
+                    .items(&names)
                     .prompt("> ")
                     .filter(query.as_deref())
                     .select()?,
