@@ -26,7 +26,7 @@
         };
 
         inherit (pkgs) lib;
-        craneLib = crane.lib.${system};
+        craneLib = crane.mkLib pkgs;
 
         # Common configuration needed for crane to build the rust project
         args = {
