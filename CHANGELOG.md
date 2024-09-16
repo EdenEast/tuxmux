@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.3](https://github.com/EdenEast/tuxmux/compare/tuxmux-v0.2.2...tuxmux-v0.2.3) (2024-09-16)
+
+
+### Security
+
+* resolve RUSTSEC-2024-0371 and RUSTSEC-2024-0367 ([1d3d94c](https://github.com/EdenEast/tuxmux/commit/1d3d94c1a20d6b8a12951d61ecaf8516a04882b2))
+
 ## [0.2.2](https://github.com/EdenEast/tuxmux/compare/tuxmux-v0.2.1...tuxmux-v0.2.2) (2024-06-01)
 
 
