@@ -38,6 +38,9 @@ shellexpand = "3.1.0"
 thiserror = "1.0.60"
 tmux_interface = "0.3.2"
 
+# Resolves RUSTSEC-2024-0367 and RUSTSEC-2024-0371
+gix-path = "0.10.11"
+
 [[bin]]
 name = "tux"
 path = "src/main.rs"
