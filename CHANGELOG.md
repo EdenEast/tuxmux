@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.2.4](https://github.com/EdenEast/tuxmux/compare/tuxmux-v0.2.3...tuxmux-v0.2.4) (2024-09-16)
+
+
+### Security
+
+* **gix:** resolve CVE-2024-35186 and CVE-2024-35197 ([04231a5](https://github.com/EdenEast/tuxmux/commit/04231a54b867a738f1f24e870e516d27d5161f3b))
+* patch gix to resolve CVE-2024-32884 ([33bc4bd](https://github.com/EdenEast/tuxmux/commit/33bc4bdee28446e7c6c7ac009510f8ad5f1b0e7b))
+* resolve RUSTSEC-2024-0371 and RUSTSEC-2024-0367 ([1d3d94c](https://github.com/EdenEast/tuxmux/commit/1d3d94c1a20d6b8a12951d61ecaf8516a04882b2))
+
+
+### Bug Fixes
+
+* **nix:** change zsh to correct completion ([d977c9f](https://github.com/EdenEast/tuxmux/commit/d977c9fce3c211089b0ea1e9d8cceb3301f46ea9))
+
 ## [0.2.3](https://github.com/EdenEast/tuxmux/compare/tuxmux-v0.2.2...tuxmux-v0.2.3) (2024-09-16)
 
 
