@@ -4,7 +4,9 @@ permissions:
   pull-requests: write
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+      - v*
   pull_request:
   workflow_dispatch:
 env:
@@ -118,7 +120,6 @@ jobs:
     if: |
       github.repository == 'edeneast/tuxmux'
       && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
-      && github.ref_name == 'main'
     outputs:
       release_created: ${{ steps.release.outputs.release_created }}
       tag_name: ${{ steps.release.outputs.tag_name }}
@@ -129,3 +130,4 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           config-file: .github/release-please-config.json
           manifest-file: .github/release-please-manifest.json
+          target-branch: ${{ github.ref_name }}
