@@ -7,7 +7,6 @@ doc/tux.1
 
 ### direnv ###
 .direnv
-.envrc
 
 ### Linux ###
 *~

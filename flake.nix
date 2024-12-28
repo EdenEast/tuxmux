@@ -1,6 +1,6 @@
 {
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-24.05";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-24.11";
     flake-utils = {
       url = "github:numtide/flake-utils";
     };
@@ -20,13 +20,12 @@
         overlays = [ (import rust-overlay) ];
         pkgs = import nixpkgs { inherit system overlays; };
         manifest = builtins.fromTOML (builtins.readFile ./Cargo.toml);
+        toolchainManifest = builtins.fromTOML (builtins.readFile ./rust-toolchain.toml);
         version = manifest.package.version;
-        rustToolchain = pkgs.rust-bin.stable.latest.default.override {
-          extensions = [ "rust-src" ];
-        };
+        rustToolchain = pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
 
-        inherit (pkgs) lib;
-        craneLib = crane.mkLib pkgs;
+        # inherit (pkgs) lib;
+        craneLib = (crane.mkLib pkgs).overrideToolchain rustToolchain;
 
         # Common configuration needed for crane to build the rust project
         args = {
@@ -45,7 +44,7 @@
         cargoArtifacts = craneLib.buildDepsOnly args;
 
         tuxmux = craneLib.buildPackage (args // {
-          inherit cargoArtifacts;
+          inherit cargoArtifacts version;
 
           doCheck = true;
 
@@ -87,7 +86,7 @@
 
         apps = {
           tuxmux = flake-utils.lib.mkApp {
-            dev = tuxmux;
+            drv = tuxmux;
             name = "tux";
           };
           default = apps.tuxmux;
@@ -100,8 +99,8 @@
 
         devShells.default =
           let
-            rust = pkgs.rust-bin.stable.latest.default.override {
-              extensions = [ "rust-src" "rust-analyzer" ];
+            rust = (pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml).override {
+              extensions = toolchainManifest.toolchain.components ++ [ "rust-analyzer" ];
             };
           in
           pkgs.mkShell {
