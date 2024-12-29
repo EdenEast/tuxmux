@@ -59,7 +59,7 @@ Default: `false`
 
 [source,javascript]
 ----
-default_worktree true
+default_worktree #true
 ----
 
 === exclude_paths
@@ -76,7 +76,7 @@ Default: `{ - ".direnv" "node_modules" }`
 
 [source,javascript]
 ----
-exclude_paths default=false {
+exclude_paths default=#false {
   - ".direnv"
   - "node_modules"
 }
@@ -90,7 +90,7 @@ attach to.
 ==== paths.workspace
 
 Workspace paths are paths to recursivly search to find valid workspaces.  Tux will recursivly search the workspace paths
-until the max depth is reached. To override the default workspace value set optional `default=false`
+until the max depth is reached. To override the default workspace value set optional `default=#false`
 
 Optional arguments:
 
@@ -103,7 +103,7 @@ Default: `{ - "~" }`
 [source, javascript]
 ----
 paths {
-  workspaces default=false {
+  workspaces default=#false {
     - "~/code"
   }
 }
@@ -125,7 +125,7 @@ Default: `{}`
 [source, javascript]
 ----
 paths {
-  single default=false {
+  single default=#false {
     - "~/.config/nvim"
   }
 }

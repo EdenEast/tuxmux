@@ -67,13 +67,13 @@ impl Config {
         let config_path = util::get_config(&["config.kdl"]);
         if config_path.exists() {
             config = Parser::new(Source::load(config_path.display().to_string())?)
-                .parse_with_default(Some(config))?;
+                .parse_with_config(Some(config))?;
         }
 
         let local_path = util::get_local(&["config.kdl"]);
         if local_path.exists() {
             config = Parser::new(Source::load(local_path.display().to_string())?)
-                .parse_with_default(Some(config))?;
+                .parse_with_config(Some(config))?;
         }
 
         Ok(config)

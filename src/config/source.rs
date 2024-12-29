@@ -47,7 +47,7 @@ impl SourceCode for Source {
     }
 }
 
-impl From<&Source> for NamedSource {
+impl From<&Source> for NamedSource<String> {
     fn from(source: &Source) -> Self {
         let name = source.path.clone();
         let input = source.raw.clone();

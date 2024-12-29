@@ -10,15 +10,15 @@ pub struct Parser {
 
 fn type_from_value(value: &KdlValue) -> &'static str {
     match value {
-        KdlValue::RawString(_) | KdlValue::String(_) => "string",
-        KdlValue::Null => "null",
+        KdlValue::String(_) => "string",
+        KdlValue::Integer(_) => "integer",
+        KdlValue::Float(_) => "float",
         KdlValue::Bool(_) => "boolean",
-        KdlValue::Base10Float(_) => "float",
-        _ => "number",
+        KdlValue::Null => "null",
     }
 }
 
-fn get_dash_values<'a>(doc: &'a KdlDocument, name: &'static str) -> Vec<&'a KdlEntry> {
+fn get_dash_values<'a>(doc: &'a KdlDocument, name: &'static str) -> Vec<&'a KdlValue> {
     doc.get(name)
         .and_then(|n| n.children())
         .map(|doc| doc.nodes())
@@ -35,11 +35,11 @@ impl Parser {
     }
 
     pub fn parse(self) -> Result<Config, ParseError> {
-        self.parse_with_default(None)
+        self.parse_with_config(None)
     }
 
-    pub fn parse_with_default(self, default: Option<Config>) -> Result<Config, ParseError> {
-        self.inner_parse(default.unwrap_or_default())
+    pub fn parse_with_config(self, config: Option<Config>) -> Result<Config, ParseError> {
+        self.inner_parse(config.unwrap_or_default())
     }
 
     fn inner_parse(self, mut config: Config) -> Result<Config, ParseError> {
@@ -94,7 +94,7 @@ impl Parser {
                     return Err(ParseError::UnknownConfigurationOption(
                         option.to_owned(),
                         self.src.clone(),
-                        *node.name().span(),
+                        node.name().span(),
                     ));
                 }
             }
@@ -107,7 +107,7 @@ impl Parser {
         node.entries()
             .iter()
             .next()
-            .ok_or(ParseError::MissingValue(self.src.clone(), *node.span()))
+            .ok_or(ParseError::MissingValue(self.src.clone(), node.span()))
     }
 
     // fn first_entry_as_string<'a>(&'a self, node: &'a KdlNode) -> Result<&'a str, ParseError> {
@@ -123,12 +123,16 @@ impl Parser {
 
     fn first_entry_as_i64<'a>(&'a self, node: &'a KdlNode) -> Result<i64, ParseError> {
         self.first_entry(node).and_then(|entry| {
-            entry.value().as_i64().ok_or(ParseError::TypeMismatch(
-                "number",
-                type_from_value(entry.value()),
-                self.src.clone(),
-                *entry.span(),
-            ))
+            entry
+                .value()
+                .as_integer()
+                .map(|n| n as i64)
+                .ok_or(ParseError::TypeMismatch(
+                    "integer",
+                    type_from_value(entry.value()),
+                    self.src.clone(),
+                    entry.span(),
+                ))
         })
     }
 
@@ -138,18 +142,18 @@ impl Parser {
                 "bool",
                 type_from_value(entry.value()),
                 self.src.clone(),
-                *entry.span(),
+                entry.span(),
             ))
         })
     }
 
     fn get_default_optional(&self, node: &KdlNode) -> Result<bool, ParseError> {
         match node.get("default") {
-            Some(value) => value.value().as_bool().ok_or(ParseError::TypeMismatch(
+            Some(value) => value.as_bool().ok_or(ParseError::TypeMismatch(
                 "boolean",
-                type_from_value(value.value()),
+                type_from_value(value),
                 self.src.clone(),
-                *value.span(),
+                node.span(),
             )),
             None => Ok(true),
         }
@@ -162,15 +166,14 @@ impl Parser {
     ) -> Result<Vec<String>, ParseError> {
         get_dash_values(doc, name)
             .into_iter()
-            .map(|entry| {
-                entry
-                    .value()
+            .map(|value| {
+                value
                     .as_string()
                     .ok_or(ParseError::TypeMismatch(
                         "string",
-                        type_from_value(entry.value()),
+                        type_from_value(value),
                         self.src.clone(),
-                        *entry.span(),
+                        doc.span(),
                     ))
                     .map(|s| s.to_string())
             })
@@ -184,15 +187,14 @@ impl Parser {
     ) -> Result<Vec<String>, ParseError> {
         get_dash_values(doc, name)
             .into_iter()
-            .map(|entry| {
-                entry
-                    .value()
+            .map(|value| {
+                value
                     .as_string()
                     .ok_or(ParseError::TypeMismatch(
                         "string",
-                        type_from_value(entry.value()),
+                        type_from_value(value),
                         self.src.clone(),
-                        *entry.span(),
+                        doc.span(),
                     ))
                     .map(|s| shellexpand::tilde(s).to_string())
             })

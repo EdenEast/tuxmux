@@ -29,8 +29,8 @@ gix = { version = "0.69.1", default-features = false, features = [ "max-performa
 indexmap = "2.7.0"
 itertools = "0.13.0"
 jwalk = "0.8.1"
-kdl = "4.6.0"
-miette = { version = "5.10.0", features = ["fancy"] }
+kdl = "6.1.0"
+miette = { version = "7.4.0", features = ["fancy"] }
 nucleo = "0.5.0"
 ratatui = "0.29.0"
 rayon = "1.10.0"

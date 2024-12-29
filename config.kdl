@@ -1,17 +1,17 @@
 // Configure the list of search paths used to search for valid workspaces.
 // Tux uses these valid workspaces as options to attach to.
-// paths {
+/-paths {
   // Workspace paths are paths to recursivly search to find valid workspaces.
   // Tux will recursivly search the workspace paths until the max depth is
   // reached. To override the default workspace value set optional
-  // `default=false`.
+  // `default=#false`.
   //
   // Default:
   //  - "~"
   //
-  // workspace default=true {
-  //   - "~/code"
-  // }
+  /-workspace default=#true {
+    - "~/code"
+  }
 
   // Single paths are paths that are added to the list of valid workspace
   // paths. This is useful if you want to add a path that would not be defined
@@ -19,34 +19,34 @@
   //
   // Default: (empty)
   //
-  // single default=false {
-  //   - "~/.config/nvim"
-  // }
-// }
+  /-single default=#false {
+    - "~/.config/nvim"
+  }
+}
 
 // Search depth for workspace paths.
 // Default: 5
 //
-// depth 3
+/-depth 3
 
 // Select the repositories remote default branch if multiple worktrees are found. If the default
 // worktree cannot be found the fallback will be to select the correct one.
 //
-// Default: false
+// Default: #false
 //
-// default_worktree true
+/-default_worktree #true
 
 // Workspace directory crawler will prune the paths containing any of these components.
 // Options:
-//   - default: boolean = true # Append to default value if true.
+//   - default: boolean = #true # Append to default value if true.
 //
 // Default:
-// exclude_path default=true {
+// exclude_path default=#true {
 //   - ".direnv"
 //   - "node_modules"
 // }
 //
-// exclude_path {
-//   - ".direnv"
-//   - "node_modules"
-// }
+/-exclude_path {
+  - ".direnv"
+  - "node_modules"
+}
