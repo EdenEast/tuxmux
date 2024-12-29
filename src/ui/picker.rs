@@ -83,6 +83,11 @@ impl Picker {
         let mut tui = Tui::new(terminal, events);
         tui.enter()?;
 
+        if !self.filter.is_empty() {
+            self.cursor_pos = self.filter.len() as u16;
+            self.update_matcher_pattern("");
+        }
+
         let mut selection = None;
         while !self.should_exit {
             tui.draw(&mut self)?;
