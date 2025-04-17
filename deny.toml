@@ -7,9 +7,19 @@ allow = [
   "MPL-2.0",
   "Unicode-DFS-2016",
   "Unicode-3.0",
+  "Zlib",
 ]
 
 [bans]
 multiple-versions = "allow"
 wildcards = "deny"
 highlight = "all"
+
+[advisories]
+version = 2
+ignore = [
+    # Crate paste is unmaintained. The dependency is already removed in
+    # ratatui:master. Until a new release is available, ignore this in
+    # order to pass CI. (https://github.com/gitui-org/gitui/issues/2554)
+    { id = "RUSTSEC-2024-0436", reason = "The paste dependency is already removed from ratatui." }
+]
