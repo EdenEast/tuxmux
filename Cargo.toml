@@ -25,7 +25,7 @@ clap = { version = "4.5.23", features = [ "cargo", "derive" ] }
 clap_complete = "4.5.40"
 crossterm = "0.28.1"
 dirs-next = "2.0.0"
-gix = { version = "0.69.1", default-features = false, features = [ "max-performance-safe"] }
+gix = { version = "0.71.0", default-features = false, features = [ "max-performance-safe"] }
 indexmap = "2.7.0"
 itertools = "0.13.0"
 jwalk = "0.8.1"
