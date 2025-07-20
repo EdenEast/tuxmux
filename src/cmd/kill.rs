@@ -1,4 +1,4 @@
-use crate::{cmd::cli::Kill, config::Config, ui::Picker};
+use crate::{cmd::cli::Kill, config::Config, mux::Mux, ui::Picker};
 
 use super::Run;
 
