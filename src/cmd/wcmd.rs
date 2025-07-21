@@ -2,7 +2,7 @@ use std::path::Path;
 
 use miette::miette;
 
-use crate::{cmd::cli::Wcmd, config::Config, util::intersperse};
+use crate::{cmd::cli::Wcmd, config::Config, mux::Mux, util::intersperse};
 
 use super::Run;
 
@@ -23,7 +23,7 @@ impl Run for Wcmd {
         let target = format!("{}:{}", session_name.trim(), name);
 
         if !mux.session_exists(&target) {
-            mux.create_window(name)?;
+            mux.create_window(name, None)?;
         }
 
         let cmd: String = intersperse(self.cmds.iter().map(|f| f.as_str()), " ").collect();

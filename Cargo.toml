@@ -36,7 +36,6 @@ ratatui = "0.29.0"
 rayon = "1.10.0"
 shellexpand = "3.1.0"
 thiserror = "2.0.9"
-tmux_interface = "0.3.2"
 
 [[bin]]
 name = "tux"

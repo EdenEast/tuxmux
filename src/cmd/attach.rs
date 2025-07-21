@@ -3,7 +3,7 @@ use std::{
     str::FromStr,
 };
 
-use crate::{cmd::cli::Attach, config::Config, ui::Picker, util, walker::Walker};
+use crate::{cmd::cli::Attach, config::Config, mux::Mux, ui::Picker, util, walker::Walker};
 
 use gix::{bstr::ByteSlice, Repository};
 use itertools::Itertools;
@@ -100,7 +100,7 @@ impl Attach {
         let repo = gix::open(selected).ok();
         let worktree = self.get_worktree(repo.as_ref(), config);
         let branch = repo.as_ref().and_then(head_branch);
-        mux.create_session(&name, selected.to_str().unwrap(), branch.as_deref())?;
+        mux.create_session(&name, selected, branch.as_deref())?;
 
         if let Some(worktree) = worktree {
             mux.send_command(&name, &format!("cd {}", worktree.display()))?;

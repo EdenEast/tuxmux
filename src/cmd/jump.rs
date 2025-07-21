@@ -1,8 +1,8 @@
 use std::{env, path::Path};
 
-use miette::IntoDiagnostic;
+use miette::{miette, IntoDiagnostic};
 
-use crate::{cmd::cli::Jump, config::Config, jumplist::Jumplist};
+use crate::{cmd::cli::Jump, config::Config, jumplist::Jumplist, mux::Mux};
 
 use super::Run;
 
@@ -32,8 +32,18 @@ impl Run for Jump {
 
         if let Some(index) = self.index {
             if let Some(sel) = list.get(index.saturating_sub(1)) {
-                let name = Path::new(sel).file_name().unwrap().to_str().unwrap();
-                config.mux.create_or_attach(name, sel)?;
+                let path = Path::new(sel);
+                let name = path
+                    .file_name()
+                    .ok_or(miette!(
+                        "Failed to find the filename of path {}",
+                        path.display()
+                    ))?
+                    .to_str()
+                    .ok_or(miette!(
+                        "Failed to convert path's filename to a utf-8 string"
+                    ))?;
+                config.mux.create_or_attach(name, path)?;
             }
 
             return Ok(());

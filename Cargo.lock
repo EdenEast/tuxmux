@@ -2156,12 +2156,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
 
 [[package]]
-name = "tmux_interface"
-version = "0.3.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3885889703554d7b0dd515111432fc3b2f9cceb15b2139f9b12da73365299c05"
-
-[[package]]
 name = "tuxmux"
 version = "0.3.0-dev"
 dependencies = [
@@ -2181,7 +2175,6 @@ dependencies = [
  "rayon",
  "shellexpand",
  "thiserror 2.0.12",
- "tmux_interface",
 ]
 
 [[package]]
