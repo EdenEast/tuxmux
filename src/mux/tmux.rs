@@ -69,8 +69,13 @@ impl Mux for Tmux {
     }
 
     fn attach_session(&self, name: &str) -> miette::Result<()> {
-        self.execute_tmux_command(&["attach-session", "-t", name])
-            .to_result()
+        if is_in_tmux() {
+            self.execute_tmux_command(&["switch-client", "-t", name])
+                .to_result()
+        } else {
+            self.execute_tmux_command(&["attach-session", "-t", name])
+                .to_result()
+        }
     }
 
     fn kill_session(&self, name: &str) -> miette::Result<()> {
@@ -111,4 +116,8 @@ impl Mux for Tmux {
             self.attach_session(name)
         }
     }
+}
+
+fn is_in_tmux() -> bool {
+    std::env::var("TMUX").is_ok()
 }
