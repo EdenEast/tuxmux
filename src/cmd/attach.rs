@@ -7,6 +7,7 @@ use crate::{cmd::cli::Attach, config::Config, mux::Mux, ui::Picker, util, walker
 
 use gix::{bstr::ByteSlice, Repository};
 use itertools::Itertools;
+use log::{debug, trace};
 use miette::{miette, IntoDiagnostic, Result};
 use rayon::prelude::{IntoParallelRefIterator, ParallelIterator};
 
@@ -91,9 +92,12 @@ impl Run for Attach {
 
 impl Attach {
     fn execute_selected(&self, selected: &Path, config: &Config) -> Result<()> {
+        trace!("fn execute_selected");
         let mux = &config.mux;
         let name = util::format_name(selected.file_name().unwrap().to_str().unwrap());
+        debug!("name: {}", name);
         if mux.session_exists(&name) {
+            debug!("session exists attaching to session");
             return mux.attach_session(&name);
         }
 

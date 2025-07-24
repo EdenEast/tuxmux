@@ -57,6 +57,8 @@ fn create_config_file(path: &Path) -> Option<File> {
 fn main() -> Result<()> {
     let mut args = std::env::args().collect::<Vec<_>>();
 
+    env_logger::init();
+
     match args.get(1) {
         Some(first) => {
             if first == "." {

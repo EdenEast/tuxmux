@@ -2,6 +2,9 @@ use std::path::Path;
 use std::process;
 
 use itertools::Itertools;
+use log::debug;
+use log::log_enabled;
+use log::Level;
 
 use super::Mux;
 use super::OutputExtension;
@@ -22,6 +25,14 @@ impl Default for Tmux {
 
 impl Tmux {
     fn execute_tmux_command(&self, args: &[&str]) -> process::Output {
+        if log_enabled!(Level::Debug) {
+            let cmd = format!(
+                "tmux -L {} {}",
+                self.socket_name,
+                args.join(" ").to_string()
+            );
+            debug!("Tmux command: {}", cmd);
+        }
         process::Command::new("tmux")
             .args(["-L", &self.socket_name])
             .args(args)
@@ -35,6 +46,7 @@ impl Mux for Tmux {
     fn list_sessions(&self) -> Vec<String> {
         self.execute_tmux_command(&["list-sessions", "-F", "#S"])
             .output_to_string()
+            .trim()
             .split('\n')
             .map(|x| x.to_string())
             .collect_vec()
