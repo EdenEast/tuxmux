@@ -79,7 +79,7 @@ impl Mux for Tmux {
     }
 
     fn kill_session(&self, name: &str) -> miette::Result<()> {
-        self.execute_tmux_command(&["kill_session", "-t", name])
+        self.execute_tmux_command(&["kill-session", "-t", name])
             .to_result()
     }
 
