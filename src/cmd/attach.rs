@@ -97,13 +97,12 @@ impl Attach {
             return mux.attach_session(&name);
         }
 
-        let repo = gix::open(selected).ok();
-        let worktree = self.get_worktree(repo.as_ref(), config);
-        let branch = repo.as_ref().and_then(head_branch);
-        mux.create_session(&name, selected, branch.as_deref())?;
+        let repo = gix::open(selected).into_diagnostic()?;
 
-        if let Some(worktree) = worktree {
-            mux.send_command(&name, &format!("cd {}", worktree.display()))?;
+        if let Some((branch, path)) = self.get_worktree(&repo, config) {
+            mux.create_session(&name, &path, Some(&branch))?;
+        } else {
+            mux.create_session(&name, selected, head_branch(&repo).as_deref())?;
         }
 
         mux.attach_session(&name)?;
@@ -115,69 +114,52 @@ impl Attach {
         self.execute_selected(&std::env::current_dir().into_diagnostic()?, config)
     }
 
-    fn get_worktree(&self, repo: Option<&Repository>, config: &Config) -> Option<PathBuf> {
-        let repo = repo?;
-        let worktrees = repo.worktrees().ok()?;
+    fn get_worktree(&self, repo: &Repository, config: &Config) -> Option<(String, PathBuf)> {
         let use_default = self.default || config.default_worktree;
-        let worktree_length = worktrees.len();
         let bare = is_bare(repo);
 
-        if worktree_length == 0 {
-            return None;
-        }
-
-        // If the repository is not bare then worktree's are in addition to the main default
-        // worktree. If we are to use 'default' we should not use any worktrees
-        if !bare && use_default {
-            return None;
-        }
-
-        // NOTE: A worktree's id() (name) can be different then it's branch name. To get the branch
-        // name you have to get the proxy repo and get the head branch of that.
-        let items = worktrees.iter().map(|t| t.id().to_string()).collect_vec();
-        if worktree_length == 1 {
-            // If the repo is a bare repo then there is only one valid working tree
-            if bare {
-                return worktrees[0].base().ok();
+        if use_default {
+            // If the repository is not bare, then worktree's are in addition to the main default
+            // worktree. If we are to use 'default' we should not use any worktrees
+            if !bare {
+                return None;
             }
 
-            let default_branch = head_branch(repo)?;
-            let mut choices = vec![default_branch];
-            choices.extend(items);
-
-            let choice = Picker::new()
-                .items(&choices)
-                .prompt("Worktree: ")
-                .select()
-                .ok()??;
-
-            let choice = Path::new(&choice);
+            // This repo is a bare repo so have to find the worktree that matches the default branch
+            let branch = default_branch(repo)?;
+            let worktrees = worktrees_from_repo(repo)?;
             return worktrees
-                .into_iter()
-                .find(|proxy| proxy.git_dir() == choice)
-                .and_then(|proxy| proxy.base().ok());
+                .iter()
+                .find(|(name, _)| *name == branch)
+                .or_else(|| worktrees.first())
+                .cloned();
         }
 
-        if use_default {
-            return default_branch(repo)
-                .and_then(|name| {
-                    let s = name.as_str();
-                    items.iter().position(|x| x == s)
-                })
-                .and_then(|index| worktrees[index].base().ok());
+        let default = default_branch(repo)?;
+        let worktrees = worktrees_from_repo(repo)?;
+        let mut choices = worktrees
+            .clone()
+            .into_iter()
+            .map(|(name, _)| name)
+            .collect_vec();
+
+        // If we are not bare then we need to add the default workspace
+        if !bare {
+            choices.push(default.clone());
         }
 
         let choice = Picker::new()
-            .items(&items)
+            .items(&choices)
             .prompt("Worktree: ")
             .select()
             .ok()??;
 
-        let choice = Path::new(&choice);
-        worktrees
-            .into_iter()
-            .find(|proxy| proxy.git_dir() == choice)
-            .and_then(|proxy| proxy.base().ok())
+        if !bare && choice == default {
+            let workdir = repo.workdir()?;
+            return Some((default, workdir.to_path_buf()));
+        }
+
+        worktrees.into_iter().find(|(name, _)| *name == choice)
     }
 }
 
@@ -211,4 +193,30 @@ fn is_bare(repo: &gix::Repository) -> bool {
     repo.config_snapshot()
         .boolean("core.bare")
         .unwrap_or_default()
+}
+
+fn worktrees_from_repo(repo: &Repository) -> Option<Vec<(String, PathBuf)>> {
+    // NOTE: A worktree's id() (name) can be different then it's branch name. To get the branch
+    // name you have to get the proxy repo and get the head branch of that.
+    //
+    // Might want to switch back to using the id instead of branch name as there might be multiple
+    // worktrees with the same branch:
+    //
+    //  worktrees.iter().map(|t| t.id()
+    Some(
+        repo.worktrees()
+            .ok()?
+            .iter()
+            .filter_map(|tree| {
+                let repo = tree
+                    .clone()
+                    .into_repo_with_possibly_inaccessible_worktree()
+                    .ok()?;
+                let head = repo.head().ok()?;
+                let name = head.referent_name().map(|r| r.shorten().to_string())?;
+                let workdir = repo.workdir()?.to_path_buf();
+                Some((name, workdir))
+            })
+            .collect_vec(),
+    )
 }
