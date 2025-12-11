@@ -1,4 +1,4 @@
-use crate::{mux::Mux, util};
+use crate::{mux::tmux::Tmux, util};
 use indexmap::{indexset, IndexSet};
 
 mod error;
@@ -28,15 +28,16 @@ impl Default for Mode {
     }
 }
 
-#[derive(Debug)]
 pub struct Config {
     pub search: SearchPath,
     pub exclude_path: IndexSet<String>,
     pub depth: usize,
     pub mode: Mode,
     pub default_worktree: bool,
-    pub mux: Mux,
+    pub mux: Tmux,
 }
+
+impl Config {}
 
 impl Default for SearchPath {
     fn default() -> Self {
@@ -55,7 +56,7 @@ impl Default for Config {
             depth: 5,
             mode: Mode::default(),
             default_worktree: false,
-            mux: Mux::default(),
+            mux: Tmux::default(),
         }
     }
 }
