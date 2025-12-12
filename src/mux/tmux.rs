@@ -13,7 +13,7 @@ pub struct Tmux {
 
 impl Default for Tmux {
     fn default() -> Self {
-        let socket_name = std::env::var("TMS_TMUX_SOCKET")
+        let socket_name = std::env::var("TUX_TMUX_SOCKET")
             .ok()
             .unwrap_or("default".to_string());
         Self { socket_name }
@@ -54,7 +54,6 @@ impl Mux for Tmux {
     ) -> miette::Result<()> {
         let mut args = vec![
             "new-session",
-            "-d",
             "-s",
             name,
             "-c",
@@ -69,12 +68,17 @@ impl Mux for Tmux {
     }
 
     fn attach_session(&self, name: &str) -> miette::Result<()> {
+        if is_in_tmux() {
+            return self
+                .execute_tmux_command(&["switch-client", "-t", name])
+                .to_result();
+        }
         self.execute_tmux_command(&["attach-session", "-t", name])
             .to_result()
     }
 
     fn kill_session(&self, name: &str) -> miette::Result<()> {
-        self.execute_tmux_command(&["kill_session", "-t", name])
+        self.execute_tmux_command(&["kill-session", "-t", name])
             .to_result()
     }
 
@@ -107,8 +111,11 @@ impl Mux for Tmux {
         if self.session_exists(name) {
             self.attach_session(name)
         } else {
-            self.create_session(name, path, None)?;
-            self.attach_session(name)
+            self.create_session(name, path, None)
         }
     }
+}
+
+fn is_in_tmux() -> bool {
+    std::env::var_os("TMUX").is_some()
 }

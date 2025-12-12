@@ -105,8 +105,6 @@ impl Attach {
             mux.create_session(&name, selected, head_branch(&repo).as_deref())?;
         }
 
-        mux.attach_session(&name)?;
-
         Ok(())
     }
 
