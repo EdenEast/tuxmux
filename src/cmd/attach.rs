@@ -141,6 +141,10 @@ impl Attach {
             .map(|(name, _)| name)
             .collect_vec();
 
+        if worktrees.is_empty() {
+            return None;
+        }
+
         // If we are not bare then we need to add the default workspace
         if !bare {
             choices.push(default.clone());
