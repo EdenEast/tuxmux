@@ -54,6 +54,7 @@ impl Mux for Tmux {
     ) -> miette::Result<()> {
         let mut args = vec![
             "new-session",
+            "-d",
             "-s",
             name,
             "-c",
