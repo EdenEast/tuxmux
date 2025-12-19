@@ -35,6 +35,7 @@ impl Mux for Tmux {
     fn list_sessions(&self) -> Vec<String> {
         self.execute_tmux_command(&["list-sessions", "-F", "#S"])
             .output_to_string()
+            .trim()
             .split('\n')
             .map(|x| x.to_string())
             .collect_vec()
