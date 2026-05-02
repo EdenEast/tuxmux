@@ -15,7 +15,7 @@ jobs:
     name: Genreate doc files
     steps:
       - name: Setup | Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup | Nix
         uses: cachix/install-nix-action@v31

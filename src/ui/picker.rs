@@ -15,8 +15,8 @@ use ratatui::{
     style::{Color, Style, Stylize},
     text::{Line, Span},
     widgets::{
-        block::Position, Block, Borders, HighlightSpacing, List, ListDirection, ListItem,
-        ListState, Paragraph,
+        Block, Borders, HighlightSpacing, List, ListDirection, ListItem, ListState, Paragraph,
+        TitlePosition,
     },
     Frame, Terminal,
 };
@@ -167,7 +167,7 @@ impl Picker {
                     .borders(Borders::BOTTOM)
                     .border_style(Style::default().fg(border_color))
                     .title_style(Style::default().fg(info_color))
-                    .title_position(Position::Bottom)
+                    .title_position(TitlePosition::Bottom)
                     .title(format!(
                         "{}/{}",
                         snapshot.matched_item_count(),
