@@ -7,7 +7,7 @@ impl Run for List {
         let config = Config::load()?;
         if self.all {
             for path in config.paths_from_walk() {
-                println!("{}", path);
+                println!("{path}");
             }
 
             return Ok(());
@@ -17,7 +17,7 @@ impl Run for List {
         let max_name = names.iter().map(|s| s.len()).max().unwrap_or_default();
 
         for s in names {
-            println!("{:npad$}", s, npad = max_name);
+            println!("{s:max_name$}");
         }
 
         Ok(())

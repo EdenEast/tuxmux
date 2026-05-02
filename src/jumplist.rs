@@ -44,7 +44,7 @@ impl Jumplist {
     pub fn write(&self) -> Result<()> {
         util::write(Jumplist::path(), |f| {
             for e in &self.0 {
-                f.write_fmt(format_args!("{}\n", e)).into_diagnostic()?;
+                f.write_fmt(format_args!("{e}\n")).into_diagnostic()?;
             }
             Ok(())
         })?;

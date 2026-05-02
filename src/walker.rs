@@ -33,7 +33,7 @@ impl Walker for Config {
                                 entry
                                     .path()
                                     .components()
-                                    .last()
+                                    .next_back()
                                     .expect("always has last component")
                                     .as_os_str()
                                     .to_str()
