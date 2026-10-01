@@ -4,7 +4,7 @@ use std::{
     sync::Arc,
 };
 
-use gix::repository::Kind;
+use gix::discover::repository::Kind;
 
 use crate::config::Config;
 
@@ -89,18 +89,20 @@ fn is_repository(path: &Path) -> Option<Kind> {
 
     if path.is_dir() {
         if path.join("HEAD").is_file() && path.join("config").is_file() {
-            gix::discover::is_git(path).ok().map(Into::into)
+            gix::discover::is_git(path).ok()
         } else {
             None
         }
     } else {
         // git files are always worktrees
-        Some(Kind::WorkTree { is_linked: true })
+        Some(Kind::WorkTree {
+            linked_git_dir: None,
+        })
     }
 }
 
 fn into_workdir(git_dir: PathBuf, kind: &Kind) -> PathBuf {
-    if matches!(kind, Kind::Bare) || gix::discover::is_bare(&git_dir) {
+    if kind.is_bare() {
         git_dir
     } else {
         git_dir
