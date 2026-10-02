@@ -50,7 +50,7 @@ impl Walker for Config {
                         if let Some(kind) = is_repository(&path) {
                             let is_bare = kind.is_bare();
                             entry.client_state = kind.into();
-                            entry.read_children_path = None;
+                            entry.read_children = None;
 
                             found_any_repo = true;
                             found_bare_repo = is_bare;
