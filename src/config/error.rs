@@ -5,14 +5,6 @@ use thiserror::Error;
 use super::source::Source;
 
 #[derive(Debug, Error, Diagnostic)]
-#[error("{kind}")]
-pub struct ConfigError {
-    #[source_code]
-    pub src: Source,
-    pub kind: ParseError,
-}
-
-#[derive(Debug, Error, Diagnostic)]
 pub enum ParseError {
     #[error("Node mismatch")]
     #[diagnostic(code("tm::node_mismatch"))]
