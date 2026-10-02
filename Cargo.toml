@@ -23,7 +23,7 @@ opt-level = "z"
 [dependencies]
 clap = { version = "4.5.23", features = [ "cargo", "derive" ] }
 clap_complete = "4.5.40"
-crossterm = "0.28.1"
+crossterm = "0.29.0"
 dirs-next = "2.0.0"
 gix = { version = "0.87.1", default-features = false, features = [ "max-performance-safe", "sha1"] }
 indexmap = "2.7.0"
