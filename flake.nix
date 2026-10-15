@@ -63,7 +63,7 @@
           meta = with pkgs.lib; {
             description = "Tmux utility for session and window management";
             homepage = "https://github.com/EdenEast/tuxmux";
-            license = licenses.apsl20;
+            license = licenses.asl20;
             mainProgram = "tux";
           };
         });
