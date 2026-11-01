@@ -140,6 +140,10 @@ $RECYCLE.BIN/
 # nix build result link to store
 result
 
+# nix develop profile links created by CI
+/dev-env
+/dev-env-*-link
+
 
 # Added by cargo
 
